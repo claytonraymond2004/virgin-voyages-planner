@@ -4,6 +4,10 @@
     --slot-height: 60px;
     --header-height: 60px;
     --virgin-red: #AF231C;
+    --virgin-purple: #5C068C;
+    --virgin-purple-light: #F3E8F5;
+    --virgin-teal: #71d6e0;
+    --virgin-border: #7C08BD;
     --custom-blue: #1d4ed8;
 }
 
@@ -278,13 +282,14 @@ body.dark .drop-zone:hover {
 #time-column {
     width: var(--time-col-width);
     flex-shrink: 0;
-    background: #fff;
-    border-right: 1px solid #e5e7eb;
+    background: var(--virgin-purple);
+    border-right: 1px solid var(--virgin-border);
     overflow-y: hidden;
-    padding-top: var(--header-height);
+    /* padding-top: var(--header-height); Removed to allow sticky header to sit at top */
     z-index: 20;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
     position: relative;
+    color: white;
 }
 
 #schedule-viewport {
@@ -306,7 +311,7 @@ body.dark .drop-zone:hover {
 .day-column {
     width: var(--day-col-width);
     min-width: var(--day-col-width);
-    border-right: 1px solid #e5e7eb;
+    border-right: 1px solid var(--virgin-border);
     position: relative;
     background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
     background-size: 100% 15px;
@@ -314,8 +319,8 @@ body.dark .drop-zone:hover {
 }
 
 .day-column:nth-child(even) {
-    background-color: #FEE2E2;
-    /* Light Virgin Red */
+    background-color: var(--virgin-purple-light);
+    /* Light Virgin Purple */
 }
 
 body.dark .day-column:nth-child(even) {
@@ -374,16 +379,20 @@ body.dark .day-column:nth-child(even) {
     padding-bottom: 4px;
     position: sticky;
     top: 0;
-    background: #fff;
-    border-bottom: 2px solid #e5e7eb;
+    background: var(--virgin-purple);
+    border-bottom: 2px solid var(--virgin-border);
+    border-right: 1px solid var(--virgin-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     z-index: 150;
     /* Higher than event cards (100) */
-    color: #374151;
+    color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin: 0;
+    margin-right: -1px;
+    width: calc(100% + 1px);
 }
 
 .time-label {
@@ -398,6 +407,30 @@ body.dark .day-column:nth-child(even) {
     font-weight: 600;
     transform: translateY(-50%);
     background-color: transparent;
+}
+
+.day-name-text {
+    color: #9ca3af;
+}
+
+.port-text {
+    color: var(--virgin-teal);
+}
+
+.time-column-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    background-color: var(--virgin-purple);
+    border-bottom: 2px solid var(--virgin-border);
+    z-index: 50;
+}
+
+body.dark .time-column-header {
+    background-color: #1f2937;
+    border-color: #374151;
 }
 
 /* --- Event Cards --- */

@@ -128,6 +128,11 @@ export function renderApp() {
     });
 
     // 2. Time Column
+    // Add header block to hide scrolling labels at the top
+    const timeHeader = document.createElement('div');
+    timeHeader.className = 'time-column-header';
+    timeCol.appendChild(timeHeader);
+
     for (let m = START_HOUR * 60; m < END_HOUR * 60; m += 60) {
         const h = Math.floor(m / 60) % 24;
         const div = document.createElement('div');
@@ -167,11 +172,11 @@ export function renderApp() {
 
         header.innerHTML = `
             <div class="text-center leading-tight w-full h-full flex flex-col justify-center relative">
-                <div class="text-xs text-gray-500 uppercase tracking-wide">${dateObj.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                <div class="text-xs day-name-text uppercase tracking-wide">${dateObj.toLocaleDateString('en-US', { weekday: 'short' })}</div>
                 <div class="text-lg">${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                 <div class="absolute bottom-1 right-1 port-note-container">
                     ${note ?
-                `<span class="text-xs font-semibold text-blue-600 cursor-pointer hover:underline port-note-edit">${note}</span>` :
+                `<span class="text-xs font-semibold port-text cursor-pointer hover:underline port-note-edit">${note}</span>` :
                 `<button class="text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded px-1 port-note-add">+</button>`
             }
                 </div>
