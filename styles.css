@@ -977,6 +977,14 @@ input:checked~.toggle-bg {
 .event-card.is-optional.is-search-dimmed,
 .event-card.is-optional.is-attending.is-search-dimmed {
     opacity: 0.1 !important;
+}
+
+.show-hidden-mode .event-card.is-optional {
+    opacity: 1 !important;
+}
+
+.event-card.is-optional.is-attending.is-search-dimmed {
+    opacity: 0.1 !important;
     filter: grayscale(100%) !important;
     z-index: 0 !important;
     transition: opacity 0.2s, filter 0.2s;
