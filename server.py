@@ -20,7 +20,7 @@ print(f"Starting Virgin Voyages Planner on {ADDRESS}:{PORT}...")
 # Change directory to where the script is located to ensure index.html is found
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-with socketserver.TCPServer((ADDRESS, PORT), NoCacheHandler) as httpd:
+with socketserver.ThreadingTCPServer((ADDRESS, PORT), NoCacheHandler) as httpd:
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
