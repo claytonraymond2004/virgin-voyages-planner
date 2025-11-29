@@ -453,7 +453,7 @@ body.dark .time-column-header {
     color: #111827;
 }
 
-.event-card:hover {
+body:not(.adding-event-mode) .event-card:hover {
     z-index: 100 !important;
     transform: scale(1.05);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);

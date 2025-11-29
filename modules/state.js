@@ -42,6 +42,7 @@ export const state = {
     tooltipShowTime: 0,
     lastTouchTime: 0,
     justCreatedButton: false,
+    justClearedSelection: false,
 
     // Confirm Callback
     confirmCallback: null

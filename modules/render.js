@@ -466,9 +466,19 @@ export function renderEventCard(ev, dayCol, widthPercent, leftPercent, isOptiona
 
     el.addEventListener('click', (e) => {
         e.stopPropagation();
+
+        if (state.justClearedSelection) return;
+
         const ctxMenu = document.getElementById('context-menu');
         if (ctxMenu.style.display === 'block') {
             ctxMenu.style.display = 'none';
+            return;
+        }
+
+        // Check for existing add button - if exists, remove it and stop
+        const existingBtn = document.querySelector('.add-event-btn');
+        if (existingBtn) {
+            existingBtn.remove();
             return;
         }
 

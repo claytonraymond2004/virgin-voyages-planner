@@ -204,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const ctxMenu = document.getElementById('context-menu');
             if (ctxMenu) ctxMenu.style.display = 'none';
+
+            const existingBtn = document.querySelector('.add-event-btn');
+            if (existingBtn) existingBtn.remove();
         }
     });
 
@@ -258,6 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
             state.confirmCallback = null;
         });
     }
+
+    // Watch for Add Event Button to toggle body class
+    const observer = new MutationObserver((mutations) => {
+        const btn = document.querySelector('.add-event-btn');
+        if (btn) document.body.classList.add('adding-event-mode');
+        else document.body.classList.remove('adding-event-mode');
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 });
 
 function loadApp() {

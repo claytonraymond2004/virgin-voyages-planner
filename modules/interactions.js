@@ -13,6 +13,16 @@ import { populateCustomModal, deleteCustomEvent, initiateEdit } from './customEv
 export function initDrag(dayCol, date) {
     dayCol.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return; // Only left click
+
+        // Check for existing add button - if exists, remove it and stop
+        const existingBtn = document.querySelector('.add-event-btn');
+        if (existingBtn && !e.target.closest('.add-event-btn')) {
+            existingBtn.remove();
+            state.justClearedSelection = true;
+            setTimeout(() => { state.justClearedSelection = false; }, 100);
+            return;
+        }
+
         if (e.target.closest('.event-card')) return; // Don't start drag on existing event
         if (e.target.closest('.day-header')) return; // Don't start drag on day header
         if (e.target.closest('.add-event-btn')) return; // Don't start drag on add button
@@ -597,6 +607,7 @@ export function moveTooltip(e) {
 
 export function showFullTooltip(e, ev, el) {
     if (state.dragPreviewEl) return;
+    if (document.querySelector('.add-event-btn')) return;
 
     const isModalOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => m.style.display === 'flex');
 
