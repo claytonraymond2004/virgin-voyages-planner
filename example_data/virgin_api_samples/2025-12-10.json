@@ -1,0 +1,1821 @@
+{
+  "mustSeeEvents": [],
+  "leadTime": null,
+  "events": [
+    {
+      "sequence": 0,
+      "time": "8am",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "622d29d0b9af6063e3180f31",
+          "name": "Friends of Bill W. Meet",
+          "imageUrl": "",
+          "timePeriod": "8-9am",
+          "type": "Informative",
+          "location": "The Test Kitchen, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "",
+          "shortDescription": "",
+          "longDescription": "",
+          "currencyCode": "USD",
+          "categoryCode": "SET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "",
+          "isBookingEnabled": false,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6925069380e9dd5638e7b418",
+            "startDateTime": "2025-12-10T08:00:00",
+            "endDateTime": "2025-12-10T09:00:00",
+            "status": "SoldOut",
+            "inventoryCount": 0,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925069380e9dd5638e7b412",
+              "startDateTime": "2025-12-08T08:00:00",
+              "endDateTime": "2025-12-08T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925069380e9dd5638e7b416",
+              "startDateTime": "2025-12-09T08:00:00",
+              "endDateTime": "2025-12-09T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925069380e9dd5638e7b418",
+              "startDateTime": "2025-12-10T08:00:00",
+              "endDateTime": "2025-12-10T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925069580e9dd5638e7b41d",
+              "startDateTime": "2025-12-11T08:00:00",
+              "endDateTime": "2025-12-11T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925069580e9dd5638e7b422",
+              "startDateTime": "2025-12-12T08:00:00",
+              "endDateTime": "2025-12-12T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925069680e9dd5638e7b431",
+              "startDateTime": "2025-12-14T08:00:00",
+              "endDateTime": "2025-12-14T09:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 1,
+      "time": "9am",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "688cff0487759f05d461b0a7",
+          "name": "Salty Trivia: Nauti Knowledge",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7c494ed9-12fa-4b67-acff-8664d0d5e872/ILL-ENT-8BIT-SaltyTrivia-1200x800.png",
+          "timePeriod": "9-9:45am",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Set sail with \"Salty Trivia: Nauti Knowledge\" a fun quiz on pirates, mermaids, and wild sea legends. Prove your nautical smarts!",
+          "shortDescription": "Pirates, myths, mermaids, and maritime lore.",
+          "longDescription": "From legendary pirates to mysterious mermaids, &quot;Salty Trivia: Nauti Knowledge&quot; takes you on a voyage through the wildest tales of the seven seas. Test your smarts on nautical myths, ocean oddities, and the epic lore that&rsquo;s been whispered across waves for centuries. Whether you&rsquo;re a sailor, a siren, or just here for the shanties, this trivia promises high-seas fun, salty surprises, and bragging rights fit for a captain. Anchors aweigh, it&rsquo;s time to play!",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "The venue will open 15 minutes prior to the event, and space is limited.",
+            "By selecting the event on the app, it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6925165a80e9dd5638e7cad8",
+            "startDateTime": "2025-12-10T09:00:00",
+            "endDateTime": "2025-12-10T09:45:00",
+            "status": "Available",
+            "inventoryCount": 16378,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925165a80e9dd5638e7cad8",
+              "startDateTime": "2025-12-10T09:00:00",
+              "endDateTime": "2025-12-10T09:45:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "68a88471b8d2af10f1207b64",
+          "name": "Run Club - Sailor Led",
+          "imageUrl": "",
+          "timePeriod": "9-10am",
+          "type": "Informative",
+          "location": "The Runway, Deck 17",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "",
+          "shortDescription": "",
+          "longDescription": "",
+          "currencyCode": "USD",
+          "categoryCode": "SET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "",
+          "isBookingEnabled": false,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "692515dd80e9dd5638e7ca1d",
+            "startDateTime": "2025-12-10T09:00:00",
+            "endDateTime": "2025-12-10T10:00:00",
+            "status": "SoldOut",
+            "inventoryCount": 0,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692511b180e9dd5638e7c413",
+              "startDateTime": "2025-12-09T09:00:00",
+              "endDateTime": "2025-12-09T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692515dd80e9dd5638e7ca1d",
+              "startDateTime": "2025-12-10T09:00:00",
+              "endDateTime": "2025-12-10T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692518df80e9dd5638e7cf10",
+              "startDateTime": "2025-12-11T09:00:00",
+              "endDateTime": "2025-12-11T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "69251b3680e9dd5638e7d30b",
+              "startDateTime": "2025-12-12T09:00:00",
+              "endDateTime": "2025-12-12T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "69251d2880e9dd5638e7d6e1",
+              "startDateTime": "2025-12-13T09:00:00",
+              "endDateTime": "2025-12-13T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925208c80e9dd5638e7dce0",
+              "startDateTime": "2025-12-14T09:00:00",
+              "endDateTime": "2025-12-14T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692523bb80e9dd5638e7e105",
+              "startDateTime": "2025-12-15T09:00:00",
+              "endDateTime": "2025-12-15T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925259780e9dd5638e7e361",
+              "startDateTime": "2025-12-16T09:00:00",
+              "endDateTime": "2025-12-16T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692528cc80e9dd5638e7e733",
+              "startDateTime": "2025-12-17T09:00:00",
+              "endDateTime": "2025-12-17T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "time": "10am",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "5e5eb3aba5ecec672cf69150",
+          "name": "Crew Drill",
+          "imageUrl": "",
+          "timePeriod": "10am",
+          "type": "Informative",
+          "location": "Ship Wide, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "",
+          "shortDescription": "",
+          "longDescription": "",
+          "currencyCode": "USD",
+          "categoryCode": "SET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "",
+          "isBookingEnabled": false,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "692515f280e9dd5638e7ca5a",
+            "startDateTime": "2025-12-10T10:00:00",
+            "endDateTime": "2025-12-10T11:00:00",
+            "status": "SoldOut",
+            "inventoryCount": 0,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692515f280e9dd5638e7ca5a",
+              "startDateTime": "2025-12-10T10:00:00",
+              "endDateTime": "2025-12-10T11:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692523d980e9dd5638e7e109",
+              "startDateTime": "2025-12-15T10:00:00",
+              "endDateTime": "2025-12-15T11:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "637d4cf05da65fd814fcba84",
+          "name": "Pickleball",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ea9e42e9-50d7-4751-80bc-0d561931f8e3/IMG-ENT-PICKLEBALL-1200x800.jpg",
+          "timePeriod": "10-5:30pm",
+          "type": "Bookable",
+          "location": "The Sport's Court, Deck 16",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Quick to learn, social, and a lot of fun, Pickleball is a fast-paced sport that combines elements of tennis, badminton, and ping-pong.",
+          "shortDescription": "Discover the world's latest sports obsession.",
+          "longDescription": "Put on some comfy clothes and get ready to break a sweat because you&#39;re about to fall in love with Pickleball &mdash; the world&#39;s latest sports obsession. For this self guided session, all you need to play is a couple of paddles, a ball, and a net, and we got it all ready and waiting for you at the Sports Court on Deck 16. But before joining us for a match, you must know one (very important) thing: learning to play Pickleball is incredibly easy... the hard part is stopping. Trust us, we know.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Pickleball is open to all Sailors on a first come first serve basis.",
+            "Please be mindful of your time on the court if others are waiting to play.",
+            "This will be a self-guided session."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "6925161f80e9dd5638e7ca97",
+            "startDateTime": "2025-12-10T10:00:00",
+            "endDateTime": "2025-12-10T17:30:00",
+            "status": "Available",
+            "inventoryCount": 16378,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250b3180e9dd5638e7ba36",
+              "startDateTime": "2025-12-08T10:00:00",
+              "endDateTime": "2025-12-08T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16366,
+              "isBooked": false
+            },
+            {
+              "id": "692511c680e9dd5638e7c417",
+              "startDateTime": "2025-12-09T10:00:00",
+              "endDateTime": "2025-12-09T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "6925161f80e9dd5638e7ca97",
+              "startDateTime": "2025-12-10T10:00:00",
+              "endDateTime": "2025-12-10T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "692518fa80e9dd5638e7cf14",
+              "startDateTime": "2025-12-11T10:00:00",
+              "endDateTime": "2025-12-11T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251b4e80e9dd5638e7d348",
+              "startDateTime": "2025-12-12T10:00:00",
+              "endDateTime": "2025-12-12T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251d4880e9dd5638e7d71e",
+              "startDateTime": "2025-12-13T10:00:00",
+              "endDateTime": "2025-12-13T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692520a880e9dd5638e7dce4",
+              "startDateTime": "2025-12-14T10:00:00",
+              "endDateTime": "2025-12-14T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "692523f880e9dd5638e7e146",
+              "startDateTime": "2025-12-15T10:00:00",
+              "endDateTime": "2025-12-15T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692525b180e9dd5638e7e365",
+              "startDateTime": "2025-12-16T10:00:00",
+              "endDateTime": "2025-12-16T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692528e680e9dd5638e7e770",
+              "startDateTime": "2025-12-17T10:00:00",
+              "endDateTime": "2025-12-17T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "time": "11am",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "637d4cf05da65fd814fcba6c",
+          "name": "Arts & Crafts - Holiday Edition",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ce95a527-a00e-4d08-b473-c50e5396b0d0/IMG-ENT-Holiday-Arts-and-Crafts-1200x800.jpg",
+          "timePeriod": "11-12pm",
+          "type": "Bookable",
+          "location": "The Dock House, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Sprinkle a little holiday magic into your day with a relaxing arts and crafts session.",
+          "shortDescription": "Level up your holiday vibe with handmade crafts.",
+          "longDescription": "Hang out with your fellow Sailors and decorate a festive ornament to remember your holiday voyage by &mdash; something besides your tan, hundreds of photos, and warm, fuzzy feelings, that is.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6925164180e9dd5638e7cad4",
+            "startDateTime": "2025-12-10T11:00:00",
+            "endDateTime": "2025-12-10T12:00:00",
+            "status": "Available",
+            "inventoryCount": 16365,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925164180e9dd5638e7cad4",
+              "startDateTime": "2025-12-10T11:00:00",
+              "endDateTime": "2025-12-10T12:00:00",
+              "status": "Available",
+              "inventoryCount": 16365,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "632b2f6e7dbc48ef9efc2079",
+          "name": "Speed Puzzle — Holiday Edition",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:0b5c2bca-c49d-4620-a1c4-a622840cf189/IMG-ENT-Speed-Puzzle-Challenge-1200x800.jpg",
+          "timePeriod": "11-12pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Do you have what it takes to compete in one of the biggest puzzle competitions on the open ocean? We’d like to sea you try.",
+          "shortDescription": "Spread cheer (and competition) in this jigsaw race",
+          "longDescription": "All your years of training with an enormous cat puzzle on your aunt&#39;s kitchen table are about to pay off. In this spirited (but friendly) competition, you and your teammates will take on one of two different holiday-themed jigsaw puzzles &mdash; 300 pieces each &mdash; and race to see who figures it out first, with a soundtrack of live color commentary provided by our onboard Gamer. The winning team will be crowned the Voyage&#39;s reigning Puzzle Masters.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "6925166c80e9dd5638e7cadc",
+            "startDateTime": "2025-12-10T11:00:00",
+            "endDateTime": "2025-12-10T12:00:00",
+            "status": "Available",
+            "inventoryCount": 16383,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925130080e9dd5638e7c611",
+              "startDateTime": "2025-12-09T10:00:00",
+              "endDateTime": "2025-12-09T11:00:00",
+              "status": "Available",
+              "inventoryCount": 16377,
+              "isBooked": false
+            },
+            {
+              "id": "6925166c80e9dd5638e7cadc",
+              "startDateTime": "2025-12-10T11:00:00",
+              "endDateTime": "2025-12-10T12:00:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "6926474b771dc8bedd1f0d1c",
+              "startDateTime": "2025-12-17T09:30:00",
+              "endDateTime": "2025-12-17T10:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 4,
+      "time": "4pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "632b2f6e7dbc48ef9efc206c",
+          "name": "Guest Artist: Selkii",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:878e0af9-b2c0-4935-a149-46ed38b26ee0/IMG-ENT-Guest-Artist-Selkii-1200x800.jpg",
+          "timePeriod": "4-5pm",
+          "type": "Bookable",
+          "location": "The Dock, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Definition of Selkii-centered 1: able to live-loop tunes from ABBA to Zeppelin 2: capable of providing (a band) for her own needs 3: Selkii-sufficient",
+          "shortDescription": "A one-woman band with an impressive soundscape.",
+          "longDescription": "Live-looping tunes from a catalog of over 1,600 songs, Selkii is a one-woman band with an impressive soundscape. With only her guitar, insane vocals, and mad improvisational skills, she isn&#39;t afraid to take a request, spice it up with some Selkii-original flair, and make it her own. And after getting Adam Levine&#39;s chair to turn on The Voice 2019, making waves on #TeamBlake, stealing the show on South African IDOL, and getting Macy Gray&#39;s praise, she is about to win your heart.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "692515c880e9dd5638e7c9e0",
+            "startDateTime": "2025-12-10T16:00:00",
+            "endDateTime": "2025-12-10T17:00:00",
+            "status": "Available",
+            "inventoryCount": 16379,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925062b80e9dd5638e7b394",
+              "startDateTime": "2025-12-07T19:30:00",
+              "endDateTime": "2025-12-07T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16367,
+              "isBooked": false
+            },
+            {
+              "id": "6925112480e9dd5638e7c2e6",
+              "startDateTime": "2025-12-09T13:30:00",
+              "endDateTime": "2025-12-09T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16376,
+              "isBooked": false
+            },
+            {
+              "id": "692515c880e9dd5638e7c9e0",
+              "startDateTime": "2025-12-10T16:00:00",
+              "endDateTime": "2025-12-10T17:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "692515a780e9dd5638e7c9dc",
+              "startDateTime": "2025-12-10T21:45:00",
+              "endDateTime": "2025-12-10T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925187a80e9dd5638e7ce55",
+              "startDateTime": "2025-12-11T13:30:00",
+              "endDateTime": "2025-12-11T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251fd380e9dd5638e7dbda",
+              "startDateTime": "2025-12-14T22:00:00",
+              "endDateTime": "2025-12-14T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925236b80e9dd5638e7e04f",
+              "startDateTime": "2025-12-15T21:45:00",
+              "endDateTime": "2025-12-15T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925255280e9dd5638e7e315",
+              "startDateTime": "2025-12-16T18:30:00",
+              "endDateTime": "2025-12-16T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "69252a6b80e9dd5638e7e953",
+              "startDateTime": "2025-12-17T17:45:00",
+              "endDateTime": "2025-12-17T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 5,
+      "time": "5pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "64ff51a9916364c6e0fe817c",
+          "name": "Guest Artist: Kennedi & the Groove",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:6596b921-8692-463c-93ed-27c6f22b5eec/Kennedi%20&%20the%20Groove%20-%201200x800.jpg",
+          "timePeriod": "5:15-6:15pm",
+          "type": "Bookable",
+          "location": "On The Rocks, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "This fearless band isn't afraid to swerve across decades and musical genres during live sets that cover everything from funk, to pop and disco.",
+          "shortDescription": "Funk, pop, disco, and rock hits sung with soul.",
+          "longDescription": "Kennedi &amp; The Groove has its origins at sea in 2021. On board a Cruise Ship where Kennedi met the four piece band that will later be known as The Groove. The connection was instant and together they created a headliner show and started to work on their repertoire with the goal of working on cruises. After a 3 month period in a 5 star hotel in South Korea, they were able to achieve what they&#39;ve been working towards for almost 2 years, a contract with Virgin Voyages.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "692514b280e9dd5638e7c876",
+            "startDateTime": "2025-12-10T17:15:00",
+            "endDateTime": "2025-12-10T18:15:00",
+            "status": "Available",
+            "inventoryCount": 16369,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250a0f80e9dd5638e7b87c",
+              "startDateTime": "2025-12-08T20:30:00",
+              "endDateTime": "2025-12-08T22:15:00",
+              "status": "Available",
+              "inventoryCount": 16370,
+              "isBooked": false
+            },
+            {
+              "id": "692510d880e9dd5638e7c268",
+              "startDateTime": "2025-12-09T23:00:00",
+              "endDateTime": "2025-12-10T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16373,
+              "isBooked": false
+            },
+            {
+              "id": "692514b280e9dd5638e7c876",
+              "startDateTime": "2025-12-10T17:15:00",
+              "endDateTime": "2025-12-10T18:15:00",
+              "status": "Available",
+              "inventoryCount": 16369,
+              "isBooked": false
+            },
+            {
+              "id": "6925185680e9dd5638e7cddb",
+              "startDateTime": "2025-12-11T22:30:00",
+              "endDateTime": "2025-12-12T00:30:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "69251ae180e9dd5638e7d285",
+              "startDateTime": "2025-12-12T16:45:00",
+              "endDateTime": "2025-12-12T17:45:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "69251f6580e9dd5638e7db55",
+              "startDateTime": "2025-12-14T23:15:00",
+              "endDateTime": "2025-12-15T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925231b80e9dd5638e7e006",
+              "startDateTime": "2025-12-15T17:00:00",
+              "endDateTime": "2025-12-15T18:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925253680e9dd5638e7e2d8",
+              "startDateTime": "2025-12-16T23:00:00",
+              "endDateTime": "2025-12-17T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "6925282880e9dd5638e7e66c",
+              "startDateTime": "2025-12-17T23:15:00",
+              "endDateTime": "2025-12-18T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "660ecd9fa521740f880bd05b",
+          "name": "Salty Trivia: Silver Screen Smarty Pants",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7c494ed9-12fa-4b67-acff-8664d0d5e872/ILL-ENT-8BIT-SaltyTrivia-1200x800.png",
+          "timePeriod": "5:30-6:15pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "A pub-style trivia game—created uniquely each day.",
+          "shortDescription": "Not your average Pub-style trivia game. ",
+          "longDescription": "The Happenings Cast compiles the best of pop culture, history, current events and beyond in a uniquely multi-round trivia event created for your voyage. Each team will have a booklet to fill out for each round of 10 questions. But this isn&rsquo;t your average trivia game&mdash;this Salty Trivia expands beyond generations, giving you the freshest, funniest brain-twisters you can find on the open ocean (or anywhere, for that matter).",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "The venue will open 15 minutes prior to the event, and space is limited.",
+            "By selecting 'book,\"  it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6925168280e9dd5638e7cb19",
+            "startDateTime": "2025-12-10T17:30:00",
+            "endDateTime": "2025-12-10T18:15:00",
+            "status": "Available",
+            "inventoryCount": 16378,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925168280e9dd5638e7cb19",
+              "startDateTime": "2025-12-10T17:30:00",
+              "endDateTime": "2025-12-10T18:15:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 6,
+      "time": "6pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "66eaca95c2eae8115e9a9bc7",
+          "name": "Guest Artist: Taylor Reed",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:932f2bfe-3f97-44f6-bf3a-a30cf4053526/Guest%20Artist_Taylor%20Reed%20-%201200x800.png",
+          "timePeriod": "6:30-7:30pm",
+          "type": "Bookable",
+          "location": "The Roundabout, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Groove to the soulful sounds of Taylor Reed as she weaves violin melodies with percussion beats!",
+          "shortDescription": "Soulful strings and angelic vocals.",
+          "longDescription": "Hailing from Tampa, FL, Taylor Reed channels her natural creativity and spontaneity through a looping station, building an elegantly layered, engrossingly soulful sound. Weaving violin melodies, bold and invigorating percussion, and angelic vocals through groove-infused creations, her pop/R&amp;B music elevates any space.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "692514ee80e9dd5638e7c8bb",
+            "startDateTime": "2025-12-10T18:30:00",
+            "endDateTime": "2025-12-10T19:30:00",
+            "status": "Available",
+            "inventoryCount": 16379,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250a9080e9dd5638e7b93e",
+              "startDateTime": "2025-12-08T13:30:00",
+              "endDateTime": "2025-12-08T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16371,
+              "isBooked": false
+            },
+            {
+              "id": "692509fb80e9dd5638e7b83f",
+              "startDateTime": "2025-12-08T18:30:00",
+              "endDateTime": "2025-12-08T19:15:00",
+              "status": "Available",
+              "inventoryCount": 16376,
+              "isBooked": false
+            },
+            {
+              "id": "6925113680e9dd5638e7c2ea",
+              "startDateTime": "2025-12-09T15:30:00",
+              "endDateTime": "2025-12-09T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "692510f580e9dd5638e7c2a5",
+              "startDateTime": "2025-12-09T18:15:00",
+              "endDateTime": "2025-12-09T19:15:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "692514ee80e9dd5638e7c8bb",
+              "startDateTime": "2025-12-10T18:30:00",
+              "endDateTime": "2025-12-10T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925186a80e9dd5638e7ce51",
+              "startDateTime": "2025-12-11T21:30:00",
+              "endDateTime": "2025-12-11T22:15:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "688cfc5487759f05d461b052",
+          "name": "Pop Quiz: 00s Music Trivia",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7b715d8e-eda8-4138-aa30-00e5274637d5/IMG-ENT-Pop-Quiz-Music-Trivia-1200x800.jpg",
+          "timePeriod": "6:45-7:45pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Test your 2000s pop knowledge! Join us for a throwback trivia night packed with hits, icons, and all the Y2K nostalgia you love.",
+          "shortDescription": "A throwback trivia trip to the 2000s hits.",
+          "longDescription": "Grab your low-rise jeans and flip phones, it&rsquo;s time to relive the era of pop princesses, emo anthems, and ringtone chart-toppers. &quot;Pop Quiz: Back To The 00&rsquo;s&quot; is a nostalgic trivia bash celebrating the unforgettable bangers, breakout stars, and guilty pleasures of the new millennium. From boy bands to indie icons, test your knowledge of the decade that gave us big hooks, bold looks, and endless vibes. No dial-up required, just all-out pop glory.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6925169380e9dd5638e7cb1d",
+            "startDateTime": "2025-12-10T18:45:00",
+            "endDateTime": "2025-12-10T19:45:00",
+            "status": "Available",
+            "inventoryCount": 16374,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925169380e9dd5638e7cb1d",
+              "startDateTime": "2025-12-10T18:45:00",
+              "endDateTime": "2025-12-10T19:45:00",
+              "status": "Available",
+              "inventoryCount": 16374,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 7,
+      "time": "7pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "65cf804811a379c8ac3ad9e2",
+          "name": "Festival Stage: Tom Crosbie",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:714db8b1-54d8-4ca6-aeb1-45e5c5c43d18/1200x800-4.jpg",
+          "timePeriod": "7:30-8:30pm",
+          "type": "Bookable",
+          "location": "The Red Room, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Come find out what makes Tom one of Britain's most in demand variety stars!",
+          "shortDescription": "Performing Nerd.",
+          "longDescription": "Tom has made a living for the last 10 years traveling the world with his collection of completely useless skills. This promises to be a funny &amp; charming show from one of Britain&#39;s most in demand variety stars! With a show that will be like nothing you&#39;ve ever seen before, join Tom as he takes the scenic route to self-improvement, as he masters the talents nobody knew he needed.<br />\n<br />\n&quot;One of the most incredible things I&#39;ve ever watched!&quot; - Simon Cowell",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "By selecting 'add to agenda', it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot.",
+            "Seats cannot be reserved or saved.",
+            "This is a show that will be performed throughout the voyage."
+          ],
+          "editorialBlocks": [],
+          "isBooked": true,
+          "bookedText": "Added",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "691624c080e9dd5638d9a8ff",
+            "startDateTime": "2025-12-10T19:30:00",
+            "endDateTime": "2025-12-10T20:30:00",
+            "status": "Available",
+            "inventoryCount": 16249,
+            "isBooked": true
+          },
+          "slots": [
+            {
+              "id": "691624c080e9dd5638d9a8ff",
+              "startDateTime": "2025-12-10T19:30:00",
+              "endDateTime": "2025-12-10T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16249,
+              "isBooked": true
+            },
+            {
+              "id": "691624df80e9dd5638d9a903",
+              "startDateTime": "2025-12-10T22:00:00",
+              "endDateTime": "2025-12-10T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16198,
+              "isBooked": false
+            },
+            {
+              "id": "6916261f80e9dd5638d9a9ac",
+              "startDateTime": "2025-12-13T19:30:00",
+              "endDateTime": "2025-12-13T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16344,
+              "isBooked": false
+            },
+            {
+              "id": "6916291680e9dd5638d9ab1e",
+              "startDateTime": "2025-12-16T19:30:00",
+              "endDateTime": "2025-12-16T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            }
+          ],
+          "appointments": {
+            "bannerText": "Added to Agenda, Wed December 10, 7:30pm",
+            "items": [
+              {
+                "id": "1b227660-04cb-4997-8b23-fd039a78fa74",
+                "slotId": "691624c080e9dd5638d9a8ff",
+                "bannerText": ""
+              }
+            ]
+          },
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "6633c077a521740f8822ccb7",
+          "name": "Delight Trio",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a893a5d0-cce5-489b-afdd-688668f47193/DelightTrioEvents_1200x800.jpg",
+          "timePeriod": "7:45-9:30pm",
+          "type": "Bookable",
+          "location": "On The Rocks, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Direct from Colombia, the Delight trio presents a wide range of musical genres with a percussive twist.",
+          "shortDescription": "A Latin Trio with a world repertoire.",
+          "longDescription": "Hailing from Colombia Delight Trio&#39;s passion for music is as palpable as the energy in their performances. Delight Trio blends music from around the globe including rock, pop, disco, and funk with a danceable mix of bossa nova, Latin, and global rhythms.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "692514c180e9dd5638e7c87a",
+            "startDateTime": "2025-12-10T19:45:00",
+            "endDateTime": "2025-12-10T21:30:00",
+            "status": "Available",
+            "inventoryCount": 16382,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250aa380e9dd5638e7b942",
+              "startDateTime": "2025-12-08T15:30:00",
+              "endDateTime": "2025-12-08T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16363,
+              "isBooked": false
+            },
+            {
+              "id": "692510c680e9dd5638e7c264",
+              "startDateTime": "2025-12-09T19:30:00",
+              "endDateTime": "2025-12-09T21:45:00",
+              "status": "Available",
+              "inventoryCount": 16370,
+              "isBooked": false
+            },
+            {
+              "id": "692514c180e9dd5638e7c87a",
+              "startDateTime": "2025-12-10T19:45:00",
+              "endDateTime": "2025-12-10T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "69251af280e9dd5638e7d289",
+              "startDateTime": "2025-12-12T19:15:00",
+              "endDateTime": "2025-12-12T21:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251ced80e9dd5638e7d667",
+              "startDateTime": "2025-12-13T21:30:00",
+              "endDateTime": "2025-12-13T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "69251f4480e9dd5638e7db14",
+              "startDateTime": "2025-12-14T17:15:00",
+              "endDateTime": "2025-12-14T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "6925232d80e9dd5638e7e00a",
+              "startDateTime": "2025-12-15T19:30:00",
+              "endDateTime": "2025-12-15T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925287a80e9dd5638e7e6ee",
+              "startDateTime": "2025-12-17T15:30:00",
+              "endDateTime": "2025-12-17T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "6925280780e9dd5638e7e62b",
+              "startDateTime": "2025-12-17T17:45:00",
+              "endDateTime": "2025-12-17T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "time": "8pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "688cfd4387759f05d461b077",
+          "name": "Salty Trivia: History Happens",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7c494ed9-12fa-4b67-acff-8664d0d5e872/ILL-ENT-8BIT-SaltyTrivia-1200x800.png",
+          "timePeriod": "8-8:45pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Test your history chops at \"Salty Trivia: History Happens\" a fast-paced, sassy trivia ride through epic moments and legendary figures!",
+          "shortDescription": "A trivia dive into the past that shaped today.",
+          "longDescription": "Time travel without jet lag. &quot;Salty Trivia: History Happens&quot; takes you on a whirlwind ride through epic events, wild moments, and legendary figures who changed the game. From ancient empires to modern milestones, it&rsquo;s your chance to flex those historical smarts and uncover the drama behind the dates. Think of it as a history lesson only way saltier, sassier, and packed with trivia twists. Because the past isn&rsquo;t boring&hellip; It&#39;s bold.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "The venue will open 15 minutes prior to the event, and space is limited.",
+            "By selecting the event on the app, it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "692516ad80e9dd5638e7cb5a",
+            "startDateTime": "2025-12-10T20:00:00",
+            "endDateTime": "2025-12-10T20:45:00",
+            "status": "Available",
+            "inventoryCount": 16383,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692516ad80e9dd5638e7cb5a",
+              "startDateTime": "2025-12-10T20:00:00",
+              "endDateTime": "2025-12-10T20:45:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251bb880e9dd5638e7d407",
+              "startDateTime": "2025-12-12T18:45:00",
+              "endDateTime": "2025-12-12T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 9,
+      "time": "9pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "6806af7372079b10d58676bb",
+          "name": "Duets",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:d92576a5-1fa5-4a21-aec7-83fd5907d14c/Duets%201200x800.jpg",
+          "timePeriod": "9-10pm",
+          "type": "Bookable",
+          "location": "The Manor, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Join the singers and band of Up With a Twist as they jazz up classic & modern pop, R&B, soul, and country duets with a fresh twist.",
+          "shortDescription": "Iconic duets reimagined with bold flair.",
+          "longDescription": "Get your swing on with the vocalists and band from Up With a Twist as they recreate classic and contemporary duets from the genres of pop, R&amp;B, Soul, and even country into jazz-infused takes.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event. The venue will open at the posted start time, and space is limited.",
+            "By selecting 'book', it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot.",
+            "Doors open 15 minutes prior to the show.",
+            "Standby line will be open 30 minutes prior to the show on a first come first serve basis.",
+            "Fog effects will be used.",
+            "Just an FYI for those possibly impacted —strobe, lasers and CO2 effects will be used."
+          ],
+          "editorialBlocks": [],
+          "isBooked": true,
+          "bookedText": "Added",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "691624f580e9dd5638d9a907",
+            "startDateTime": "2025-12-10T21:00:00",
+            "endDateTime": "2025-12-10T22:00:00",
+            "status": "Available",
+            "inventoryCount": 16222,
+            "isBooked": true
+          },
+          "slots": [
+            {
+              "id": "691624f580e9dd5638d9a907",
+              "startDateTime": "2025-12-10T21:00:00",
+              "endDateTime": "2025-12-10T22:00:00",
+              "status": "Available",
+              "inventoryCount": 16222,
+              "isBooked": true
+            },
+            {
+              "id": "692522cc80e9dd5638e7df82",
+              "startDateTime": "2025-12-15T19:00:00",
+              "endDateTime": "2025-12-15T20:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "692522cc80e9dd5638e7df84",
+              "startDateTime": "2025-12-15T21:30:00",
+              "endDateTime": "2025-12-15T22:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            }
+          ],
+          "appointments": {
+            "bannerText": "Added to Agenda, Wed December 10, 9:00pm",
+            "items": [
+              {
+                "id": "f9525baf-5153-4519-af6c-1f67199ef009",
+                "slotId": "691624f580e9dd5638d9a907",
+                "bannerText": ""
+              }
+            ]
+          },
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "688cfc2987759f05d461b039",
+          "name": "Pop Quiz: Through the Ages Music Trivia",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7b715d8e-eda8-4138-aa30-00e5274637d5/IMG-ENT-Pop-Quiz-Music-Trivia-1200x800.jpg",
+          "timePeriod": "9:15-10:15pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Step up for \"Hits Through The Ages\" a high-energy music trivia night spanning iconic songs and eras. Show off your music smarts!",
+          "shortDescription": "A trivia trip through iconic chart-topping hits.",
+          "longDescription": "Get ready to strut through the soundtrack of time. &quot;Hits Through The Ages&quot; is your all-access trivia pass to the most unforgettable songs across eras. From timeless anthems to guilty pleasures, test your knowledge of the tracks that defined generations. Whether you&rsquo;re vibing to vintage rock, belting out a diva ballad, or jamming to pop gold, this high-energy quiz is the ultimate music throwdown. Bragging rights? Legendary. Bonus points for dance moves.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "692516c480e9dd5638e7cb5e",
+            "startDateTime": "2025-12-10T21:15:00",
+            "endDateTime": "2025-12-10T22:15:00",
+            "status": "Available",
+            "inventoryCount": 16380,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692516c480e9dd5638e7cb5e",
+              "startDateTime": "2025-12-10T21:15:00",
+              "endDateTime": "2025-12-10T22:15:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "692526c880e9dd5638e7e499",
+              "startDateTime": "2025-12-16T17:00:00",
+              "endDateTime": "2025-12-16T18:00:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "632b2f6e7dbc48ef9efc206c",
+          "name": "Guest Artist: Selkii",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:878e0af9-b2c0-4935-a149-46ed38b26ee0/IMG-ENT-Guest-Artist-Selkii-1200x800.jpg",
+          "timePeriod": "9:45-10:45pm",
+          "type": "Bookable",
+          "location": "The Roundabout, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Definition of Selkii-centered 1: able to live-loop tunes from ABBA to Zeppelin 2: capable of providing (a band) for her own needs 3: Selkii-sufficient",
+          "shortDescription": "A one-woman band with an impressive soundscape.",
+          "longDescription": "Live-looping tunes from a catalog of over 1,600 songs, Selkii is a one-woman band with an impressive soundscape. With only her guitar, insane vocals, and mad improvisational skills, she isn&#39;t afraid to take a request, spice it up with some Selkii-original flair, and make it her own. And after getting Adam Levine&#39;s chair to turn on The Voice 2019, making waves on #TeamBlake, stealing the show on South African IDOL, and getting Macy Gray&#39;s praise, she is about to win your heart.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "692515a780e9dd5638e7c9dc",
+            "startDateTime": "2025-12-10T21:45:00",
+            "endDateTime": "2025-12-10T22:45:00",
+            "status": "Available",
+            "inventoryCount": 16381,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925062b80e9dd5638e7b394",
+              "startDateTime": "2025-12-07T19:30:00",
+              "endDateTime": "2025-12-07T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16367,
+              "isBooked": false
+            },
+            {
+              "id": "6925112480e9dd5638e7c2e6",
+              "startDateTime": "2025-12-09T13:30:00",
+              "endDateTime": "2025-12-09T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16376,
+              "isBooked": false
+            },
+            {
+              "id": "692515c880e9dd5638e7c9e0",
+              "startDateTime": "2025-12-10T16:00:00",
+              "endDateTime": "2025-12-10T17:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "692515a780e9dd5638e7c9dc",
+              "startDateTime": "2025-12-10T21:45:00",
+              "endDateTime": "2025-12-10T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925187a80e9dd5638e7ce55",
+              "startDateTime": "2025-12-11T13:30:00",
+              "endDateTime": "2025-12-11T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251fd380e9dd5638e7dbda",
+              "startDateTime": "2025-12-14T22:00:00",
+              "endDateTime": "2025-12-14T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925236b80e9dd5638e7e04f",
+              "startDateTime": "2025-12-15T21:45:00",
+              "endDateTime": "2025-12-15T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925255280e9dd5638e7e315",
+              "startDateTime": "2025-12-16T18:30:00",
+              "endDateTime": "2025-12-16T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "69252a6b80e9dd5638e7e953",
+              "startDateTime": "2025-12-17T17:45:00",
+              "endDateTime": "2025-12-17T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 10,
+      "time": "10pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "65cf804811a379c8ac3ad9e2",
+          "name": "Festival Stage: Tom Crosbie",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:714db8b1-54d8-4ca6-aeb1-45e5c5c43d18/1200x800-4.jpg",
+          "timePeriod": "10-11pm",
+          "type": "Bookable",
+          "location": "The Red Room, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Come find out what makes Tom one of Britain's most in demand variety stars!",
+          "shortDescription": "Performing Nerd.",
+          "longDescription": "Tom has made a living for the last 10 years traveling the world with his collection of completely useless skills. This promises to be a funny &amp; charming show from one of Britain&#39;s most in demand variety stars! With a show that will be like nothing you&#39;ve ever seen before, join Tom as he takes the scenic route to self-improvement, as he masters the talents nobody knew he needed.<br />\n<br />\n&quot;One of the most incredible things I&#39;ve ever watched!&quot; - Simon Cowell",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "By selecting 'add to agenda', it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot.",
+            "Seats cannot be reserved or saved.",
+            "This is a show that will be performed throughout the voyage."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "691624df80e9dd5638d9a903",
+            "startDateTime": "2025-12-10T22:00:00",
+            "endDateTime": "2025-12-10T23:00:00",
+            "status": "Available",
+            "inventoryCount": 16198,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "691624c080e9dd5638d9a8ff",
+              "startDateTime": "2025-12-10T19:30:00",
+              "endDateTime": "2025-12-10T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16249,
+              "isBooked": false
+            },
+            {
+              "id": "691624df80e9dd5638d9a903",
+              "startDateTime": "2025-12-10T22:00:00",
+              "endDateTime": "2025-12-10T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16198,
+              "isBooked": false
+            },
+            {
+              "id": "6916261f80e9dd5638d9a9ac",
+              "startDateTime": "2025-12-13T19:30:00",
+              "endDateTime": "2025-12-13T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16344,
+              "isBooked": false
+            },
+            {
+              "id": "6916291680e9dd5638d9ab1e",
+              "startDateTime": "2025-12-16T19:30:00",
+              "endDateTime": "2025-12-16T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "620c2ec2cdc91c622de67b07",
+          "name": "Karaoke with the Happenings Cast",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:06cf90f8-76d9-40e8-b86e-db9dc38e9320/IMG-ENT-Karaoke-With-The-Happenings-Cast-1200x800.jpg",
+          "timePeriod": "10:30-12am",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Sing your heart out, Sailors.",
+          "shortDescription": "It's an onboard karaoke night, Sailors.",
+          "longDescription": "Just by being here on board, you&#39;re a bonafide star. Don&#39;t even try to fight it, it&#39;s the truth. So indulge that very truth and join the Happenings Cast for a wild night of tunes, trills, and togetherness. Everyone has their favorite karaoke song, so come show us yours. And your star power behind it.&nbsp;",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "692516dc80e9dd5638e7cb9b",
+            "startDateTime": "2025-12-10T22:30:00",
+            "endDateTime": "2025-12-11T00:00:00",
+            "status": "Available",
+            "inventoryCount": 16375,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250d3b80e9dd5638e7bd32",
+              "startDateTime": "2025-12-08T22:00:00",
+              "endDateTime": "2025-12-09T00:00:00",
+              "status": "Available",
+              "inventoryCount": 16370,
+              "isBooked": false
+            },
+            {
+              "id": "692513fd80e9dd5638e7c77f",
+              "startDateTime": "2025-12-09T22:30:00",
+              "endDateTime": "2025-12-10T00:00:00",
+              "status": "Available",
+              "inventoryCount": 16373,
+              "isBooked": false
+            },
+            {
+              "id": "692516dc80e9dd5638e7cb9b",
+              "startDateTime": "2025-12-10T22:30:00",
+              "endDateTime": "2025-12-11T00:00:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "69251a0e80e9dd5638e7d116",
+              "startDateTime": "2025-12-11T22:30:00",
+              "endDateTime": "2025-12-12T00:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251bd380e9dd5638e7d40f",
+              "startDateTime": "2025-12-12T21:30:00",
+              "endDateTime": "2025-12-12T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925224380e9dd5638e7defe",
+              "startDateTime": "2025-12-14T22:30:00",
+              "endDateTime": "2025-12-15T00:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925246e80e9dd5638e7e1d0",
+              "startDateTime": "2025-12-15T22:00:00",
+              "endDateTime": "2025-12-15T23:30:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925270280e9dd5638e7e517",
+              "startDateTime": "2025-12-16T22:00:00",
+              "endDateTime": "2025-12-16T23:30:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "69252a3580e9dd5638e7e912",
+              "startDateTime": "2025-12-17T21:30:00",
+              "endDateTime": "2025-12-17T23:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 11,
+      "time": "11pm",
+      "date": "2025-12-10",
+      "items": [
+        {
+          "id": "641352fca0431606ca52c0d9",
+          "name": "Guest Artists: Dustin Monk & The Hustle",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:1efea52e-1f44-415e-b9d2-ea306763ade8/IMG-ENT-dustin-monk-the-hustle-1200x800.jpg",
+          "timePeriod": "11-1am",
+          "type": "Bookable",
+          "location": "On The Rocks, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "From turning chairs on \"The Voice\" to turning heads in the music industry, Dustin Monk & The Hustle brings Hollywood rock experience to Virgin Voyages",
+          "shortDescription": "A rock ensemble with the heartbeat of soul and R&B",
+          "longDescription": "Rising to fame on Season 9 of NBC&#39;s &quot;The Voice,&quot; Dustin managed to catch the attention and turn the chairs of Blake Shelton and Adam Levine. Now he&#39;s doing more than turning chairs -- he&#39;s filling them with fans all around the country. Rooted in rock n&#39; roll, the catchy sound of Dustin Monk &amp; The Hustle is also inspired by a fusion of Blues, Soul, Funk, and R&amp;B.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "692514d480e9dd5638e7c8b7",
+            "startDateTime": "2025-12-10T23:00:00",
+            "endDateTime": "2025-12-11T01:00:00",
+            "status": "Available",
+            "inventoryCount": 16375,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692505d280e9dd5638e7b31a",
+              "startDateTime": "2025-12-07T20:45:00",
+              "endDateTime": "2025-12-07T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16365,
+              "isBooked": false
+            },
+            {
+              "id": "69250a2080e9dd5638e7b880",
+              "startDateTime": "2025-12-08T23:15:00",
+              "endDateTime": "2025-12-09T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "692514d480e9dd5638e7c8b7",
+              "startDateTime": "2025-12-10T23:00:00",
+              "endDateTime": "2025-12-11T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "6925184480e9dd5638e7cdd7",
+              "startDateTime": "2025-12-11T19:30:00",
+              "endDateTime": "2025-12-11T21:15:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "69251cb380e9dd5638e7d5af",
+              "startDateTime": "2025-12-13T23:15:00",
+              "endDateTime": "2025-12-14T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251f5380e9dd5638e7db18",
+              "startDateTime": "2025-12-14T20:00:00",
+              "endDateTime": "2025-12-14T21:45:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "6925234080e9dd5638e7e047",
+              "startDateTime": "2025-12-15T23:00:00",
+              "endDateTime": "2025-12-16T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925281780e9dd5638e7e668",
+              "startDateTime": "2025-12-17T20:15:00",
+              "endDateTime": "2025-12-17T22:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "68d3f58387759f05d48d2bba",
+          "name": "Club Night Featuring Queen HD the DJ",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:9657da32-1ba3-43ac-bfec-00d3638cc840/QueenHDtheDJ_1200x800.jpg",
+          "timePeriod": "11-2am",
+          "type": "Bookable",
+          "location": "The Manor, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Queen HD the DJ brings high-energy sets, sharp scratching, and nostalgic grooves—get ready to dance all night with this global party-starter!",
+          "shortDescription": "Queen HD spins high-energy, nostalgic party vibes.",
+          "longDescription": "Queen HD The DJ is a high-energy, self-taught Baltimore DJ known for sharp scratching and nostalgic grooves. She&rsquo;s battled in NYC, DC, and Atlanta, and DJed globally from London to Botswana. She&rsquo;s the official DJ for the Washington Spirit, spun for Team USA Soccer, and made history as the first queer Black woman to DJ on the White House South Lawn. Expect an electrifying set that blends nostalgia with unstoppable energy.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "6925148880e9dd5638e7c839",
+            "startDateTime": "2025-12-10T23:00:00",
+            "endDateTime": "2025-12-11T02:00:00",
+            "status": "Available",
+            "inventoryCount": 16364,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925092f80e9dd5638e7b740",
+              "startDateTime": "2025-12-09T00:00:00",
+              "endDateTime": "2025-12-09T02:30:00",
+              "status": "Available",
+              "inventoryCount": 16348,
+              "isBooked": false
+            },
+            {
+              "id": "6925148880e9dd5638e7c839",
+              "startDateTime": "2025-12-10T23:00:00",
+              "endDateTime": "2025-12-11T02:00:00",
+              "status": "Available",
+              "inventoryCount": 16364,
+              "isBooked": false
+            },
+            {
+              "id": "692522fc80e9dd5638e7dfc9",
+              "startDateTime": "2025-12-15T23:15:00",
+              "endDateTime": "2025-12-16T02:00:00",
+              "status": "Available",
+              "inventoryCount": 16371,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    }
+  ]
+}

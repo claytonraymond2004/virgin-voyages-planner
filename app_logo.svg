@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Offset Vertical Timeline (Left Side) -->
+  <g opacity="0.5">
+    <!-- The Line -->
+    <line x1="25" y1="10" x2="25" y2="90" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+    
+    <!-- Event Nodes & Blocks -->
+    <!-- Node 1 -->
+    <circle cx="25" cy="25" r="5" fill="#64748b" />
+    <rect x="35" y="20" width="40" height="10" rx="3" fill="#94a3b8" />
+    
+    <!-- Node 2 -->
+    <circle cx="25" cy="50" r="5" fill="#64748b" />
+    <rect x="35" y="45" width="50" height="10" rx="3" fill="#94a3b8" />
+    
+    <!-- Node 3 -->
+    <circle cx="25" cy="75" r="5" fill="#64748b" />
+    <rect x="35" y="70" width="30" height="10" rx="3" fill="#94a3b8" />
+  </g>
+
+  <!-- Double Nested V (Virgin Red) - Centered Horizontally, Shifted Up Vertically -->
+  <!-- White glow/stroke for separation -->
+  <path d="M 20 20 L 50 80 L 80 20" fill="none" stroke="white" stroke-width="14" stroke-linejoin="miter" stroke-linecap="butt" />
+  
+  <!-- Outer V -->
+  <path d="M 20 20 L 50 80 L 80 20" fill="none" stroke="#AF231C" stroke-width="10" stroke-linejoin="miter" stroke-linecap="butt" />
+  
+  <!-- Inner V -->
+  <path d="M 35 30 L 50 60 L 65 30" fill="none" stroke="#AF231C" stroke-width="5" stroke-linejoin="miter" stroke-linecap="butt" />
+</svg>

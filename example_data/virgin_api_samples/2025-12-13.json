@@ -1,0 +1,1387 @@
+{
+  "mustSeeEvents": [],
+  "leadTime": null,
+  "events": [
+    {
+      "sequence": 0,
+      "time": "9am",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "68a88471b8d2af10f1207b64",
+          "name": "Run Club - Sailor Led",
+          "imageUrl": "",
+          "timePeriod": "9-10am",
+          "type": "Informative",
+          "location": "The Runway, Deck 17",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "",
+          "shortDescription": "",
+          "longDescription": "",
+          "currencyCode": "USD",
+          "categoryCode": "SET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "",
+          "isBookingEnabled": false,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "69251d2880e9dd5638e7d6e1",
+            "startDateTime": "2025-12-13T09:00:00",
+            "endDateTime": "2025-12-13T10:00:00",
+            "status": "SoldOut",
+            "inventoryCount": 0,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692511b180e9dd5638e7c413",
+              "startDateTime": "2025-12-09T09:00:00",
+              "endDateTime": "2025-12-09T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692515dd80e9dd5638e7ca1d",
+              "startDateTime": "2025-12-10T09:00:00",
+              "endDateTime": "2025-12-10T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692518df80e9dd5638e7cf10",
+              "startDateTime": "2025-12-11T09:00:00",
+              "endDateTime": "2025-12-11T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "69251b3680e9dd5638e7d30b",
+              "startDateTime": "2025-12-12T09:00:00",
+              "endDateTime": "2025-12-12T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "69251d2880e9dd5638e7d6e1",
+              "startDateTime": "2025-12-13T09:00:00",
+              "endDateTime": "2025-12-13T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925208c80e9dd5638e7dce0",
+              "startDateTime": "2025-12-14T09:00:00",
+              "endDateTime": "2025-12-14T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692523bb80e9dd5638e7e105",
+              "startDateTime": "2025-12-15T09:00:00",
+              "endDateTime": "2025-12-15T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "6925259780e9dd5638e7e361",
+              "startDateTime": "2025-12-16T09:00:00",
+              "endDateTime": "2025-12-16T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            },
+            {
+              "id": "692528cc80e9dd5638e7e733",
+              "startDateTime": "2025-12-17T09:00:00",
+              "endDateTime": "2025-12-17T10:00:00",
+              "status": "SoldOut",
+              "inventoryCount": 0,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "660ecd88a521740f880bd03e",
+          "name": "Salty Trivia: Know-It-All",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7c494ed9-12fa-4b67-acff-8664d0d5e872/ILL-ENT-8BIT-SaltyTrivia-1200x800.png",
+          "timePeriod": "9:30-10:15am",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "A pub-style trivia game—created uniquely each day.",
+          "shortDescription": "Not your average Pub-style trivia game. ",
+          "longDescription": "The Happenings Cast compiles the best of pop culture, history, current events and beyond in a uniquely multi-round trivia event created for your voyage. Each team will have a booklet to fill out for each round of 10 questions. But this isn&rsquo;t your average trivia game&mdash;this Salty Trivia expands beyond generations, giving you the freshest, funniest brain-twisters you can find on the open ocean (or anywhere, for that matter).",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "The venue will open 15 minutes prior to the event, and space is limited.",
+            "By selecting 'book,\"  it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "69251dd380e9dd5638e7d814",
+            "startDateTime": "2025-12-13T09:30:00",
+            "endDateTime": "2025-12-13T10:15:00",
+            "status": "Available",
+            "inventoryCount": 16381,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925083c80e9dd5638e7b642",
+              "startDateTime": "2025-12-07T20:30:00",
+              "endDateTime": "2025-12-07T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16366,
+              "isBooked": false
+            },
+            {
+              "id": "69251dd380e9dd5638e7d814",
+              "startDateTime": "2025-12-13T09:30:00",
+              "endDateTime": "2025-12-13T10:15:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251e1080e9dd5638e7d892",
+              "startDateTime": "2025-12-13T19:00:00",
+              "endDateTime": "2025-12-13T19:45:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "6925245d80e9dd5638e7e1cc",
+              "startDateTime": "2025-12-15T20:45:00",
+              "endDateTime": "2025-12-15T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "6925261f80e9dd5638e7e3ea",
+              "startDateTime": "2025-12-16T09:30:00",
+              "endDateTime": "2025-12-16T10:15:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "692527e180e9dd5638e7e623",
+              "startDateTime": "2025-12-17T11:15:00",
+              "endDateTime": "2025-12-17T12:00:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69252a1580e9dd5638e7e8d1",
+              "startDateTime": "2025-12-17T18:45:00",
+              "endDateTime": "2025-12-17T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 1,
+      "time": "10am",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "637d4cf05da65fd814fcba84",
+          "name": "Pickleball",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ea9e42e9-50d7-4751-80bc-0d561931f8e3/IMG-ENT-PICKLEBALL-1200x800.jpg",
+          "timePeriod": "10-5:30pm",
+          "type": "Bookable",
+          "location": "The Sport's Court, Deck 16",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Quick to learn, social, and a lot of fun, Pickleball is a fast-paced sport that combines elements of tennis, badminton, and ping-pong.",
+          "shortDescription": "Discover the world's latest sports obsession.",
+          "longDescription": "Put on some comfy clothes and get ready to break a sweat because you&#39;re about to fall in love with Pickleball &mdash; the world&#39;s latest sports obsession. For this self guided session, all you need to play is a couple of paddles, a ball, and a net, and we got it all ready and waiting for you at the Sports Court on Deck 16. But before joining us for a match, you must know one (very important) thing: learning to play Pickleball is incredibly easy... the hard part is stopping. Trust us, we know.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Pickleball is open to all Sailors on a first come first serve basis.",
+            "Please be mindful of your time on the court if others are waiting to play.",
+            "This will be a self-guided session."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "69251d4880e9dd5638e7d71e",
+            "startDateTime": "2025-12-13T10:00:00",
+            "endDateTime": "2025-12-13T17:30:00",
+            "status": "Available",
+            "inventoryCount": 16383,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250b3180e9dd5638e7ba36",
+              "startDateTime": "2025-12-08T10:00:00",
+              "endDateTime": "2025-12-08T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16366,
+              "isBooked": false
+            },
+            {
+              "id": "692511c680e9dd5638e7c417",
+              "startDateTime": "2025-12-09T10:00:00",
+              "endDateTime": "2025-12-09T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "6925161f80e9dd5638e7ca97",
+              "startDateTime": "2025-12-10T10:00:00",
+              "endDateTime": "2025-12-10T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "692518fa80e9dd5638e7cf14",
+              "startDateTime": "2025-12-11T10:00:00",
+              "endDateTime": "2025-12-11T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251b4e80e9dd5638e7d348",
+              "startDateTime": "2025-12-12T10:00:00",
+              "endDateTime": "2025-12-12T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69251d4880e9dd5638e7d71e",
+              "startDateTime": "2025-12-13T10:00:00",
+              "endDateTime": "2025-12-13T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692520a880e9dd5638e7dce4",
+              "startDateTime": "2025-12-14T10:00:00",
+              "endDateTime": "2025-12-14T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "692523f880e9dd5638e7e146",
+              "startDateTime": "2025-12-15T10:00:00",
+              "endDateTime": "2025-12-15T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692525b180e9dd5638e7e365",
+              "startDateTime": "2025-12-16T10:00:00",
+              "endDateTime": "2025-12-16T17:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "692528e680e9dd5638e7e770",
+              "startDateTime": "2025-12-17T10:00:00",
+              "endDateTime": "2025-12-17T14:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "time": "2pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "641352fca0431606ca52c09b",
+          "name": "DJ James Campbell at Aquatic Club",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:20488ccc-2185-48d8-a13a-b79338f84568/IMG-ENT-James-Campbell-1200x800.jpg",
+          "timePeriod": "2-4:30pm",
+          "type": "Bookable",
+          "location": "Aquatic Club, Deck 15",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Vibe out in the midday sun with strangers, lovers, and everyone in between.",
+          "shortDescription": "A splash of afternoon sunshine.",
+          "longDescription": "At the Aquatic Club, it&#39;s all about good energy. You&#39;ll hear a mix of current and classic pop, Latin, reggae, hip-hop (of the chill variety), dance, minimal house music, and remixes. Perfect for poolside lounging &mdash; cocktail optional.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "69251d0e80e9dd5638e7d6a4",
+            "startDateTime": "2025-12-13T14:00:00",
+            "endDateTime": "2025-12-13T16:30:00",
+            "status": "Available",
+            "inventoryCount": 16368,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250ade80e9dd5638e7b9bc",
+              "startDateTime": "2025-12-08T13:30:00",
+              "endDateTime": "2025-12-08T17:00:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            },
+            {
+              "id": "69251d0e80e9dd5638e7d6a4",
+              "startDateTime": "2025-12-13T14:00:00",
+              "endDateTime": "2025-12-13T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16368,
+              "isBooked": false
+            },
+            {
+              "id": "692528b980e9dd5638e7e72f",
+              "startDateTime": "2025-12-17T13:30:00",
+              "endDateTime": "2025-12-17T17:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "time": "4pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "67129ae0c2eae8115eb59424",
+          "name": "Solo Salty Trivia",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:1c11f30d-60e1-4acd-a72e-e887d384035c/ILL-ENT-Placeholder-Graphic-1200x800.jpg",
+          "timePeriod": "4-4:45pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "You don’t need anyone but yourself to be the Trivia Champion!",
+          "shortDescription": "Test your solo trivia knowledge.",
+          "longDescription": "Here at Virgin, we love our Trivia! And you don&rsquo;t need a team to prove just how smart you are. Take on this new twist of Salty Trivia where you face off against other masterful trivia minds in the ultimate solo show down!",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "69251de980e9dd5638e7d851",
+            "startDateTime": "2025-12-13T16:00:00",
+            "endDateTime": "2025-12-13T16:45:00",
+            "status": "Available",
+            "inventoryCount": 16381,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251de980e9dd5638e7d851",
+              "startDateTime": "2025-12-13T16:00:00",
+              "endDateTime": "2025-12-13T16:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925243780e9dd5638e7e18b",
+              "startDateTime": "2025-12-15T18:00:00",
+              "endDateTime": "2025-12-15T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 4,
+      "time": "5pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "68d2fe1587759f05d48d164a",
+          "name": "Pop Quiz: Latin Hits Music Trivia",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7b715d8e-eda8-4138-aa30-00e5274637d5/IMG-ENT-Pop-Quiz-Music-Trivia-1200x800.jpg",
+          "timePeriod": "5:30-6:30pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Test your Latin music knowledge with fiesta-fueled trivia—salsa, reggaetón, pop, and more!",
+          "shortDescription": "A total fiesta of Latin music trivia.",
+          "longDescription": "Feel the rhythm and turn up the sabor! From salsa and bachata to reggaet&oacute;n and Latin pop, this fiesta-fueled trivia game will test your knowledge of the biggest hits and icons. Whether you love Selena, Shakira, Bad Bunny, or just crave the beats, get ready to show off your canci&oacute;n smarts and celebrate Latin music!",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "69251e0080e9dd5638e7d88e",
+            "startDateTime": "2025-12-13T17:30:00",
+            "endDateTime": "2025-12-13T18:30:00",
+            "status": "Available",
+            "inventoryCount": 16380,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251e0080e9dd5638e7d88e",
+              "startDateTime": "2025-12-13T17:30:00",
+              "endDateTime": "2025-12-13T18:30:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 5,
+      "time": "6pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "61ab98e3248e3706b1c8673e",
+          "name": "The Myth of Scarlet Night",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:84760fbc-493c-4da5-8a94-c27dca7b32d4/ILL-APP-UK-Summer-Series-Entertainment-A-Splash-of-Scarlet-Night-1200x800.jpg",
+          "timePeriod": "6-6:15pm",
+          "type": "Bookable",
+          "location": "The Roundabout, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "A peek behind the Scarlet (Night) curtain...",
+          "shortDescription": "Let us explain what it's all about.",
+          "longDescription": "Okay...so you get it. Scarlet Night is important, we&#39;ve made that clear. But... what is it exactly? We like to keep it fun and mysterious so that all the incredible surprises, well, surprise you. That being said, the story behind Scarlet Night is enchanting, so if you want to learn about the myth of our lady ship&#39;s most important night, you can join members of our Happenings cast to make sure you get the most out of your Scarlet Night.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "This is event is on a first-come, first-served basis."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDMI",
+          "selectedSlot": {
+            "id": "69251cc680e9dd5638e7d5ec",
+            "startDateTime": "2025-12-13T18:00:00",
+            "endDateTime": "2025-12-13T18:15:00",
+            "status": "Available",
+            "inventoryCount": 16356,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251cc680e9dd5638e7d5ec",
+              "startDateTime": "2025-12-13T18:00:00",
+              "endDateTime": "2025-12-13T18:15:00",
+              "status": "Available",
+              "inventoryCount": 16356,
+              "isBooked": false
+            },
+            {
+              "id": "69251cd180e9dd5638e7d5f0",
+              "startDateTime": "2025-12-13T19:45:00",
+              "endDateTime": "2025-12-13T20:00:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "6308e4c37dbc48ef9efc2020",
+          "name": "VV Cabaret: Featuring the Diva",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a4a07748-ed73-4df8-867c-0642441d190c/ILL-ENT-UK-Summer-Series-Entertainment-Show-Tunes-And-Video-At-The-Manor-1200x800.jpg",
+          "timePeriod": "6:30-7:15pm",
+          "type": "Bookable",
+          "location": "On The Rocks, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Join the ship's resident drag queen up close and personal, for a fierce and fabulous hootenanny.",
+          "shortDescription": "Sip, Sing, and Slay along with the Diva.",
+          "longDescription": "As the ship&#39;s grand jewel, the Diva from the Happenings Cast knows how to command attention and captivate audiences. Adorned in her finest drag, this performance is one you won&rsquo;t want to miss. Enjoy a cocktail at the bar, relax, and let the magic unfold. Sing along, sway to the rhythm, and snap your fingers to the beat - our Diva promises to provide some unforgettable entertainment!",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "This event is on a first-come, first-served basis."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "69251ca080e9dd5638e7d5ab",
+            "startDateTime": "2025-12-13T18:30:00",
+            "endDateTime": "2025-12-13T19:15:00",
+            "status": "Available",
+            "inventoryCount": 16372,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251ca080e9dd5638e7d5ab",
+              "startDateTime": "2025-12-13T18:30:00",
+              "endDateTime": "2025-12-13T19:15:00",
+              "status": "Available",
+              "inventoryCount": 16372,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "641352fca0431606ca52c11f",
+          "name": "Glam Station Motivation",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:c2b5e571-1c4b-4fa7-9c1b-5e348b9b8548/IMG-ENT-discotechnique-1200x800.jpg",
+          "timePeriod": "6:45-7:45pm",
+          "type": "Bookable",
+          "location": "The Roundabout Dk 7, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Add a little (or a lot) of sparkle to your already sparkling night...",
+          "shortDescription": "Get glam, glittered, & sparkled for an epic night.",
+          "longDescription": "For our luminous nights under the stars, our glam patrol is here to elevate your on-deck esthetic for one sensational night at sea. Make-up. Glitter. Face Gems &mdash; however you want to maximize your look, our glamor-azzi team is here to help you make it happen. Make sure to arrive soon, as it is first come, first served!",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "69251dae80e9dd5638e7d7d7",
+            "startDateTime": "2025-12-13T18:45:00",
+            "endDateTime": "2025-12-13T19:45:00",
+            "status": "Available",
+            "inventoryCount": 16356,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692512a680e9dd5638e7c557",
+              "startDateTime": "2025-12-09T20:30:00",
+              "endDateTime": "2025-12-09T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16348,
+              "isBooked": false
+            },
+            {
+              "id": "69251dae80e9dd5638e7d7d7",
+              "startDateTime": "2025-12-13T18:45:00",
+              "endDateTime": "2025-12-13T19:45:00",
+              "status": "Available",
+              "inventoryCount": 16356,
+              "isBooked": false
+            },
+            {
+              "id": "6925298280e9dd5638e7e841",
+              "startDateTime": "2025-12-17T20:30:00",
+              "endDateTime": "2025-12-17T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16373,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 6,
+      "time": "7pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "660ecd88a521740f880bd03e",
+          "name": "Salty Trivia: Know-It-All",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7c494ed9-12fa-4b67-acff-8664d0d5e872/ILL-ENT-8BIT-SaltyTrivia-1200x800.png",
+          "timePeriod": "7-7:45pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "A pub-style trivia game—created uniquely each day.",
+          "shortDescription": "Not your average Pub-style trivia game. ",
+          "longDescription": "The Happenings Cast compiles the best of pop culture, history, current events and beyond in a uniquely multi-round trivia event created for your voyage. Each team will have a booklet to fill out for each round of 10 questions. But this isn&rsquo;t your average trivia game&mdash;this Salty Trivia expands beyond generations, giving you the freshest, funniest brain-twisters you can find on the open ocean (or anywhere, for that matter).",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "The venue will open 15 minutes prior to the event, and space is limited.",
+            "By selecting 'book,\"  it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "69251e1080e9dd5638e7d892",
+            "startDateTime": "2025-12-13T19:00:00",
+            "endDateTime": "2025-12-13T19:45:00",
+            "status": "Available",
+            "inventoryCount": 16382,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6925083c80e9dd5638e7b642",
+              "startDateTime": "2025-12-07T20:30:00",
+              "endDateTime": "2025-12-07T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16366,
+              "isBooked": false
+            },
+            {
+              "id": "69251dd380e9dd5638e7d814",
+              "startDateTime": "2025-12-13T09:30:00",
+              "endDateTime": "2025-12-13T10:15:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251e1080e9dd5638e7d892",
+              "startDateTime": "2025-12-13T19:00:00",
+              "endDateTime": "2025-12-13T19:45:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "6925245d80e9dd5638e7e1cc",
+              "startDateTime": "2025-12-15T20:45:00",
+              "endDateTime": "2025-12-15T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "6925261f80e9dd5638e7e3ea",
+              "startDateTime": "2025-12-16T09:30:00",
+              "endDateTime": "2025-12-16T10:15:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "692527e180e9dd5638e7e623",
+              "startDateTime": "2025-12-17T11:15:00",
+              "endDateTime": "2025-12-17T12:00:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "69252a1580e9dd5638e7e8d1",
+              "startDateTime": "2025-12-17T18:45:00",
+              "endDateTime": "2025-12-17T19:30:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "65cf804811a379c8ac3ad9e2",
+          "name": "Festival Stage: Tom Crosbie",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:714db8b1-54d8-4ca6-aeb1-45e5c5c43d18/1200x800-4.jpg",
+          "timePeriod": "7:30-8:30pm",
+          "type": "Bookable",
+          "location": "The Red Room, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Come find out what makes Tom one of Britain's most in demand variety stars!",
+          "shortDescription": "Performing Nerd.",
+          "longDescription": "Tom has made a living for the last 10 years traveling the world with his collection of completely useless skills. This promises to be a funny &amp; charming show from one of Britain&#39;s most in demand variety stars! With a show that will be like nothing you&#39;ve ever seen before, join Tom as he takes the scenic route to self-improvement, as he masters the talents nobody knew he needed.<br />\n<br />\n&quot;One of the most incredible things I&#39;ve ever watched!&quot; - Simon Cowell",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Please keep in mind this is a first come, first served event.",
+            "By selecting 'add to agenda', it does not guarantee admission to the event, so try to arrive when the venue opens to ensure a spot.",
+            "Seats cannot be reserved or saved.",
+            "This is a show that will be performed throughout the voyage."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "6916261f80e9dd5638d9a9ac",
+            "startDateTime": "2025-12-13T19:30:00",
+            "endDateTime": "2025-12-13T20:30:00",
+            "status": "Available",
+            "inventoryCount": 16344,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "691624c080e9dd5638d9a8ff",
+              "startDateTime": "2025-12-10T19:30:00",
+              "endDateTime": "2025-12-10T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16249,
+              "isBooked": false
+            },
+            {
+              "id": "691624df80e9dd5638d9a903",
+              "startDateTime": "2025-12-10T22:00:00",
+              "endDateTime": "2025-12-10T23:00:00",
+              "status": "Available",
+              "inventoryCount": 16198,
+              "isBooked": false
+            },
+            {
+              "id": "6916261f80e9dd5638d9a9ac",
+              "startDateTime": "2025-12-13T19:30:00",
+              "endDateTime": "2025-12-13T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16344,
+              "isBooked": false
+            },
+            {
+              "id": "6916291680e9dd5638d9ab1e",
+              "startDateTime": "2025-12-16T19:30:00",
+              "endDateTime": "2025-12-16T20:30:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "61ab98e3248e3706b1c8673e",
+          "name": "The Myth of Scarlet Night",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:84760fbc-493c-4da5-8a94-c27dca7b32d4/ILL-APP-UK-Summer-Series-Entertainment-A-Splash-of-Scarlet-Night-1200x800.jpg",
+          "timePeriod": "7:45-8pm",
+          "type": "Bookable",
+          "location": "The Roundabout, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "A peek behind the Scarlet (Night) curtain...",
+          "shortDescription": "Let us explain what it's all about.",
+          "longDescription": "Okay...so you get it. Scarlet Night is important, we&#39;ve made that clear. But... what is it exactly? We like to keep it fun and mysterious so that all the incredible surprises, well, surprise you. That being said, the story behind Scarlet Night is enchanting, so if you want to learn about the myth of our lady ship&#39;s most important night, you can join members of our Happenings cast to make sure you get the most out of your Scarlet Night.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "This is event is on a first-come, first-served basis."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDMI",
+          "selectedSlot": {
+            "id": "69251cd180e9dd5638e7d5f0",
+            "startDateTime": "2025-12-13T19:45:00",
+            "endDateTime": "2025-12-13T20:00:00",
+            "status": "Available",
+            "inventoryCount": 16354,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251cc680e9dd5638e7d5ec",
+              "startDateTime": "2025-12-13T18:00:00",
+              "endDateTime": "2025-12-13T18:15:00",
+              "status": "Available",
+              "inventoryCount": 16356,
+              "isBooked": false
+            },
+            {
+              "id": "69251cd180e9dd5638e7d5f0",
+              "startDateTime": "2025-12-13T19:45:00",
+              "endDateTime": "2025-12-13T20:00:00",
+              "status": "Available",
+              "inventoryCount": 16354,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 7,
+      "time": "9pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "5a6a364b3575f82115347088",
+          "name": "Scarlet Night",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:b78901d8-3133-42c7-8e5f-f91db3a4faee/IMG-ENT-the-manor-entrance-S18-048-v1-1200x800.jpg",
+          "timePeriod": "9pm",
+          "type": "Bookable",
+          "location": "Ship Wide, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Wear a splash of red and get ready for the dreamiest, most surprising, and heart-stirring event at sea. Scarlet Night isn’t just a dance party…",
+          "shortDescription": "Red sky at night, Sailor's delight...",
+          "longDescription": "On every voyage, there&#39;s one night that reigns supreme above the rest. Welcome to Scarlet Night &mdash; an immersive celebration of the fabled love between the mysterious Goddess of the Sea and the Sailor who won her heart. Throughout Deck 7 and the Roundabout on Deck 6, the ship is transformed into a menagerie of delights and epic dance moves. Through pop-up performances, interactive games, karaoke, myth-telling, and live music, come pay tribute to a love that washed the world scarlet.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "Red is a must.",
+            "The adventurous will be rewarded.",
+            "Keep your hands to yourself! NO touching of any cast/performer/crew member or Sailor.",
+            "This event will be recorded as part of a marketing production that will be used for commercial advertising.",
+            "Your attendance confirms your consent for us to use your name, image and/or persona in some or all of our marketing or promotional materials.",
+            "Materials which may be in print, on television, on our website, on our social media sites, or other media."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "69251d6580e9dd5638e7d75b",
+            "startDateTime": "2025-12-13T21:00:00",
+            "endDateTime": "2025-12-13T22:45:00",
+            "status": "Available",
+            "inventoryCount": 16292,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251d6580e9dd5638e7d75b",
+              "startDateTime": "2025-12-13T21:00:00",
+              "endDateTime": "2025-12-13T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16292,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "619e9b8d248e3706b1c249a8",
+          "name": "The Octopus Garden: The Story of Scarlet Night",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:24f24e9c-0976-4c01-81cc-44b6938363ac/IMG-ENT-The-Octopus-Garden-The-Story-Of-Scarlet-Night-1200x800.jpg",
+          "timePeriod": "9:15-9:30pm",
+          "type": "Bookable",
+          "location": "The Red Room, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "8 tentacles and one epic love story to tell.",
+          "shortDescription": "The story behind the greatest love story at sea.",
+          "longDescription": "The Octopus Goddess welcomes you to her garden on our epic Scarlet Night. Learn straight from the Octopus&#39; mouth about the myth and story behind Scarlet Night&#39;s origins &mdash;&nbsp;the world&#39;s most romantic love story.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "This event is on a first-come, first-served basis."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDMI",
+          "selectedSlot": {
+            "id": "691626ca80e9dd5638d9aa5b",
+            "startDateTime": "2025-12-13T21:15:00",
+            "endDateTime": "2025-12-13T21:30:00",
+            "status": "Available",
+            "inventoryCount": 16198,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "691626ca80e9dd5638d9aa5b",
+              "startDateTime": "2025-12-13T21:15:00",
+              "endDateTime": "2025-12-13T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16198,
+              "isBooked": false
+            },
+            {
+              "id": "691626d780e9dd5638d9aa5f",
+              "startDateTime": "2025-12-13T21:45:00",
+              "endDateTime": "2025-12-13T22:00:00",
+              "status": "Available",
+              "inventoryCount": 16269,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "62fd4190eff21f1e705164e7",
+          "name": "Karaoke with the Diva",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:69fe05ac-348a-42c8-826a-c328558d39ee/ILL-APP-UK-Summer-Series-Entertainment-Show-Tunes-And-Video-At-The-Manor-1200x800.jpg",
+          "timePeriod": "9:15-10:30pm",
+          "type": "Bookable",
+          "location": "The Social Club, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Let your inner rockstar come out by sharing your lyrical talents during Scarlet Night’s epic (live) karaoke sesh with the Diva.",
+          "shortDescription": "Sing loud, strong, all night long — with the Diva.",
+          "longDescription": "It&rsquo;s Scarlet Night dahlings &mdash; where everybody is a star, so show off your vocal, lyrical, or harmonious talents during karaoke with the Diva herself. Everyone has their go-to song so whether you want to belt out your high-octave emotions Mariah-style, take a chance as a rapper, or keep us believing that this is a real journey of a lifetime, lose yourself in the moment &mdash; and own it &mdash; cause this opportunity comes once in a Scarlet Night.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "69251e3980e9dd5638e7d8cf",
+            "startDateTime": "2025-12-13T21:15:00",
+            "endDateTime": "2025-12-13T22:30:00",
+            "status": "Available",
+            "inventoryCount": 16375,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69251e3980e9dd5638e7d8cf",
+              "startDateTime": "2025-12-13T21:15:00",
+              "endDateTime": "2025-12-13T22:30:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "6633c077a521740f8822ccb7",
+          "name": "Delight Trio",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a893a5d0-cce5-489b-afdd-688668f47193/DelightTrioEvents_1200x800.jpg",
+          "timePeriod": "9:30-10:45pm",
+          "type": "Bookable",
+          "location": "The Dock House, Deck 7",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "Direct from Colombia, the Delight trio presents a wide range of musical genres with a percussive twist.",
+          "shortDescription": "A Latin Trio with a world repertoire.",
+          "longDescription": "Hailing from Colombia Delight Trio&#39;s passion for music is as palpable as the energy in their performances. Delight Trio blends music from around the globe including rock, pop, disco, and funk with a danceable mix of bossa nova, Latin, and global rhythms.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDMI",
+          "selectedSlot": {
+            "id": "69251ced80e9dd5638e7d667",
+            "startDateTime": "2025-12-13T21:30:00",
+            "endDateTime": "2025-12-13T22:45:00",
+            "status": "Available",
+            "inventoryCount": 16382,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "69250aa380e9dd5638e7b942",
+              "startDateTime": "2025-12-08T15:30:00",
+              "endDateTime": "2025-12-08T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16363,
+              "isBooked": false
+            },
+            {
+              "id": "692510c680e9dd5638e7c264",
+              "startDateTime": "2025-12-09T19:30:00",
+              "endDateTime": "2025-12-09T21:45:00",
+              "status": "Available",
+              "inventoryCount": 16370,
+              "isBooked": false
+            },
+            {
+              "id": "692514c180e9dd5638e7c87a",
+              "startDateTime": "2025-12-10T19:45:00",
+              "endDateTime": "2025-12-10T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "69251af280e9dd5638e7d289",
+              "startDateTime": "2025-12-12T19:15:00",
+              "endDateTime": "2025-12-12T21:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251ced80e9dd5638e7d667",
+              "startDateTime": "2025-12-13T21:30:00",
+              "endDateTime": "2025-12-13T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16382,
+              "isBooked": false
+            },
+            {
+              "id": "69251f4480e9dd5638e7db14",
+              "startDateTime": "2025-12-14T17:15:00",
+              "endDateTime": "2025-12-14T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "6925232d80e9dd5638e7e00a",
+              "startDateTime": "2025-12-15T19:30:00",
+              "endDateTime": "2025-12-15T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "6925287a80e9dd5638e7e6ee",
+              "startDateTime": "2025-12-17T15:30:00",
+              "endDateTime": "2025-12-17T16:30:00",
+              "status": "Available",
+              "inventoryCount": 16383,
+              "isBooked": false
+            },
+            {
+              "id": "6925280780e9dd5638e7e62b",
+              "startDateTime": "2025-12-17T17:45:00",
+              "endDateTime": "2025-12-17T18:45:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "619e9b8d248e3706b1c249a8",
+          "name": "The Octopus Garden: The Story of Scarlet Night",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:24f24e9c-0976-4c01-81cc-44b6938363ac/IMG-ENT-The-Octopus-Garden-The-Story-Of-Scarlet-Night-1200x800.jpg",
+          "timePeriod": "9:45-10pm",
+          "type": "Bookable",
+          "location": "The Red Room, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "8 tentacles and one epic love story to tell.",
+          "shortDescription": "The story behind the greatest love story at sea.",
+          "longDescription": "The Octopus Goddess welcomes you to her garden on our epic Scarlet Night. Learn straight from the Octopus&#39; mouth about the myth and story behind Scarlet Night&#39;s origins &mdash;&nbsp;the world&#39;s most romantic love story.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [
+            "This event is on a first-come, first-served basis."
+          ],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDMI",
+          "selectedSlot": {
+            "id": "691626d780e9dd5638d9aa5f",
+            "startDateTime": "2025-12-13T21:45:00",
+            "endDateTime": "2025-12-13T22:00:00",
+            "status": "Available",
+            "inventoryCount": 16269,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "691626ca80e9dd5638d9aa5b",
+              "startDateTime": "2025-12-13T21:15:00",
+              "endDateTime": "2025-12-13T21:30:00",
+              "status": "Available",
+              "inventoryCount": 16198,
+              "isBooked": false
+            },
+            {
+              "id": "691626d780e9dd5638d9aa5f",
+              "startDateTime": "2025-12-13T21:45:00",
+              "endDateTime": "2025-12-13T22:00:00",
+              "status": "Available",
+              "inventoryCount": 16269,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "time": "11pm",
+      "date": "2025-12-13",
+      "items": [
+        {
+          "id": "641352fca0431606ca52c0d9",
+          "name": "Guest Artists: Dustin Monk & The Hustle",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:1efea52e-1f44-415e-b9d2-ea306763ade8/IMG-ENT-dustin-monk-the-hustle-1200x800.jpg",
+          "timePeriod": "11:15-1am",
+          "type": "Bookable",
+          "location": "On The Rocks, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "From turning chairs on \"The Voice\" to turning heads in the music industry, Dustin Monk & The Hustle brings Hollywood rock experience to Virgin Voyages",
+          "shortDescription": "A rock ensemble with the heartbeat of soul and R&B",
+          "longDescription": "Rising to fame on Season 9 of NBC&#39;s &quot;The Voice,&quot; Dustin managed to catch the attention and turn the chairs of Blake Shelton and Adam Levine. Now he&#39;s doing more than turning chairs -- he&#39;s filling them with fans all around the country. Rooted in rock n&#39; roll, the catchy sound of Dustin Monk &amp; The Hustle is also inspired by a fusion of Blues, Soul, Funk, and R&amp;B.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "MDSI",
+          "selectedSlot": {
+            "id": "69251cb380e9dd5638e7d5af",
+            "startDateTime": "2025-12-13T23:15:00",
+            "endDateTime": "2025-12-14T01:00:00",
+            "status": "Available",
+            "inventoryCount": 16381,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "692505d280e9dd5638e7b31a",
+              "startDateTime": "2025-12-07T20:45:00",
+              "endDateTime": "2025-12-07T22:45:00",
+              "status": "Available",
+              "inventoryCount": 16365,
+              "isBooked": false
+            },
+            {
+              "id": "69250a2080e9dd5638e7b880",
+              "startDateTime": "2025-12-08T23:15:00",
+              "endDateTime": "2025-12-09T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "692514d480e9dd5638e7c8b7",
+              "startDateTime": "2025-12-10T23:00:00",
+              "endDateTime": "2025-12-11T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16375,
+              "isBooked": false
+            },
+            {
+              "id": "6925184480e9dd5638e7cdd7",
+              "startDateTime": "2025-12-11T19:30:00",
+              "endDateTime": "2025-12-11T21:15:00",
+              "status": "Available",
+              "inventoryCount": 16378,
+              "isBooked": false
+            },
+            {
+              "id": "69251cb380e9dd5638e7d5af",
+              "startDateTime": "2025-12-13T23:15:00",
+              "endDateTime": "2025-12-14T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            },
+            {
+              "id": "69251f5380e9dd5638e7db18",
+              "startDateTime": "2025-12-14T20:00:00",
+              "endDateTime": "2025-12-14T21:45:00",
+              "status": "Available",
+              "inventoryCount": 16380,
+              "isBooked": false
+            },
+            {
+              "id": "6925234080e9dd5638e7e047",
+              "startDateTime": "2025-12-15T23:00:00",
+              "endDateTime": "2025-12-16T01:00:00",
+              "status": "Available",
+              "inventoryCount": 16379,
+              "isBooked": false
+            },
+            {
+              "id": "6925281780e9dd5638e7e668",
+              "startDateTime": "2025-12-17T20:15:00",
+              "endDateTime": "2025-12-17T22:00:00",
+              "status": "Available",
+              "inventoryCount": 16381,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        },
+        {
+          "id": "668c318d6f3dd71e285bdddf",
+          "name": "Scarlet Night Hip-Hop Afterparty",
+          "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:b2f4a45d-9d60-49f2-92d9-00eb3a3dda4e/ILL-ENT-UK-Summer-Series-Entertainment-Under-the-Stars-with-a-DJ-at-the-Aquatic-Club-1200x800.jpg",
+          "timePeriod": "11:30pm-Late",
+          "type": "Bookable",
+          "location": "The Manor, Deck 6",
+          "price": 0,
+          "priceFormatted": "",
+          "introduction": "From Biggie to Burna Boy, our DJs will keep you celebrating until dawn.",
+          "shortDescription": "A hip-hop themed Scarlet Night afterparty.",
+          "longDescription": "Scarlet Night isn&#39;t over until the Octogodess says it is over so make your way to the Manor dance floor for a mix of Urban music drops that spans generations of hip-hop, reggae, afrobeat, reggaeton, soca, and more.",
+          "currencyCode": "USD",
+          "categoryCode": "NET",
+          "needToKnows": [],
+          "editorialBlocks": [],
+          "isBooked": false,
+          "bookedText": "",
+          "isPreVoyageBookingStopped": false,
+          "bookButtonText": "Add to agenda",
+          "isBookingEnabled": true,
+          "inventoryState": "NonInventoried",
+          "bookingType": "SDSI",
+          "selectedSlot": {
+            "id": "6916272880e9dd5638d9aa6e",
+            "startDateTime": "2025-12-13T23:30:00",
+            "endDateTime": "2025-12-14T02:30:00",
+            "status": "Available",
+            "inventoryCount": 16100,
+            "isBooked": false
+          },
+          "slots": [
+            {
+              "id": "6916272880e9dd5638d9aa6e",
+              "startDateTime": "2025-12-13T23:30:00",
+              "endDateTime": "2025-12-14T02:30:00",
+              "status": "Available",
+              "inventoryCount": 16100,
+              "isBooked": false
+            }
+          ],
+          "appointments": null,
+          "pictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:14161e80-e72c-4342-a144-2bc462463e8e/PTG-SHORETHINGS-booking-type-eventsgigs-80x80.svg"
+        }
+      ]
+    }
+  ]
+}

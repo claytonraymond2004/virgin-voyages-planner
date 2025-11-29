@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virgin Voyages Event Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="icon" type="image/svg+xml" href="app_logo.svg">
+</head>
+
+<body>
+
+    <!-- Upload Screen -->
+    <div id="upload-screen">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-[#AF231C] mb-2 tracking-wide uppercase"
+                style="font-family: 'Oswald', sans-serif;">Virgin Voyages Planner</h1>
+            <p class="text-gray-500">Upload CleanAgenda.json, Raw API Files, or a Backup File</p>
+        </div>
+
+        <div id="drop-zone" class="drop-zone">
+            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <span class="text-lg text-gray-600 font-medium">Drag & Drop File</span>
+            <span class="text-sm text-gray-400 mt-2">or click to browse</span>
+            <input type="file" id="file-input" accept=".json" class="hidden" multiple>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header"
+        class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center z-30 shadow-sm hidden"
+        style="z-index: 500;">
+        <div class="flex items-center gap-3">
+            <img src="app_logo.svg" alt="Cruise Path Logo" class="h-8 w-8 rounded-full object-cover bg-white">
+            <h1 class="text-2xl font-bold text-[#AF231C] hidden md:block tracking-wide uppercase"
+                style="font-family: 'Oswald', sans-serif;">Voyage Planner</h1>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md mx-4 relative flex items-center gap-2">
+            <div class="relative w-full group">
+                <!-- Search Mode Trigger -->
+                <button id="search-mode-btn"
+                    class="absolute left-1 top-1 bottom-1 px-2 flex items-center gap-0.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded cursor-pointer z-10"
+                    onclick="toggleSearchMenu(event)" title="Search Options">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <!-- Search Mode Dropdown -->
+                <div id="search-mode-menu"
+                    class="absolute left-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 hidden z-[5001]">
+                    <div class="py-1">
+                        <button onclick="setSearchMode('title')"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
+                            <span>Title Only</span>
+                            <svg id="check-title" class="w-4 h-4 text-[#AF231C]" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
+                                </path>
+                            </svg>
+                        </button>
+                        <button onclick="setSearchMode('all')"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
+                            <span>Title & Description</span>
+                            <svg id="check-all" class="w-4 h-4 text-[#AF231C] hidden" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <input type="text" id="search-input" placeholder="Filter Events..."
+                    class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 pl-16 pr-8 bg-gray-50">
+
+                <!-- Clear Button -->
+                <button id="clear-search" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden"
+                    onclick="clearSearch()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+                <!-- Search Results Dropdown -->
+                <div id="search-results"></div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm">
+
+            <!-- Attendance Panel Button -->
+            <button onclick="toggleAttendancePanel()"
+                class="p-2 rounded-full hover:bg-gray-100 text-gray-600 mr-1 flex items-center"
+                title="Missing Events - Events you're not attending">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                    </path>
+                </svg>
+                <span id="missing-count" class="ml-1 text-xs font-bold text-gray-500">0</span>
+            </button>
+
+            <!-- Hidden Events Manager Button -->
+            <button onclick="openHiddenManager()"
+                class="p-2 rounded-full hover:bg-gray-100 text-gray-600 mr-1 flex items-center"
+                title="Manage Hidden Events">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                    </path>
+                </svg>
+                <span id="hidden-count" class="ml-1 text-xs font-bold text-gray-500">0</span>
+            </button>
+
+            <!-- Toggle Hidden Events Button -->
+            <button onclick="toggleShowHiddenTemp()" id="btn-toggle-hidden"
+                class="p-2 rounded-full hover:bg-gray-100 text-gray-400 mr-1" title="Toggle Hidden Events Visibility">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Print Button -->
+            <button onclick="exportPrintable()" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 mr-1"
+                title="Print Schedule">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Dark Mode Toggle -->
+            <button onclick="toggleDarkMode()"
+                class="text-gray-600 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition mr-1"
+                title="Toggle Dark Mode">
+                <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style="display:block">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                    </path>
+                </svg>
+                <svg id="icon-sun" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style="display:none">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Menu Button -->
+            <button id="menu-btn" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 relative">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <div id="dropdown-menu">
+                <div onclick="exportData()" class="ctx-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg> Export Backup
+                </div>
+                <div class="ctx-divider"></div>
+                <div onclick="openBlacklistModal()" class="ctx-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                        </path>
+                    </svg> Blacklist Events
+                </div>
+                <div class="ctx-divider"></div>
+                <div onclick="confirmResetData()" class="ctx-item danger">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg> Reset Data
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App -->
+    <div id="app-container">
+        <div id="time-column" id="time-column-container"></div>
+        <div id="schedule-viewport">
+            <div id="schedule-grid"></div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip"></div>
+
+    <!-- Attendance Panel -->
+    <div id="attendance-panel" class="attendance-panel">
+        <div class="attendance-panel-header">
+            <h3 class="text-lg font-bold text-gray-800">Missing Events</h3>
+            <button onclick="toggleAttendancePanel()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+        <div id="attendance-panel-tabs" class="flex border-b border-gray-200 bg-gray-50">
+            <button id="tab-required" onclick="switchAttendanceTab('required')"
+                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700">Required</button>
+            <button id="tab-optional" onclick="switchAttendanceTab('optional')"
+                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700">Optional</button>
+        </div>
+        <div id="attendance-panel-content" class="attendance-panel-content">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+    <!-- Context Menu -->
+    <div id="context-menu">
+
+
+        <div class="ctx-item" id="ctx-edit" style="display:none">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                </path>
+            </svg> Edit Custom Event
+        </div>
+
+        <div class="ctx-item" id="ctx-unhide">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                </path>
+            </svg> Unhide Event
+        </div>
+
+        <div class="ctx-divider" id="ctx-unhide-divider"></div>
+
+        <div class="ctx-item" id="ctx-note">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                </path>
+            </svg> Add / Edit Note
+        </div>
+
+        <div class="ctx-divider" id="ctx-note-divider"></div>
+
+        <div class="ctx-divider" id="ctx-nav-divider"></div>
+
+        <div class="ctx-item" id="ctx-prev">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg> Previous Occurrence
+        </div>
+        <div class="ctx-item" id="ctx-next">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg> Next Occurrence
+        </div>
+
+        <div class="ctx-divider" id="ctx-vv-divider"></div>
+
+        <div class="ctx-item" id="ctx-vvinsider">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg> Search VVInsider
+        </div>
+        <div class="ctx-item" id="ctx-google">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9">
+                </path>
+            </svg> Search Google
+        </div>
+
+        <div class="ctx-divider" id="ctx-hide-divider"></div>
+
+        <div class="ctx-item" id="ctx-optional">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg> Mark as Optional
+        </div>
+
+        <div class="ctx-item danger" id="ctx-hide">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                </path>
+            </svg> Hide Event...
+        </div>
+        <div class="ctx-item danger" id="ctx-blacklist">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                </path>
+            </svg> Blacklist Event
+        </div>
+        <div class="ctx-item danger" id="ctx-delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+            </svg> Delete
+        </div>
+    </div>
+
+    <!-- Confirmation Modal (High Z-Index) -->
+    <div id="confirmation-modal" class="modal-overlay" style="z-index: 5000;">
+        <div class="modal-content p-6 max-w-sm">
+            <h3 class="text-lg font-bold mb-2" id="confirm-title">Confirm</h3>
+            <p class="text-gray-600 mb-6 text-sm" id="confirm-message">Are you sure?</p>
+
+            <div class="flex justify-end gap-3">
+                <button id="btn-confirm-cancel"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button id="btn-confirm-ok"
+                    class="px-4 py-2 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hide Options Modal -->
+    <div id="hide-choice-modal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <h3 class="text-lg font-bold mb-2">Hide Event</h3>
+            <p class="text-gray-600 mb-6 text-sm">This event has multiple occurrences. What would you like to hide?</p>
+
+            <div class="space-y-3">
+                <button onclick="confirmHideInstance()"
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-800">Hide just this time</div>
+                        <div class="text-xs text-gray-500">Only removes this specific slot from the calendar</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+
+                <button onclick="confirmHideSeries()"
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-800">Hide entire series</div>
+                        <div class="text-xs text-gray-500">Removes ALL occurrences of "<span
+                                id="hide-series-name"></span>"</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Choice Modal -->
+    <div id="delete-choice-modal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <h3 class="text-lg font-bold mb-2">Delete Recurring Event</h3>
+            <p class="text-gray-600 mb-6 text-sm">This is a repeating event. Which instances would you like to delete?
+            </p>
+
+            <div class="space-y-3">
+                <button onclick="confirmDeleteInstance()"
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-800">Just this one</div>
+                        <div class="text-xs text-gray-500">Delete only the selected date</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+
+                <button onclick="confirmDeleteSeries()"
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-800">The entire series</div>
+                        <div class="text-xs text-gray-500">Delete ALL occurrences</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Custom Event Modal -->
+    <div id="custom-event-modal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <h3 class="text-lg font-bold mb-4" id="custom-modal-title">New Custom Event</h3>
+
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" id="custom-title" class="form-input" placeholder="e.g. Dinner Reservation">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Location</label>
+                <input type="text" id="custom-location" class="form-input" placeholder="e.g. The Wake">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <select id="custom-date" class="form-input bg-gray-50"></select>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="form-group flex-1">
+                    <label class="form-label">Start Time</label>
+                    <input type="time" id="custom-start" class="form-input" list="time-intervals" step="900">
+                </div>
+                <div class="form-group flex-1">
+                    <label class="form-label">End Time</label>
+                    <input type="time" id="custom-end" class="form-input" list="time-intervals" step="900">
+                </div>
+            </div>
+
+            <div class="form-group flex items-center gap-2 mb-4" id="custom-repeat-group">
+                <input type="checkbox" id="custom-repeat"
+                    class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                <label for="custom-repeat" class="text-sm font-medium text-gray-700">Repeat Daily</label>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description / Notes</label>
+                <textarea id="custom-desc" class="form-input" rows="2"></textarea>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="tryCloseCustomModal()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button onclick="saveCustomEvent()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save
+                    Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Manager Modal -->
+    <div id="hidden-manager-modal" class="modal-overlay">
+        <div class="modal-content flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-800">Hidden Events</h3>
+                <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg></button>
+            </div>
+
+            <div id="hidden-manager-tabs" class="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
+                <button id="tab-hidden-series" onclick="switchHiddenTab('series')"
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Hidden
+                    Series</button>
+                <button id="tab-hidden-partial" onclick="switchHiddenTab('partial')"
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Partially
+                    Hidden</button>
+                <button id="tab-hidden-instances" onclick="switchHiddenTab('instances')"
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Instances</button>
+            </div>
+
+            <div class="overflow-y-auto p-4 flex-1" id="hidden-list-container">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="p-4 border-t border-gray-200 bg-gray-50 text-right">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800">Done</button>
+            </div>
+        </div>
+    </div>
+    <!-- Port Note Modal -->
+    <div id="port-note-modal" class="modal-overlay">
+        <div class="modal-content p-6 max-w-sm">
+            <h3 class="text-lg font-bold mb-4">Edit Port Note</h3>
+            <div class="form-group">
+                <label class="form-label">Port Name / Note</label>
+                <input type="text" id="port-note-input" class="form-input" placeholder="e.g. Cozumel" autofocus>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button onclick="savePortNote()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
+            </div>
+        </div>
+    </div>
+    <!-- Event Note Modal -->
+    <div id="event-note-modal" class="modal-overlay">
+        <div class="modal-content p-6 max-w-sm">
+            <h3 class="text-lg font-bold mb-4">Event Note</h3>
+            <div class="form-group">
+                <label class="form-label">Note</label>
+                <input type="text" id="event-note-input" class="form-input" placeholder="e.g. Meet John here" autofocus>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button onclick="saveEventNote()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
+            </div>
+        </div>
+    </div>
+    <!-- Datalist for Time Inputs -->
+    <datalist id="time-intervals">
+        <option value="00:00"></option>
+        <option value="00:15"></option>
+        <option value="00:30"></option>
+        <option value="00:45"></option>
+        <option value="01:00"></option>
+        <option value="01:15"></option>
+        <option value="01:30"></option>
+        <option value="01:45"></option>
+        <option value="02:00"></option>
+        <option value="02:15"></option>
+        <option value="02:30"></option>
+        <option value="02:45"></option>
+        <option value="03:00"></option>
+        <option value="03:15"></option>
+        <option value="03:30"></option>
+        <option value="03:45"></option>
+        <option value="04:00"></option>
+        <option value="04:15"></option>
+        <option value="04:30"></option>
+        <option value="04:45"></option>
+        <option value="05:00"></option>
+        <option value="05:15"></option>
+        <option value="05:30"></option>
+        <option value="05:45"></option>
+        <option value="06:00"></option>
+        <option value="06:15"></option>
+        <option value="06:30"></option>
+        <option value="06:45"></option>
+        <option value="07:00"></option>
+        <option value="07:15"></option>
+        <option value="07:30"></option>
+        <option value="07:45"></option>
+        <option value="08:00"></option>
+        <option value="08:15"></option>
+        <option value="08:30"></option>
+        <option value="08:45"></option>
+        <option value="09:00"></option>
+        <option value="09:15"></option>
+        <option value="09:30"></option>
+        <option value="09:45"></option>
+        <option value="10:00"></option>
+        <option value="10:15"></option>
+        <option value="10:30"></option>
+        <option value="10:45"></option>
+        <option value="11:00"></option>
+        <option value="11:15"></option>
+        <option value="11:30"></option>
+        <option value="11:45"></option>
+        <option value="12:00"></option>
+        <option value="12:15"></option>
+        <option value="12:30"></option>
+        <option value="12:45"></option>
+        <option value="13:00"></option>
+        <option value="13:15"></option>
+        <option value="13:30"></option>
+        <option value="13:45"></option>
+        <option value="14:00"></option>
+        <option value="14:15"></option>
+        <option value="14:30"></option>
+        <option value="14:45"></option>
+        <option value="15:00"></option>
+        <option value="15:15"></option>
+        <option value="15:30"></option>
+        <option value="15:45"></option>
+        <option value="16:00"></option>
+        <option value="16:15"></option>
+        <option value="16:30"></option>
+        <option value="16:45"></option>
+        <option value="17:00"></option>
+        <option value="17:15"></option>
+        <option value="17:30"></option>
+        <option value="17:45"></option>
+        <option value="18:00"></option>
+        <option value="18:15"></option>
+        <option value="18:30"></option>
+        <option value="18:45"></option>
+        <option value="19:00"></option>
+        <option value="19:15"></option>
+        <option value="19:30"></option>
+        <option value="19:45"></option>
+        <option value="20:00"></option>
+        <option value="20:15"></option>
+        <option value="20:30"></option>
+        <option value="20:45"></option>
+        <option value="21:00"></option>
+        <option value="21:15"></option>
+        <option value="21:30"></option>
+        <option value="21:45"></option>
+        <option value="22:00"></option>
+        <option value="22:15"></option>
+        <option value="22:30"></option>
+        <option value="22:45"></option>
+        <option value="23:00"></option>
+        <option value="23:15"></option>
+        <option value="23:30"></option>
+        <option value="23:45"></option>
+    </datalist>
+
+    <!-- Unhide Choice Modal -->
+    <div id="unhide-modal" class="modal-overlay" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Unhide Event</h3>
+                <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-500 mb-6">Would you like to unhide only this specific instance or the entire
+                    series?</p>
+                <div class="flex flex-col gap-3">
+                    <button id="btn-unhide-instance"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#AF231C] text-base font-medium text-white hover:bg-[#8e1c16] focus:outline-none sm:text-sm">
+                        Unhide Only This Instance
+                    </button>
+                    <button id="btn-unhide-series"
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        Unhide Entire Series
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Choice Modal -->
+    <div id="edit-choice-modal" class="modal-overlay" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Edit Event</h3>
+                <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-500 mb-6">This is a repeating event. Would you like to edit only this
+                    instance or the entire series?</p>
+                <div class="flex flex-col gap-3">
+                    <button onclick="confirmEditInstance()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#AF231C] text-base font-medium text-white hover:bg-[#8e1c16] focus:outline-none sm:text-sm">
+                        Edit Only This Instance
+                    </button>
+                    <button onclick="confirmEditSeries()"
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        Edit Entire Series
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blacklist Modal -->
+    <div id="blacklist-modal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <h3 class="text-lg font-bold mb-4">Blacklist Events</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                Enter exact event names to completely exclude from the planner (one per line).
+                These events will not appear in the grid or hidden lists.
+            </p>
+            <div class="form-group">
+                <textarea id="blacklist-input" class="form-input font-mono text-sm" rows="10"
+                    placeholder="Event Name 1&#10;Event Name 2"></textarea>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button onclick="saveBlacklist()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save
+                    Blacklist</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Choice Modal -->
+    <div id="generic-choice-modal" class="modal-overlay" style="display: none; z-index: 5000;">
+        <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900" id="generic-choice-title">Title</h3>
+                <button id="btn-generic-cancel-x" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-500 mb-6" id="generic-choice-message">Message</p>
+                <div class="flex flex-col gap-3">
+                    <button id="btn-generic-primary"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#AF231C] text-base font-medium text-white hover:bg-[#8e1c16] focus:outline-none sm:text-sm">
+                        Primary Action
+                    </button>
+                    <button id="btn-generic-secondary"
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        Secondary Action
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=2"></script>
+    <script src="print_logic.js"></script>
+</body>
+
+</html>
+```
