@@ -35,6 +35,7 @@ import {
     hideInstance, hideSeries, unhideSeries, unhideInstance
 } from './interactions.js';
 import { parseTimeRange } from './utils.js';
+import { initTooltips } from './tooltips.js';
 
 // --- Global Exposure ---
 
@@ -271,6 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else document.body.classList.remove('adding-event-mode');
     });
     observer.observe(document.body, { childList: true, subtree: true });
+
+    // Initialize Toolbar Tooltips
+    initTooltips();
 });
 
 function loadApp() {
