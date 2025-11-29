@@ -22,20 +22,198 @@
 
     <!-- Upload Screen -->
     <div id="upload-screen">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-[#AF231C] mb-2 tracking-wide uppercase"
-                style="font-family: 'Oswald', sans-serif;">Virgin Voyages Planner</h1>
-            <p class="text-gray-500">Upload CleanAgenda.json, Raw API Files, or a Backup File</p>
+        <div class="w-full flex flex-col items-center my-auto">
+            <div class="text-center mb-8">
+                <img src="app_logo.svg" alt="Virgin Voyages Planner Logo" class="w-24 h-24 mx-auto mb-4">
+                <h1 class="text-4xl font-bold text-[#AF231C] mb-2 tracking-wide uppercase"
+                    style="font-family: 'Oswald', sans-serif;">Virgin Voyages Planner</h1>
+            </div>
+
+            <!-- Main Content Layout -->
+            <div class="flex flex-col md:flex-row gap-8 items-stretch justify-center max-w-5xl mx-auto w-full px-4">
+
+                <!-- Login Section -->
+                <div class="flex-1 w-full max-w-md mx-auto">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-full flex flex-col justify-center">
+                        <h2 class="text-lg font-bold text-gray-800 mb-1 text-center">Import from Virgin Voyages</h2>
+                        <div id="cors-help-link" class="text-center mb-4">
+                            <button onclick="openCorsHelp()"
+                                class="text-blue-600 hover:text-blue-800 text-xs underline">
+                                Browser CORS must be disabled to import. How do I disable CORS?
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
+                                <input type="text" id="vv-username"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    placeholder="sailor@example.com">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                                    <button onclick="openPasswordHelp()"
+                                        class="text-xs text-blue-600 hover:text-blue-800 underline">Password
+                                        Help</button>
+                                </div>
+                                <input type="password" id="vv-password"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    placeholder="••••••••">
+                            </div>
+                            <button onclick="handleVVLogin()" id="btn-vv-login"
+                                class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition flex justify-center items-center gap-2">
+                                <span>Sign In & Import</span>
+                                <svg id="vv-spinner" class="animate-spin h-4 w-4 text-white hidden"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </button>
+                            <div id="vv-status" class="text-center text-sm text-gray-600 min-h-[20px]"></div>
+                        </div>
+                        <div class="mt-4 text-xs text-center text-gray-400">
+                            Credentials are sent directly to Virgin Voyages and are not stored.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="flex flex-row md:flex-col items-center justify-center gap-4">
+                    <div class="h-px w-full md:w-px md:h-full bg-gray-300 flex-1"></div>
+                    <span class="text-gray-400 font-medium text-sm">OR</span>
+                    <div class="h-px w-full md:w-px md:h-full bg-gray-300 flex-1"></div>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="flex-1 w-full max-w-md mx-auto flex flex-col justify-center">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2 text-center">Import from File</h2>
+                    <p class="text-sm text-gray-500 mb-4 text-center">Upload CleanAgenda.json, Raw API Files, or a
+                        Backup
+                        File</p>
+                    <div id="drop-zone"
+                        class="drop-zone w-full h-full min-h-[250px] flex flex-col justify-center items-center p-6 border-3 border-dashed border-gray-300 rounded-xl hover:bg-gray-50 transition cursor-pointer bg-gray-50">
+                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                        <span class="text-lg text-gray-600 font-medium">Drag & Drop File</span>
+                        <span class="text-sm text-gray-400 mt-2">or click to browse</span>
+                        <input type="file" id="file-input" accept=".json" class="hidden" multiple>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button onclick="loadSampleData()"
+                            class="text-[#AF231C] hover:text-red-800 font-medium underline text-sm">
+                            Load Sample Data (Dec 7 - Dec 17)
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="drop-zone" class="drop-zone">
-            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-            </svg>
-            <span class="text-lg text-gray-600 font-medium">Drag & Drop File</span>
-            <span class="text-sm text-gray-400 mt-2">or click to browse</span>
-            <input type="file" id="file-input" accept=".json" class="hidden" multiple>
+        <!-- Password Help Modal -->
+        <div id="password-help-modal" class="modal-overlay">
+            <div class="modal-content p-6 max-w-lg">
+                <h3 class="text-lg font-bold mb-4 text-[#AF231C]">How to get your Password</h3>
+                <div class="text-sm text-gray-700 space-y-4">
+                    <p>
+                        We can only use your Virgin Voyages username and password to import your information -- not
+                        social login or by booking reference number.
+                    </p>
+                    <p class="font-semibold">
+                        If you don't know your password, or you use Social Login (Google, Facebook, etc.) and never set
+                        a password:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 ml-2">
+                        <li>
+                            <strong>Reset your password:</strong>
+                            <ul class="list-disc list-inside ml-4 mt-1 space-y-1 text-gray-600">
+                                <li>Go to the <a href="https://www.virginvoyages.com/auth/v1/reset-password"
+                                        target="_blank" class="text-blue-600 underline">Virgin Voyages Password Reset
+                                        Site</a>.</li>
+                                <li>Sign out of your Virgin Voyages app, then go to Login > "Did you forget your login
+                                    details?"</li>
+                            </ul>
+                        </li>
+                        <li>Enter your email and press "Reset my password"</li>
+                        <li>You will receive an email with a link to reset your password</li>
+                        <li>Click the link and follow the instructions to reset your password</li>
+                    </ul>
+                    <p class="font-medium text-green-700 mt-2">
+                        Now you can enter your Virgin Voyages email and password in this app!
+                    </p>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closeAllModals()"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded text-sm font-medium hover:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CORS Help Modal -->
+        <div id="cors-help-modal" class="modal-overlay">
+            <div class="modal-content p-6 max-w-lg">
+                <h3 class="text-lg font-bold mb-4 text-[#AF231C]">How to Disable CORS</h3>
+                <div class="text-sm text-gray-700 space-y-4">
+                    <p>
+                        To protect your privacy, this app runs entirely in your browser. However, browser security
+                        (CORS) normally prevents
+                        websites from talking to the Virgin Voyages API directly.
+                    </p>
+                    <p>
+                        To fix this, you need to temporarily disable CORS using a Chrome extension (or equivalent for
+                        other browsers):
+                    </p>
+                    <ol class="list-decimal list-inside space-y-2 ml-2">
+                        <li>
+                            Install the CORS Bypass Extension</a>.
+                        </li>
+                        <li>
+                            Click the "CORS Bypass Extension" icon in your browser toolbar. Note: The icon may be hidden
+                            in the "Extension/Puzzle" menu
+                        </li>
+                        <li>
+                            Click the Shield Icon to disable CORS for this site. The page should
+                            reload, refresh if it doesn't.
+                        </li>
+                        <li>
+                            Try logging in again.
+                        </li>
+                    </ol>
+                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded text-yellow-800 text-xs mt-4">
+                        <strong>Important:</strong> After your itinerary is loaded, please click the extension icon
+                        again to re-enable CORS and restore your browser's security.
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closeAllModals()"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded text-sm font-medium hover:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 max-w-md mx-auto bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-left">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-1">Privacy Notice</h3>
+                    <p class="text-xs text-blue-700 leading-relaxed">
+                        Your data stays on your device. All files are processed locally in your browser and are never
+                        transmitted to any server.
+                        Your itinerary plan is stored in your browser's LocalStorage.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -759,9 +937,9 @@
         </div>
     </div>
 
+    <script src="virgin_api.js"></script>
     <script src="script.js?v=2"></script>
     <script src="print_logic.js"></script>
 </body>
 
 </html>
-```

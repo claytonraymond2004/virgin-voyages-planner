@@ -203,9 +203,32 @@ body.dark #search-input::placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Changed from center to prevent clipping */
     padding: 20px;
     transition: opacity 0.3s ease;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+}
+
+/* Ensure content doesn't get clipped when centered */
+#upload-screen::before {
+    content: '';
+    flex: 0 0 auto;
+    height: 20px;
+    /* Top spacer */
+}
+
+#upload-screen::after {
+    content: '';
+    flex: 0 0 auto;
+    height: 20px;
+    /* Bottom spacer */
+}
+
+/* When content is taller than screen, justify-content: center breaks scrolling in some browsers without margin auto on child */
+#upload-screen>* {
+    flex-shrink: 0;
 }
 
 body.dark #upload-screen {

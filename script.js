@@ -198,6 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     confirmCallback = null;
                 }
                 else if (overlay.id === 'custom-event-modal') tryCloseCustomModal();
+                else if (overlay.id === 'cors-help-modal') overlay.style.display = 'none';
+                else if (overlay.id === 'password-help-modal') overlay.style.display = 'none';
                 else closeAllModals();
             }
         });
@@ -212,6 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Touch detection
     document.addEventListener('touchstart', () => { lastTouchTime = Date.now(); }, { passive: true });
+
+    // Login Enter Key
+    const vvPassword = document.getElementById('vv-password');
+    if (vvPassword) {
+        vvPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleVVLogin();
+        });
+    }
 });
 
 // --- Dark Mode Toggle ---
@@ -255,6 +265,89 @@ function handleFiles(fileList) {
         });
 }
 
+function loadSampleData() {
+    const files = [
+        '2025-12-07.json', '2025-12-08.json', '2025-12-09.json',
+        '2025-12-10.json', '2025-12-11.json', '2025-12-12.json',
+        '2025-12-13.json', '2025-12-14.json', '2025-12-15.json',
+        '2025-12-16.json', '2025-12-17.json'
+    ];
+
+    const promises = files.map(file =>
+        fetch(`example_data/virgin_api_samples/${file}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to load ${file}`);
+                return response.json();
+            })
+    );
+
+    Promise.all(promises)
+        .then(results => {
+            processLoadedData(results);
+        })
+        .catch(err => {
+            alert("Error loading sample data: " + err.message);
+            console.error(err);
+        });
+}
+
+async function handleVVLogin() {
+    const usernameInput = document.getElementById('vv-username');
+    const passwordInput = document.getElementById('vv-password');
+    const btn = document.getElementById('btn-vv-login');
+    const spinner = document.getElementById('vv-spinner');
+    const statusDiv = document.getElementById('vv-status');
+    const corsHelpLink = document.getElementById('cors-help-link');
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+        statusDiv.textContent = "Please enter both email and password.";
+        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
+        return;
+    }
+
+    // Reset UI
+    statusDiv.textContent = "";
+    statusDiv.className = "text-center text-sm text-gray-600 min-h-[20px]";
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    usernameInput.disabled = true;
+    passwordInput.disabled = true;
+
+    try {
+        const events = await VirginAPI.fetchAllData(username, password, (msg) => {
+            statusDiv.textContent = msg;
+        });
+
+        statusDiv.textContent = "Import successful! Rendering...";
+        statusDiv.className = "text-center text-sm text-green-600 min-h-[20px]";
+
+        // Process the data
+        processLoadedData(events);
+
+    } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Error: " + err.message;
+        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
+
+        // Re-enable UI
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+    }
+}
+
+function openCorsHelp() {
+    document.getElementById('cors-help-modal').style.display = 'flex';
+}
+
+function openPasswordHelp() {
+    document.getElementById('password-help-modal').style.display = 'flex';
+}
+
 function processLoadedData(jsonObjects) {
     // Case 1: Single file that is a Backup or CleanAgenda
     if (jsonObjects.length === 1) {
@@ -272,8 +365,14 @@ function processLoadedData(jsonObjects) {
 
     // Case 2: One or more Raw API files
     const combinedEvents = [];
+    const newPortNotes = {};
 
     jsonObjects.forEach(json => {
+        // Extract port name if available (from our API integration)
+        if (json.date && json.portName) {
+            newPortNotes[json.date] = json.portName;
+        }
+
         if (json.events && Array.isArray(json.events)) {
             const clean = parseRawData(json);
             combinedEvents.push(...clean);
@@ -281,7 +380,7 @@ function processLoadedData(jsonObjects) {
     });
 
     if (combinedEvents.length > 0) {
-        saveData(combinedEvents);
+        saveData(combinedEvents, newPortNotes);
     } else {
         alert("No valid agenda data found in the uploaded file(s).");
     }
@@ -322,18 +421,26 @@ function restoreBackup(json) {
     loadFromStorage();
 }
 
-function saveData(json) {
+function saveData(json, newPortNotes = {}) {
     localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(json));
     localStorage.removeItem(STORAGE_KEY_ATTENDANCE);
     localStorage.removeItem(STORAGE_KEY_HIDDEN_NAMES);
     localStorage.removeItem(STORAGE_KEY_HIDDEN_UIDS);
-    localStorage.removeItem(STORAGE_KEY_PORT_NOTES);
+
+    // Save new port notes if provided, otherwise clear
+    if (Object.keys(newPortNotes).length > 0) {
+        localStorage.setItem(STORAGE_KEY_PORT_NOTES, JSON.stringify(newPortNotes));
+    } else {
+        localStorage.removeItem(STORAGE_KEY_PORT_NOTES);
+    }
+
     localStorage.removeItem(STORAGE_KEY_EVENT_NOTES);
     localStorage.removeItem(STORAGE_KEY_BLACKLIST);
     localStorage.removeItem(STORAGE_KEY_OPTIONAL_EVENTS);
     hiddenNames.clear();
     hiddenUids.clear();
-    portNotes = {};
+    // Update global state with new port notes
+    portNotes = newPortNotes;
     eventNotes = {};
     blacklist.clear();
     optionalEvents.clear();
