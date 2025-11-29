@@ -145,7 +145,7 @@ export function renderApp() {
     // Strut to match day-column height exactly for sync scrolling
     const totalMins = (END_HOUR - START_HOUR) * 60;
     const strut = document.createElement('div');
-    strut.style.height = `${(totalMins / 60) * 60 + 50}px`;
+    strut.style.height = `${(totalMins / 60) * 60}px`;
     strut.style.width = '1px';
     strut.style.position = 'absolute';
     strut.style.top = '0';
@@ -189,6 +189,7 @@ export function renderApp() {
         }
 
         dayCol.appendChild(header);
+        renderTimeBlocks(dayCol);
 
         // Packing
         const events = eventsByDate[date].sort((a, b) => a.startMins - b.startMins || (b.endMins - b.startMins) - (a.endMins - a.startMins));
@@ -296,7 +297,7 @@ export function renderApp() {
             renderEventCard(ev, dayCol, optionalLaneWidth, optionalStart + (rtlIndex * optionalLaneWidth), true);
         });
 
-        dayCol.style.height = `${(totalMins / 60) * 60 + 50}px`;
+        dayCol.style.height = `${(totalMins / 60) * 60}px`;
 
         grid.appendChild(dayCol);
     });
@@ -713,5 +714,36 @@ export function updateVisualStates() {
                 card.classList.add('is-search-dimmed');
             }
         }
+    });
+}
+
+function renderTimeBlocks(container) {
+    if (!state.timeBlocks.enabled) return;
+    const tb = state.timeBlocks;
+    const blocks = [
+        { name: 'Breakfast', start: 6 * 60, end: tb.morning * 60, class: 'time-block-breakfast' },
+        { name: 'Morning', start: tb.morning * 60, end: tb.lunch * 60, class: 'time-block-morning' },
+        { name: 'Lunch', start: tb.lunch * 60, end: tb.afternoon * 60, class: 'time-block-lunch' },
+        { name: 'Afternoon', start: tb.afternoon * 60, end: tb.dinner * 60, class: 'time-block-afternoon' },
+        { name: 'Dinner', start: tb.dinner * 60, end: tb.evening * 60, class: 'time-block-dinner' },
+        { name: 'Evening', start: tb.evening * 60, end: END_HOUR * 60, class: 'time-block-evening' }
+    ];
+
+    blocks.forEach(block => {
+        const startMins = Math.max(block.start, START_HOUR * 60);
+        const endMins = Math.min(block.end, END_HOUR * 60);
+
+        if (startMins >= endMins) return;
+
+        const top = ((startMins - START_HOUR * 60) / 60) * 60;
+        const height = ((endMins - startMins) / 60) * 60;
+
+        const div = document.createElement('div');
+        div.className = `time-block ${block.class}`;
+        div.style.top = `${top}px`;
+        div.style.height = `${height}px`;
+        div.dataset.label = block.name;
+
+        container.appendChild(div);
     });
 }

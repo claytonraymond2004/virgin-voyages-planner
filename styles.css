@@ -980,3 +980,95 @@ input:checked~.toggle-bg {
     height: 80vh;
     /* Fixed height for better scrolling */
 }
+
+/* Time Blocks */
+.time-block {
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    /* Allow clicking through to grid */
+    z-index: 0;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.1);
+    /* Divider */
+}
+
+/* Teal to Purple Progression (More Dramatic) */
+.time-block-breakfast {
+    background-color: rgba(113, 214, 224, 0.25);
+    /* Virgin Teal */
+}
+
+.time-block-morning {
+    background-color: rgba(100, 180, 230, 0.25);
+    /* Teal-Blue transition */
+}
+
+.time-block-lunch {
+    background-color: rgba(100, 130, 240, 0.25);
+    /* Blue-Indigo transition */
+}
+
+.time-block-afternoon {
+    background-color: rgba(120, 100, 220, 0.25);
+    /* Indigo-Purple transition */
+}
+
+.time-block-dinner {
+    background-color: rgba(92, 6, 140, 0.25);
+    /* Virgin Purple */
+}
+
+.time-block-evening {
+    background-color: rgba(60, 0, 90, 0.3);
+    /* Deep Purple */
+}
+
+/* violet-50 */
+
+/* Dark mode overrides */
+/* Dark mode overrides - Brightest to Darkest */
+body.dark .time-block {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .time-block-breakfast {
+    background-color: rgba(113, 214, 224, 0.25);
+}
+
+body.dark .time-block-morning {
+    background-color: rgba(90, 160, 210, 0.3);
+}
+
+body.dark .time-block-lunch {
+    background-color: rgba(80, 120, 200, 0.35);
+}
+
+body.dark .time-block-afternoon {
+    background-color: rgba(100, 80, 180, 0.4);
+}
+
+body.dark .time-block-dinner {
+    background-color: rgba(92, 6, 140, 0.45);
+}
+
+body.dark .time-block-evening {
+    background-color: rgba(40, 0, 60, 0.6);
+}
+
+/* Add labels to time blocks */
+.time-block::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+body.dark .time-block::after {
+    color: rgba(255, 255, 255, 0.2);
+}

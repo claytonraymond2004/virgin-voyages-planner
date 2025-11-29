@@ -19,7 +19,7 @@ import {
     switchHiddenTab, restoreAllHidden, editPortNote, savePortNoteUI,
     editEventNote, saveEventNoteUI, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
-    toggleShowHiddenTemp
+    toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -86,6 +86,8 @@ window.openCorsHelp = () => document.getElementById('cors-help-modal').style.dis
 window.openPasswordHelp = () => document.getElementById('password-help-modal').style.display = 'flex';
 window.toggleDarkMode = toggleDarkMode;
 window.toggleShowHiddenTemp = toggleShowHiddenTemp;
+window.openTimeBlocksModal = openTimeBlocksModal;
+window.saveTimeBlocksUI = saveTimeBlocksUI;
 
 // --- Initialization ---
 

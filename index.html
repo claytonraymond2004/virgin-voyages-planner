@@ -371,6 +371,12 @@
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg> Export Backup
                 </div>
+                <div onclick="openTimeBlocksModal()" class="ctx-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg> Time Blocks
+                </div>
                 <div class="ctx-divider"></div>
                 <div onclick="openBlacklistModal()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,6 +385,7 @@
                         </path>
                     </svg> Blacklist Events
                 </div>
+
                 <div class="ctx-divider"></div>
                 <div onclick="confirmResetData()" class="ctx-item danger">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -728,6 +735,57 @@
                 <button onclick="closeAllModals()"
                     class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
                 <button onclick="saveEventNote()"
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
+            </div>
+        </div>
+    </div>
+    <!-- Time Blocks Modal -->
+    <div id="time-blocks-modal" class="modal-overlay">
+        <div class="modal-content p-6 max-w-sm">
+            <h3 class="text-lg font-bold mb-4">Configure Time Blocks</h3>
+            <p class="text-sm text-gray-500 mb-4">Adjust when each part of the day begins.</p>
+
+            <div class="space-y-3">
+                <div class="flex items-center justify-between mb-4 border-b pb-4">
+                    <label class="text-sm font-bold text-gray-800">Show Time Blocks</label>
+                    <input type="checkbox" id="tb-enabled" class="form-checkbox h-5 w-5 text-[#AF231C]">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">Morning Starts</label>
+                    <select id="tb-morning" class="form-input w-24 py-1">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">Lunch Starts</label>
+                    <select id="tb-lunch" class="form-input w-24 py-1">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">Afternoon Starts</label>
+                    <select id="tb-afternoon" class="form-input w-24 py-1">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">Dinner Starts</label>
+                    <select id="tb-dinner" class="form-input w-24 py-1">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">Evening Starts</label>
+                    <select id="tb-evening" class="form-input w-24 py-1">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeAllModals()"
+                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                <button onclick="saveTimeBlocksUI()"
                     class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
             </div>
         </div>

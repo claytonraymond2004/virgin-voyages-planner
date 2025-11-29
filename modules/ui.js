@@ -1,4 +1,4 @@
-import { state, saveData, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents } from './state.js';
+import { state, saveData, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks } from './state.js';
 import { STORAGE_KEY_BLACKLIST, STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, SHIFT_START_ADD, SHIFT_END_ADD, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_OPTIONAL_EVENTS } from './constants.js';
 import { renderApp } from './render.js';
 import { parseTimeRange, formatTimeRange, escapeHtml } from './utils.js';
@@ -791,4 +791,76 @@ export function toggleShowHiddenTemp() {
         }
     }
     renderApp();
+}
+
+// --- Time Blocks ---
+
+export function openTimeBlocksModal() {
+    const modal = document.getElementById('time-blocks-modal');
+    const cbEnabled = document.getElementById('tb-enabled');
+    const selects = {
+        morning: document.getElementById('tb-morning'),
+        lunch: document.getElementById('tb-lunch'),
+        afternoon: document.getElementById('tb-afternoon'),
+        dinner: document.getElementById('tb-dinner'),
+        evening: document.getElementById('tb-evening')
+    };
+
+    // Set enabled state
+    cbEnabled.checked = state.timeBlocks.enabled !== false; // Default true
+
+    // Toggle inputs
+    const toggleInputs = () => {
+        Object.values(selects).forEach(el => el.disabled = !cbEnabled.checked);
+    };
+    cbEnabled.onchange = toggleInputs;
+    toggleInputs();
+
+    // Populate options (5 AM to 28 AM/4 AM next day)
+    const options = [];
+    for (let h = 5; h <= 28; h++) {
+        const displayH = h >= 24 ? h - 24 : h;
+        const ampm = displayH >= 12 ? 'PM' : 'AM';
+        const labelH = displayH > 12 ? displayH - 12 : (displayH === 0 || displayH === 24 ? 12 : displayH);
+        const label = `${labelH}:00 ${ampm}`;
+        options.push({ value: h, label });
+
+        // Add half hour
+        const label30 = `${labelH}:30 ${ampm}`;
+        options.push({ value: h + 0.5, label: label30 });
+    }
+
+    Object.keys(selects).forEach(key => {
+        const sel = selects[key];
+        sel.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        sel.value = state.timeBlocks[key];
+    });
+
+    document.getElementById('dropdown-menu').style.display = 'none';
+    modal.style.display = 'flex';
+}
+
+export function saveTimeBlocksUI() {
+    const newBlocks = {
+        enabled: document.getElementById('tb-enabled').checked,
+        morning: parseFloat(document.getElementById('tb-morning').value),
+        lunch: parseFloat(document.getElementById('tb-lunch').value),
+        afternoon: parseFloat(document.getElementById('tb-afternoon').value),
+        dinner: parseFloat(document.getElementById('tb-dinner').value),
+        evening: parseFloat(document.getElementById('tb-evening').value)
+    };
+
+    // Validate order
+    if (newBlocks.morning >= newBlocks.lunch ||
+        newBlocks.lunch >= newBlocks.afternoon ||
+        newBlocks.afternoon >= newBlocks.dinner ||
+        newBlocks.dinner >= newBlocks.evening) {
+        alert("Time blocks must be in chronological order.");
+        return;
+    }
+
+    state.timeBlocks = newBlocks;
+    saveTimeBlocks();
+    renderApp();
+    closeAllModals();
 }

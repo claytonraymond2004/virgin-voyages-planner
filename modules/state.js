@@ -2,7 +2,7 @@ import {
     STORAGE_KEY_DATA, STORAGE_KEY_ATTENDANCE, STORAGE_KEY_HIDDEN_NAMES,
     STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_CUSTOM,
     STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, STORAGE_KEY_BLACKLIST,
-    STORAGE_KEY_OPTIONAL_EVENTS, STORAGE_KEY_THEME
+    STORAGE_KEY_OPTIONAL_EVENTS, STORAGE_KEY_THEME, STORAGE_KEY_TIME_BLOCKS
 } from './constants.js';
 
 // --- State ---
@@ -17,6 +17,14 @@ export const state = {
     eventNotes: {},
     blacklist: new Set(),
     optionalEvents: new Set(),
+    timeBlocks: {
+        enabled: true,
+        morning: 8,
+        lunch: 11,
+        afternoon: 13,
+        dinner: 17,
+        evening: 20
+    },
     eventColors: {},
     imageColorCache: {},
     editMode: 'instance',
@@ -61,6 +69,7 @@ export function loadFromStorage() {
     const storedEventNotes = localStorage.getItem(STORAGE_KEY_EVENT_NOTES);
     const storedBlacklist = localStorage.getItem(STORAGE_KEY_BLACKLIST);
     const storedOptional = localStorage.getItem(STORAGE_KEY_OPTIONAL_EVENTS);
+    const storedTimeBlocks = localStorage.getItem(STORAGE_KEY_TIME_BLOCKS);
 
     if (storedData) {
         try { state.appData = JSON.parse(storedData); } catch (e) { return false; }
@@ -73,6 +82,7 @@ export function loadFromStorage() {
         if (storedEventNotes) try { state.eventNotes = JSON.parse(storedEventNotes); } catch (e) { state.eventNotes = {}; }
         if (storedBlacklist) try { state.blacklist = new Set(JSON.parse(storedBlacklist)); } catch (e) { state.blacklist = new Set(); }
         if (storedOptional) try { state.optionalEvents = new Set(JSON.parse(storedOptional)); } catch (e) { state.optionalEvents = new Set(); }
+        if (storedTimeBlocks) try { state.timeBlocks = { ...state.timeBlocks, ...JSON.parse(storedTimeBlocks) }; } catch (e) { }
 
         return true;
     }
@@ -117,6 +127,7 @@ export function restoreBackup(json) {
     localStorage.setItem(STORAGE_KEY_EVENT_NOTES, JSON.stringify(json.eventNotes || {}));
     localStorage.setItem(STORAGE_KEY_BLACKLIST, JSON.stringify(json.blacklist || []));
     localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify(json.optionalEvents || []));
+    localStorage.setItem(STORAGE_KEY_TIME_BLOCKS, JSON.stringify(json.timeBlocks || {}));
     loadFromStorage();
 }
 
@@ -158,4 +169,8 @@ export function saveOptionalEvents() {
 
 export function saveTheme(theme) {
     localStorage.setItem(STORAGE_KEY_THEME, theme);
+}
+
+export function saveTimeBlocks() {
+    localStorage.setItem(STORAGE_KEY_TIME_BLOCKS, JSON.stringify(state.timeBlocks));
 }
