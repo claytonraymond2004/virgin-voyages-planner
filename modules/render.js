@@ -445,7 +445,7 @@ export function renderEventCard(ev, dayCol, widthPercent, leftPercent, isOptiona
     }
 
     if (ev.isHiddenTemp) {
-        el.style.opacity = '0.25';
+        el.style.opacity = '0.5';
     }
 
     el.style.top = `${top}px`;

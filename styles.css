@@ -498,14 +498,14 @@ body:not(.adding-event-mode) .event-card:hover {
 }
 
 .event-card.is-sibling-attended {
-    opacity: 0.5;
+    opacity: 0.85;
     border-left-color: #86efac !important;
     border-left-width: 4px !important;
 }
 
 .event-card.is-dimmed {
-    opacity: 0.5;
-    filter: grayscale(50%);
+    opacity: 0.85;
+    filter: grayscale(30%);
 }
 
 .event-card.is-sibling-highlight {
@@ -947,8 +947,8 @@ input:checked~.toggle-bg {
 
 /* --- Optional Event in Grid --- */
 .event-card.is-optional {
-    opacity: 0.6;
-    filter: grayscale(30%);
+    opacity: 0.75;
+    filter: grayscale(20%);
     border-style: dashed !important;
 }
 
@@ -961,9 +961,9 @@ input:checked~.toggle-bg {
 
 .event-card.is-optional.is-attending {
     border-style: dashed !important;
-    opacity: 0.8 !important;
+    opacity: 0.85 !important;
     /* Slightly less dimmed than non-attending optional */
-    filter: grayscale(10%) !important;
+    filter: grayscale(5%) !important;
 }
 
 .event-card.is-optional:hover {
