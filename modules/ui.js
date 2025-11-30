@@ -42,11 +42,7 @@ export function showConfirm(msg, onYes, title = "Confirm") {
     document.getElementById('confirmation-modal').style.display = 'flex';
 }
 
-export function closeAllModals() {
-    document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
-    state.currentCtxEvent = null;
-    state.initialFormState = null;
-}
+
 
 // --- Unhide Modal ---
 
@@ -103,7 +99,7 @@ export function openUnhideModal(ev) {
                 }
 
                 const totalHidden = state.hiddenNames.size + state.hiddenUids.size;
-                document.getElementById('hidden-count').textContent = totalHidden;
+                document.querySelectorAll('.hidden-count').forEach(el => el.textContent = totalHidden);
                 renderApp();
             } else {
                 unhideSeries(ev.name);
@@ -147,7 +143,7 @@ export function openUnhideModal(ev) {
             saveHiddenUids();
 
             const totalHidden = state.hiddenNames.size + state.hiddenUids.size;
-            document.getElementById('hidden-count').textContent = totalHidden;
+            document.querySelectorAll('.hidden-count').forEach(el => el.textContent = totalHidden);
             renderApp();
             closeAllModals();
         };
@@ -268,7 +264,7 @@ export function restoreAllHidden(type) {
     }
 
     const totalHidden = state.hiddenNames.size + state.hiddenUids.size;
-    document.getElementById('hidden-count').textContent = totalHidden;
+    document.querySelectorAll('.hidden-count').forEach(el => el.textContent = totalHidden);
     renderApp();
     renderHiddenContent();
 }
@@ -374,15 +370,15 @@ export function renderHiddenSeriesList(container, type) {
                 const e = timeData.end + SHIFT_END_ADD;
                 const tooltipEvent = { ...repEvent, startMins: s, endMins: e, uid: 'hidden-series-preview' };
                 row.onmouseenter = (e) => showFullTooltip(e, tooltipEvent, row);
-                row.onmousemove = (e) => moveTooltip(e);
-                row.onmouseleave = () => hideTooltip();
+                row.onmousemove = moveTooltip;
+                row.onmouseleave = () => { tooltip.style.display = 'none'; };
             }
         }
 
-        row.innerHTML = `<span class="font-medium text-gray-800 text-sm truncate pr-4">${name}${countText}</span>
+        row.innerHTML = `<span class="font-medium text-gray-800 text-sm truncate pr-4 cursor-pointer flex-1" onclick="if(window.innerWidth <= 768) openMobileEventModalFromHidden('${name}')">${name}${countText}</span>
 <button class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-semibold restore-series-btn">Restore</button>`;
 
-        row.querySelector('.restore-series-btn').onclick = () => unhideSeries(name, true);
+        row.querySelector('.restore-series-btn').onclick = (e) => { e.stopPropagation(); unhideSeries(name, true); };
         container.appendChild(row);
     });
 }
@@ -424,17 +420,18 @@ export function renderHiddenInstances(container) {
 
         const row = document.createElement('div');
         row.className = 'flex justify-between items-center bg-white border border-gray-200 rounded p-3 mb-2 shadow-sm';
-        row.onmouseenter = (e) => showFullTooltip(e, ev, row);
-        row.onmousemove = (e) => moveTooltip(e);
-        row.onmouseleave = () => hideTooltip();
 
-        row.innerHTML = `<div class="flex flex-col overflow-hidden pr-4">
+        row.onmouseenter = (e) => showFullTooltip(e, ev, row);
+        row.onmousemove = moveTooltip;
+        row.onmouseleave = () => { tooltip.style.display = 'none'; };
+
+        row.innerHTML = `<div class="flex flex-col overflow-hidden pr-4 cursor-pointer flex-1" onclick="if(window.innerWidth <= 768) openMobileEventModalFromHidden('${ev.name}', '${ev.uid}')">
                 <span class="font-medium text-gray-800 text-sm truncate">${ev.name}</span>
                 <span class="text-xs text-gray-500">${dateStr} @ ${timeStr}</span>
             </div>
             <button class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-semibold flex-shrink-0 restore-instance-btn">Restore</button>`;
 
-        row.querySelector('.restore-instance-btn').onclick = () => unhideInstance(ev.uid, true);
+        row.querySelector('.restore-instance-btn').onclick = (e) => { e.stopPropagation(); unhideInstance(ev.uid, true); };
         section.appendChild(row);
     });
     container.appendChild(section);
@@ -479,6 +476,17 @@ export function editEventNote(uid) {
     };
 }
 
+export function closeEventNoteModal() {
+    // Check if we are on mobile and the mobile event modal is open
+    const mobileModal = document.getElementById('mobile-event-modal');
+    if (window.innerWidth <= 768 && mobileModal.style.display === 'flex') {
+        // Only close the note modal
+        document.getElementById('event-note-modal').style.display = 'none';
+    } else {
+        closeAllModals();
+    }
+}
+
 export function saveEventNoteUI() {
     if (!state.currentEventNoteUid) return;
     const input = document.getElementById('event-note-input').value;
@@ -488,12 +496,76 @@ export function saveEventNoteUI() {
 
     saveEventNotes();
     renderApp();
-    closeAllModals();
+
+    // Check if we are on mobile and the mobile event modal is open
+    const mobileModal = document.getElementById('mobile-event-modal');
+    if (window.innerWidth <= 768 && mobileModal.style.display === 'flex') {
+        // Only close the note modal
+        document.getElementById('event-note-modal').style.display = 'none';
+
+        // Re-render the mobile modal content to show the new note
+        // We need to find the event object again
+        const uid = state.currentEventNoteUid;
+        // Try to find in appData or customEvents
+        let ev = state.appData.find(e => {
+            const timeData = parseTimeRange(e.timePeriod);
+            if (!timeData) return false;
+            const s = timeData.start + SHIFT_START_ADD;
+            return `${e.date}_${e.name}_${s}` === uid;
+        });
+
+        if (!ev) {
+            ev = state.customEvents.find(e => e.uid === uid);
+        }
+
+        if (ev) {
+            // Refresh the mobile modal to show the new note
+            if (window.openMobileEventModal) {
+                // Determine if it was a hidden preview
+                const btnToggle = document.getElementById('mobile-btn-toggle');
+                const isHiddenPreview = btnToggle && btnToggle.classList.contains('cursor-not-allowed');
+
+                window.openMobileEventModal(ev, isHiddenPreview);
+            }
+        }
+    } else {
+        closeAllModals();
+    }
 }
 
 // --- Attendance Panel ---
 
+export function toggleMenu() {
+    const menu = document.getElementById('dropdown-menu');
+    menu.classList.toggle('hidden');
+}
+
+export function closeAllModals() {
+    document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
+    document.getElementById('context-menu').style.display = 'none';
+
+    state.currentCtxEvent = null;
+    state.initialFormState = null;
+
+    const ctxOverlay = document.getElementById('context-menu-overlay');
+    if (ctxOverlay) ctxOverlay.classList.remove('active');
+
+    document.getElementById('dropdown-menu').classList.add('hidden');
+
+    // Close mobile event modal
+    closeMobileEventModal();
+}
+
 export function toggleAttendancePanel() {
+    const ctxOverlay = document.getElementById('context-menu-overlay');
+    if (ctxOverlay) ctxOverlay.classList.remove('active');
+
+    const menuOverlay = document.getElementById('menu-overlay');
+    if (menuOverlay) menuOverlay.classList.remove('active');
+    document.getElementById('dropdown-menu').classList.add('hidden');
+
+    // Close mobile event modal
+    closeMobileEventModal();
     const panel = document.getElementById('attendance-panel');
     const isOpen = panel.classList.contains('open');
 
@@ -524,11 +596,11 @@ export function toggleOptionalEvent(eventName) {
 export function updateAttendancePanel() {
     const { missing, optional } = getMissingEvents();
     const content = document.getElementById('attendance-panel-content');
-    const countBadge = document.getElementById('missing-count');
+    const countBadges = document.querySelectorAll('.missing-count');
     const tabRequired = document.getElementById('tab-required');
     const tabOptional = document.getElementById('tab-optional');
 
-    if (countBadge) countBadge.textContent = missing.length;
+    countBadges.forEach(el => el.textContent = missing.length);
 
     if (state.activePanelTab === 'required') {
         tabRequired.classList.add('tab-active');
@@ -736,6 +808,12 @@ export function jumpToEventFromPanel(uid) {
     const isPanelOpen = panel && panel.classList.contains('open');
 
     if (isPanelOpen) {
+        if (window.innerWidth <= 768) {
+            toggleAttendancePanel();
+            setTimeout(() => jumpToEvent(uid), 100);
+            return;
+        }
+
         const viewport = document.getElementById('schedule-viewport');
         const grid = document.getElementById('schedule-grid');
 
@@ -779,8 +857,8 @@ export function saveBlacklistUI() {
 
 export function toggleShowHiddenTemp() {
     state.showHiddenTemp = !state.showHiddenTemp;
-    const btn = document.getElementById('btn-toggle-hidden');
-    if (btn) {
+    const btns = document.querySelectorAll('.btn-toggle-hidden');
+    btns.forEach(btn => {
         // Toggle visual state for the icon button
         if (state.showHiddenTemp) {
             btn.classList.add('text-blue-600', 'bg-blue-50');
@@ -789,7 +867,7 @@ export function toggleShowHiddenTemp() {
             btn.classList.remove('text-blue-600', 'bg-blue-50');
             btn.classList.add('text-gray-400');
         }
-    }
+    });
     renderApp();
 }
 

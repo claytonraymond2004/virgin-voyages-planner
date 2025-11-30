@@ -127,7 +127,8 @@ body.dark #search-input::placeholder {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 4000;
+    z-index: 7500;
+    /* Increased to be above mobile modal (7000) */
     display: none;
     align-items: center;
     justify-content: center;
@@ -656,11 +657,44 @@ body.dark .search-result-item {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     border: 1px solid #e5e7eb;
     width: 200px;
-    z-index: 3000;
+    z-index: 8000;
+    /* Increased to be above mobile modal (7000) */
     display: none;
     overflow: hidden;
     font-size: 0.85rem;
     color: #374151;
+}
+
+@media (max-width: 768px) {
+    #context-menu {
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%);
+        width: 90vw;
+        max-width: 400px;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Overlay for context menu on mobile */
+    #context-menu-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 7900;
+        /* Just below context menu (8000) */
+        backdrop-filter: blur(2px);
+    }
+
+    #context-menu-overlay.active {
+        display: block;
+    }
+
+    .ctx-item {
+        padding: 20px 24px;
+        font-size: 18px;
+    }
 }
 
 .ctx-item {
@@ -1010,6 +1044,31 @@ input:checked~.toggle-bg {
     /* Fixed height for better scrolling */
 }
 
+@media (max-width: 768px) {
+    #hidden-manager-modal {
+        z-index: 6500 !important;
+        /* Ensure it's below mobile event modal (7000) */
+    }
+
+    #hidden-manager-modal .modal-content {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        /* Use dynamic viewport height if supported */
+        max-height: none;
+        max-width: none;
+        border-radius: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
 /* Time Blocks */
 .time-block {
     position: absolute;
@@ -1100,4 +1159,39 @@ body.dark .time-block-evening {
 
 body.dark .time-block::after {
     color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Mobile Layout --- */
+@media (max-width: 768px) {
+    :root {
+        --day-col-width: calc(100vw - var(--time-col-width));
+    }
+
+    #schedule-viewport {
+        scroll-snap-type: x mandatory;
+    }
+
+    .day-column {
+        scroll-snap-align: start;
+        /* Ensure width is strictly enforced */
+        min-width: var(--day-col-width);
+        width: var(--day-col-width);
+    }
+
+    .attendance-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    /* Wider Main Menu on Mobile */
+    #dropdown-menu {
+        width: 280px;
+        right: 10px;
+    }
+
+    #dropdown-menu .ctx-item {
+        padding: 16px 20px;
+        /* Taller and more padding */
+        font-size: 16px;
+    }
 }

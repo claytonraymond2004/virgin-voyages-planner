@@ -12,12 +12,13 @@ import {
 import { renderApp, updateVisualStates } from './render.js';
 import {
     initDrag, toggleAttendance, performToggleAttendance, jumpToEvent,
-    showContextMenu, hideTooltip, lastTouchTime
+    showContextMenu, hideTooltip, lastTouchTime, closeMobileEventModal,
+    openMobileEventModalFromHidden
 } from './interactions.js';
 import {
     showConfirm, closeAllModals, openUnhideModal, openHiddenManager,
     switchHiddenTab, restoreAllHidden, editPortNote, savePortNoteUI,
-    editEventNote, saveEventNoteUI, toggleAttendancePanel, switchAttendanceTab,
+    editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI
 } from './ui.js';
@@ -77,6 +78,9 @@ window.savePortNote = savePortNoteUI;
 window.saveEventNote = saveEventNoteUI;
 window.exportPrintable = exportPrintable;
 window.closeAllModals = closeAllModals;
+window.closeMobileEventModal = closeMobileEventModal;
+window.openMobileEventModalFromHidden = openMobileEventModalFromHidden;
+window.closeEventNoteModal = closeEventNoteModal;
 window.switchAttendanceTab = switchAttendanceTab;
 window.toggleAttendancePanel = toggleAttendancePanel;
 window.exportData = exportData;
@@ -272,6 +276,76 @@ document.addEventListener('DOMContentLoaded', () => {
         else document.body.classList.remove('adding-event-mode');
     });
     observer.observe(document.body, { childList: true, subtree: true });
+
+    // Hidden Manager Swipe Logic
+    const hiddenContainer = document.getElementById('hidden-list-container');
+    let hiddenTouchStartX = 0;
+    let hiddenTouchEndX = 0;
+
+    if (hiddenContainer) {
+        hiddenContainer.addEventListener('touchstart', (e) => {
+            hiddenTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        hiddenContainer.addEventListener('touchend', (e) => {
+            hiddenTouchEndX = e.changedTouches[0].screenX;
+            handleHiddenSwipe();
+        }, { passive: true });
+    }
+
+    function handleHiddenSwipe() {
+        if (Math.abs(hiddenTouchEndX - hiddenTouchStartX) < 50) return; // Ignore small swipes
+
+        const tabs = ['series', 'partial', 'instances'];
+        const currentIdx = tabs.indexOf(state.activeHiddenTab);
+
+        if (hiddenTouchEndX < hiddenTouchStartX) {
+            // Swipe Left -> Next Tab
+            if (currentIdx < tabs.length - 1) {
+                switchHiddenTab(tabs[currentIdx + 1]);
+            }
+        } else {
+            // Swipe Right -> Prev Tab
+            if (currentIdx > 0) {
+                switchHiddenTab(tabs[currentIdx - 1]);
+            }
+        }
+    }
+
+    // Attendance Panel Swipe Logic
+    const attendanceContainer = document.getElementById('attendance-panel-content');
+    let attendanceTouchStartX = 0;
+    let attendanceTouchEndX = 0;
+
+    if (attendanceContainer) {
+        attendanceContainer.addEventListener('touchstart', (e) => {
+            attendanceTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        attendanceContainer.addEventListener('touchend', (e) => {
+            attendanceTouchEndX = e.changedTouches[0].screenX;
+            handleAttendanceSwipe();
+        }, { passive: true });
+    }
+
+    function handleAttendanceSwipe() {
+        if (Math.abs(attendanceTouchEndX - attendanceTouchStartX) < 50) return;
+
+        const tabs = ['required', 'optional'];
+        const currentIdx = tabs.indexOf(state.activePanelTab);
+
+        if (attendanceTouchEndX < attendanceTouchStartX) {
+            // Swipe Left -> Next Tab (Required -> Optional)
+            if (currentIdx < tabs.length - 1) {
+                switchAttendanceTab(tabs[currentIdx + 1]);
+            }
+        } else {
+            // Swipe Right -> Prev Tab (Optional -> Required)
+            if (currentIdx > 0) {
+                switchAttendanceTab(tabs[currentIdx - 1]);
+            }
+        }
+    }
 
     // Initialize Toolbar Tooltips
     initTooltips();

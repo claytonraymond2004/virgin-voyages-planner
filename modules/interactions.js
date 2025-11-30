@@ -267,14 +267,48 @@ export function toggleAttendance(uid) {
 
 // --- Context Menu ---
 
-export function showContextMenu(e, ev) {
+export function showContextMenu(e, ev, isHiddenPreview = false) {
     const ctxMenu = document.getElementById('context-menu');
+    const ctxOverlay = document.getElementById('context-menu-overlay');
+
     ctxMenu.style.display = 'block';
-    let x = e.clientX, y = e.clientY;
-    if (x + 200 > window.innerWidth) x -= 200;
-    if (y + 200 > window.innerHeight) y -= 200;
-    ctxMenu.style.left = `${x}px`;
-    ctxMenu.style.top = `${y}px`;
+
+    // Mobile Overlay Logic
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        if (ctxOverlay) {
+            ctxOverlay.classList.add('active');
+            ctxOverlay.onclick = () => {
+                ctxMenu.style.display = 'none';
+                ctxOverlay.classList.remove('active');
+            };
+        }
+        // No manual positioning needed for mobile (CSS handles centering)
+    } else {
+        // Desktop Positioning
+        let x = e.clientX;
+        let y = e.clientY;
+
+        // Adjust if going off screen
+        if (x + 220 > window.innerWidth) x = window.innerWidth - 230; // 200px width + padding
+
+        // Dynamic vertical positioning
+        const menuHeight = ctxMenu.offsetHeight;
+
+        // If menu would go off screen, shift up
+        if (y + menuHeight > window.innerHeight) {
+            y = y - menuHeight;
+        }
+
+        // Safety check
+        if (y < 10) y = 10;
+        if (y + menuHeight > window.innerHeight) {
+            y = window.innerHeight - menuHeight - 10;
+        }
+
+        ctxMenu.style.left = `${x}px`;
+        ctxMenu.style.top = `${y}px`;
+    }
 
     const siblings = state.eventNameMap.get(ev.name) || [];
     const myIndex = siblings.indexOf(ev.uid);
@@ -303,6 +337,12 @@ export function showContextMenu(e, ev) {
     const unhideOption = document.getElementById('ctx-unhide');
     const unhideDivider = document.getElementById('ctx-unhide-divider');
 
+    // Helper to close menu and overlay
+    const closeMenu = () => {
+        ctxMenu.style.display = 'none';
+        if (ctxOverlay) ctxOverlay.classList.remove('active');
+    };
+
     if (ev.isHiddenTemp) {
         btnHide.style.display = 'none';
         unhideOption.style.display = 'flex';
@@ -310,7 +350,7 @@ export function showContextMenu(e, ev) {
 
         unhideOption.onclick = (e) => {
             e.stopPropagation();
-            ctxMenu.style.display = 'none';
+            closeMenu();
             openUnhideModal(ev);
         };
     } else {
@@ -332,7 +372,7 @@ export function showContextMenu(e, ev) {
                     btnHide.style.display = 'flex';
                     btnHide.onclick = (e) => {
                         e.stopPropagation();
-                        ctxMenu.style.display = 'none';
+                        closeMenu();
                         initiateHide(ev);
                     };
                 } else {
@@ -342,11 +382,39 @@ export function showContextMenu(e, ev) {
                 btnHide.style.display = 'flex';
                 btnHide.onclick = (e) => {
                     e.stopPropagation();
-                    ctxMenu.style.display = 'none';
+                    closeMenu();
                     initiateHide(ev);
                 };
             }
         }
+    }
+
+    // If hidden preview, allow unhide but hide "Hide" option
+    if (isHiddenPreview) {
+        btnHide.style.display = 'none';
+
+        // Show Unhide option
+        unhideOption.style.display = 'flex';
+        unhideDivider.style.display = 'block';
+
+        unhideOption.onclick = (e) => {
+            e.stopPropagation();
+            closeMenu();
+
+            // Determine unhide action based on active tab
+            if (state.activeHiddenTab === 'instances') {
+                // Unhide specific instance
+                unhideInstance(ev.uid, true);
+            } else {
+                // Unhide series (series or partial tab)
+                unhideSeries(ev.name, true);
+            }
+
+            // Close mobile modal as the event is no longer hidden/previewed in the same way
+            closeMobileEventModal();
+        };
+
+        dividerHide.style.display = 'none';
     }
 
     if (ev.isCustom) {
@@ -376,8 +444,8 @@ export function showContextMenu(e, ev) {
         }
 
         dividerNote.style.display = 'block'; // Divider after Note
-        btnDelete.onclick = (e) => { e.stopPropagation(); deleteCustomEvent(ev.uid); ctxMenu.style.display = 'none'; }
-        btnEdit.onclick = (e) => { e.stopPropagation(); ctxMenu.style.display = 'none'; initiateEdit(ev); }
+        btnDelete.onclick = (e) => { e.stopPropagation(); deleteCustomEvent(ev.uid); closeMenu(); }
+        btnEdit.onclick = (e) => { e.stopPropagation(); closeMenu(); initiateEdit(ev); }
     } else {
         btnDelete.style.display = 'none';
         btnEdit.style.display = 'none';
@@ -407,13 +475,13 @@ export function showContextMenu(e, ev) {
         btnVV.onclick = (e) => {
             e.stopPropagation();
             window.open('https://www.google.com/search?q=site:vvinsider.com ' + encodeURIComponent(ev.name), '_blank');
-            ctxMenu.style.display = 'none';
+            closeMenu();
         };
 
         btnGoogle.onclick = (e) => {
             e.stopPropagation();
             window.open('https://www.google.com/search?q=' + encodeURIComponent(ev.name), '_blank');
-            ctxMenu.style.display = 'none';
+            closeMenu();
         };
     }
 
@@ -423,24 +491,39 @@ export function showContextMenu(e, ev) {
         `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Mark as Required` :
         `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Mark as Optional`;
 
-    btnOptional.onclick = (e) => {
-        e.stopPropagation();
-        ctxMenu.style.display = 'none';
-        toggleOptionalEvent(ev.name);
-    };
+    if (ev.isHiddenTemp) {
+        btnOptional.style.opacity = '0.5';
+        btnOptional.style.pointerEvents = 'none';
+    } else {
+        btnOptional.style.opacity = '1';
+        btnOptional.style.pointerEvents = 'auto';
+        btnOptional.onclick = (e) => {
+            e.stopPropagation();
+            closeMenu();
+            toggleOptionalEvent(ev.name);
+        };
+    }
 
     // Note Button Logic
     btnNote.onclick = (e) => {
         e.stopPropagation();
-        ctxMenu.style.display = 'none';
+        closeMenu();
         editEventNote(ev.uid);
     };
 
     // Nav
     btnPrev.style.display = hasPrev ? 'flex' : 'none';
     btnNext.style.display = hasNext ? 'flex' : 'none';
-    if (hasPrev) btnPrev.onclick = () => jumpToEvent(siblings[myIndex - 1]);
-    if (hasNext) btnNext.onclick = () => jumpToEvent(siblings[myIndex + 1]);
+    if (hasPrev) btnPrev.onclick = () => {
+        document.getElementById('mobile-event-modal').style.display = 'none';
+        closeMenu();
+        jumpToEvent(siblings[myIndex - 1]);
+    };
+    if (hasNext) btnNext.onclick = () => {
+        document.getElementById('mobile-event-modal').style.display = 'none';
+        closeMenu();
+        jumpToEvent(siblings[myIndex + 1]);
+    };
 
     dividerNav.style.display = 'none';
 
@@ -541,6 +624,11 @@ export function unhideSeries(name, refreshModal = false) {
 export function unhideInstance(uid, refreshModal = false) {
     state.hiddenUids.delete(uid);
     saveHiddenUids();
+
+    if (refreshModal) {
+        openHiddenManager(true);
+    }
+
     renderApp();
 }
 
@@ -569,12 +657,17 @@ export function jumpToEvent(targetUid) {
         });
 
         const grid = document.getElementById('schedule-grid');
-        grid.classList.add('dimmed-for-flash');
-        el.classList.add('event-flash');
+
+        // Wait for scroll to likely finish (approx 500ms) or use a scrollend listener if supported
+        // For simplicity and broad support, we'll use a timeout that should cover the smooth scroll duration
         setTimeout(() => {
-            el.classList.remove('event-flash');
-            grid.classList.remove('dimmed-for-flash');
-        }, 1000);
+            grid.classList.add('dimmed-for-flash');
+            el.classList.add('event-flash');
+            setTimeout(() => {
+                el.classList.remove('event-flash');
+                grid.classList.remove('dimmed-for-flash');
+            }, 1000);
+        }, 600);
     }
 
     const ctxMenu = document.getElementById('context-menu');
@@ -612,7 +705,7 @@ export function showFullTooltip(e, ev, el) {
     const isModalOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => m.style.display === 'flex');
 
     if (isModalOpen) {
-        tooltip.style.zIndex = '6000';
+        tooltip.style.zIndex = '8000';
     } else {
         tooltip.style.zIndex = '2000';
 
@@ -744,9 +837,217 @@ export function hideTooltip() {
 
 export function confirmBlacklist(name) {
     document.getElementById('context-menu').style.display = 'none';
+    const ctxOverlay = document.getElementById('context-menu-overlay');
+    if (ctxOverlay) ctxOverlay.classList.remove('active');
+
     showConfirm(`Are you sure you want to blacklist "${name}"? This will permanently hide all occurrences of this event. You can restore it later from the Blacklist Manager.`, () => {
         state.blacklist.add(name);
         saveBlacklist();
         renderApp();
     }, "Blacklist Event");
+}
+
+// --- Mobile Event Modal ---
+
+export function openMobileEventModal(ev, isHiddenPreview = false) {
+    const modal = document.getElementById('mobile-event-modal');
+    const titleEl = document.getElementById('mobile-modal-title');
+    const contentEl = document.getElementById('mobile-modal-content');
+    const btnToggle = document.getElementById('mobile-btn-toggle');
+    const btnMenu = document.getElementById('mobile-btn-menu');
+
+    titleEl.textContent = ev.name;
+
+    // Build Content
+    const dObj = new Date(ev.date + 'T00:00:00');
+    const dateStr = dObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const fmt = (h, m) => `${h === 12 || h === 0 ? 12 : h % 12}:${m.toString().padStart(2, '0')}${h >= 12 && h < 24 ? 'pm' : 'am'}`;
+    const sH = Math.floor(ev.startMins / 60) % 24, sM = ev.startMins % 60;
+    const eH = Math.floor(ev.endMins / 60) % 24, eM = ev.endMins % 60;
+
+    let html = ``;
+
+    if (ev.imageUrl) {
+        html += `<img src="${ev.imageUrl}" class="w-full h-48 object-cover rounded-lg shadow-sm mb-4" onerror="this.style.display='none'" />`;
+    }
+
+    html += `<div class="space-y-3">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <div class="font-semibold text-gray-800">Time</div>
+                <div class="text-gray-600">${dateStr}, ${fmt(sH, sM)} - ${fmt(eH, eM)}</div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <div>
+                <div class="font-semibold text-gray-800">Location</div>
+                <div class="text-gray-600">${ev.location || 'Unknown'}</div>
+            </div>
+        </div>
+    `;
+
+    const myNote = state.eventNotes[ev.uid];
+    if (myNote) {
+        html += `<div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
+            <strong>Note:</strong> ${myNote}
+        </div>`;
+    }
+
+    if (ev.longDescription) {
+        html += `<div class="pt-2 border-t border-gray-100">
+            <div class="font-semibold text-gray-800 mb-1">Description</div>
+            <p class="text-gray-600 text-sm leading-relaxed">${ev.longDescription}</p>
+        </div>`;
+    }
+
+    // Add All Occurrences Section
+    let allSiblings = [];
+    state.appData.forEach(item => {
+        if (item.name === ev.name) {
+            const timeData = parseTimeRange(item.timePeriod);
+            if (timeData) {
+                const s = timeData.start + SHIFT_START_ADD;
+                const e = timeData.end + SHIFT_END_ADD;
+                const uid = `${item.date}_${item.name}_${s}`;
+                allSiblings.push({ ...item, startMins: s, endMins: e, uid: uid });
+            }
+        }
+    });
+    state.customEvents.forEach(item => {
+        if (item.name === ev.name) {
+            allSiblings.push(item);
+        }
+    });
+
+    if (allSiblings.length > 0) {
+        html += `<div class="pt-2 border-t border-gray-100">
+            <div class="font-semibold text-gray-800 mb-2">All Occurrences</div>
+            <div class="space-y-1">`;
+
+        const siblings = allSiblings.sort((a, b) => {
+            if (a.date !== b.date) return a.date.localeCompare(b.date);
+            return a.startMins - b.startMins;
+        });
+
+        siblings.forEach(sib => {
+            const isAttending = state.attendingIds.has(sib.uid);
+            const sDate = new Date(sib.date + 'T00:00:00');
+            const sDateStr = sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const sH = Math.floor(sib.startMins / 60) % 24, sM = sib.startMins % 60;
+            const attendingLabel = isAttending ? ' <span class="text-green-600 font-bold ml-1">(Attending)</span>' : '';
+            const itemClass = isAttending ? 'text-sm text-green-700 font-medium cursor-pointer hover:bg-gray-50 p-1 rounded' : 'text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-1 rounded';
+
+            // If in hidden preview mode, disable jumping to event
+            const clickAction = isHiddenPreview ? '' : `onclick="closeMobileEventModal(); jumpToEvent('${sib.uid}')"`;
+            const cursorClass = isHiddenPreview ? '' : 'cursor-pointer hover:bg-gray-50';
+
+            html += `<div class="${itemClass.replace('cursor-pointer hover:bg-gray-50', cursorClass)}" ${clickAction}>• ${sDateStr} @ ${fmt(sH, sM)}${attendingLabel}</div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    html += `</div>`;
+    contentEl.innerHTML = html;
+
+    // Configure Buttons
+    // Check if this is a hidden event being temporarily shown
+    const isTempHidden = ev.isHiddenTemp;
+
+    if (isHiddenPreview || isTempHidden) {
+        btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed flex justify-center items-center gap-2";
+        btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> Hidden Event`;
+        btnToggle.onclick = null;
+
+        // For temp hidden events, we still want the menu to allow unhiding
+        if (isTempHidden) {
+            btnMenu.style.opacity = '1';
+            btnMenu.style.pointerEvents = 'auto';
+        } else {
+            btnMenu.style.opacity = '1';
+            btnMenu.style.pointerEvents = 'auto';
+        }
+    } else {
+        btnMenu.style.opacity = '1';
+        btnMenu.style.pointerEvents = 'auto';
+
+        const isAttending = state.attendingIds.has(ev.uid);
+        if (isAttending) {
+            btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2 bg-red-100 text-red-700 border border-red-200 hover:bg-red-200";
+            btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Remove from Agenda`;
+            btnToggle.onclick = () => {
+                document.getElementById('mobile-event-modal').style.display = 'none';
+                toggleAttendance(ev.uid);
+            };
+        } else {
+            btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2 bg-[#AF231C] hover:bg-red-800";
+            btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add to Agenda`;
+            btnToggle.onclick = () => {
+                document.getElementById('mobile-event-modal').style.display = 'none';
+                toggleAttendance(ev.uid);
+            };
+        }
+    }
+
+    btnMenu.onclick = (e) => {
+        e.stopPropagation(); // Prevent global click from closing it immediately
+        // Position context menu near the button
+        const rect = btnMenu.getBoundingClientRect();
+        // Fake event for showContextMenu
+        // Pass the button's top position so we can calculate upward expansion dynamically
+        const fakeEvent = {
+            clientX: rect.left - 160, // Shift left to keep on screen
+            clientY: rect.top - 5, // Just above the button
+            preventDefault: () => { },
+            stopPropagation: () => { }
+        };
+        showContextMenu(fakeEvent, ev, isHiddenPreview);
+    };
+
+    modal.style.display = 'flex';
+    state.activeMobileEventUid = (isHiddenPreview || isTempHidden) ? null : ev.uid; // Don't track active UID for hidden previews to prevent jump on close
+}
+
+export function closeMobileEventModal() {
+    const modal = document.getElementById('mobile-event-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        state.activeMobileEventUid = null;
+    }
+}
+
+export function openMobileEventModalFromHidden(name, specificUid = null) {
+    // Find a representative event object
+    let ev = state.appData.find(e => e.name === name) || state.customEvents.find(e => e.name === name);
+
+    if (ev) {
+        // If specific UID provided (instance), try to find exact match for time
+        if (specificUid) {
+            // Reconstruct time for specific instance if possible
+            // But ev might be the generic one.
+            // Let's try to find the exact instance in appData
+            const exact = state.appData.find(e => {
+                const timeData = parseTimeRange(e.timePeriod);
+                if (!timeData) return false;
+                const s = timeData.start + SHIFT_START_ADD;
+                return `${e.date}_${e.name}_${s}` === specificUid;
+            });
+            if (exact) {
+                const timeData = parseTimeRange(exact.timePeriod);
+                const s = timeData.start + SHIFT_START_ADD;
+                const e = timeData.end + SHIFT_END_ADD;
+                ev = { ...exact, startMins: s, endMins: e, uid: specificUid };
+            }
+        } else {
+            // Series view - just use the representative but ensure it has time props
+            const timeData = parseTimeRange(ev.timePeriod);
+            if (timeData) {
+                const s = timeData.start + SHIFT_START_ADD;
+                const e = timeData.end + SHIFT_END_ADD;
+                ev = { ...ev, startMins: s, endMins: e, uid: 'hidden-series-preview' };
+            }
+        }
+        openMobileEventModal(ev, true);
+    }
 }

@@ -9,7 +9,7 @@ import {
 import {
     initDrag, toggleAttendance, showContextMenu,
     showFullTooltip, hideTooltip, moveTooltip, lastTouchTime,
-    tooltipShowTime, activeTooltipUid
+    tooltipShowTime, activeTooltipUid, openMobileEventModal
 } from './interactions.js';
 import { editPortNote, updateAttendancePanel } from './ui.js';
 
@@ -27,8 +27,7 @@ export function renderApp() {
     state.eventLookup.clear();
 
     const totalHidden = state.hiddenNames.size + state.hiddenUids.size;
-    const hiddenCountEl = document.getElementById('hidden-count');
-    if (hiddenCountEl) hiddenCountEl.textContent = totalHidden;
+    document.querySelectorAll('.hidden-count').forEach(el => el.textContent = totalHidden);
 
     const eventsByDate = {};
     const totalEventCounts = {};
@@ -487,14 +486,54 @@ export function renderEventCard(ev, dayCol, widthPercent, leftPercent, isOptiona
 
         if (isTouchInteraction) {
             // Touch Logic: First tap shows tooltip, Second tap toggles attendance
-            if (activeTooltipUid === ev.uid && (Date.now() - tooltipShowTime) > 200) {
-                toggleAttendance(ev.uid);
+            // On mobile (small screen), always open modal
+            if (window.innerWidth <= 768) {
+                // Import dynamically to avoid circular dependency issues if possible, 
+                // but since we are in render.js and interactions.js imports render.js, 
+                // we rely on the fact that we can attach it to window or import it.
+                // However, render.js imports from interactions.js already.
+                // We need to make sure openMobileEventModal is exported and imported.
+                // Since I can't easily change imports in this step without re-reading top of file,
+                // I will assume I need to add the import or use a global.
+                // Let's use the imported function if I added it to imports, but I haven't yet.
+                // So I will use window.openMobileEventModal if I attach it, OR
+                // better yet, I will use the existing import structure.
+                // Wait, I haven't added openMobileEventModal to the import list in render.js yet.
+                // I should do that first or use a global.
+                // Let's use a custom event or global for now to be safe, OR update imports.
+                // Actually, I'll update the import in the next step. For now, let's assume it's available as `openMobileEventModal`.
+                // But wait, I can't assume.
+
+                // Let's check if I can add it to the import list in this same file.
+                // I will update the import list in a separate step.
+                // For now, I will write the code assuming `openMobileEventModal` is available.
+
+                // Actually, to be safe and avoid errors, I'll use a window dispatch or similar if I can't change imports easily.
+                // But I CAN change imports. 
+
+                // Let's just use the logic:
+                if (typeof openMobileEventModal === 'function') {
+                    openMobileEventModal(ev);
+                } else {
+                    // Fallback if not imported yet (should not happen if I do steps correctly)
+                    console.error("openMobileEventModal not found");
+                }
             } else {
-                showFullTooltip(e, ev, el);
+                if (activeTooltipUid === ev.uid && (Date.now() - tooltipShowTime) > 200) {
+                    toggleAttendance(ev.uid);
+                } else {
+                    showFullTooltip(e, ev, el);
+                }
             }
         } else {
             // Desktop Logic: Click always toggles
-            toggleAttendance(ev.uid);
+            if (window.innerWidth <= 768) {
+                if (typeof openMobileEventModal === 'function') {
+                    openMobileEventModal(ev);
+                }
+            } else {
+                toggleAttendance(ev.uid);
+            }
         }
     });
 

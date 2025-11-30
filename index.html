@@ -286,73 +286,77 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4 text-sm">
+        <div class="flex items-center text-sm">
 
-            <!-- Attendance Panel Button -->
-            <button onclick="toggleAttendancePanel()"
-                class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 flex items-center transition-colors"
-                data-tooltip="Missing Events">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
-                    </path>
-                </svg>
-                <span id="missing-count" class="ml-1 text-xs font-bold text-white dark:text-gray-500">0</span>
-            </button>
+            <div class="hidden md:flex items-center gap-1">
+                <!-- Attendance Panel Button -->
+                <button onclick="toggleAttendancePanel()"
+                    class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 flex items-center transition-colors"
+                    data-tooltip="Missing Events">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                        </path>
+                    </svg>
+                    <span id="missing-count"
+                        class="missing-count ml-1 text-xs font-bold text-white dark:text-gray-500">0</span>
+                </button>
 
-            <!-- Hidden Events Manager Button -->
-            <button onclick="openHiddenManager()"
-                class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 flex items-center transition-colors"
-                data-tooltip="Manage Hidden Events">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
-                    </path>
-                </svg>
-                <span id="hidden-count" class="ml-1 text-xs font-bold text-white dark:text-gray-500">0</span>
-            </button>
+                <!-- Hidden Events Manager Button -->
+                <button onclick="openHiddenManager()"
+                    class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 flex items-center transition-colors"
+                    data-tooltip="Manage Hidden Events">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                        </path>
+                    </svg>
+                    <span id="hidden-count"
+                        class="hidden-count ml-1 text-xs font-bold text-white dark:text-gray-500">0</span>
+                </button>
 
-            <!-- Toggle Hidden Events Button -->
-            <button onclick="toggleShowHiddenTemp()" id="btn-toggle-hidden"
-                class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-200 dark:text-gray-500 mr-1 transition-colors"
-                data-tooltip="Toggle Hidden Events">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                    </path>
-                </svg>
-            </button>
+                <!-- Toggle Hidden Events Button -->
+                <button onclick="toggleShowHiddenTemp()" id="btn-toggle-hidden"
+                    class="btn-toggle-hidden p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-200 dark:text-gray-500 mr-1 transition-colors"
+                    data-tooltip="Toggle Hidden Events">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                </button>
 
-            <!-- Print Button -->
-            <button onclick="exportPrintable()"
-                class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 transition-colors"
-                data-tooltip="Print Schedule">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-                    </path>
-                </svg>
-            </button>
+                <!-- Print Button -->
+                <button onclick="exportPrintable()"
+                    class="p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 text-red-100 dark:text-gray-400 mr-1 transition-colors"
+                    data-tooltip="Print Schedule">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2v4h10z">
+                        </path>
+                    </svg>
+                </button>
 
-            <!-- Dark Mode Toggle -->
-            <button onclick="toggleDarkMode()"
-                class="text-red-100 dark:text-gray-400 p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 transition mr-1"
-                data-tooltip="Toggle Dark Mode">
-                <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    style="display:block">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                    </path>
-                </svg>
-                <svg id="icon-sun" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    style="display:none">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                    </path>
-                </svg>
-            </button>
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDarkMode()"
+                    class="text-red-100 dark:text-gray-400 p-2 rounded-full hover:bg-red-700 dark:hover:bg-gray-700 transition mr-1"
+                    data-tooltip="Toggle Dark Mode">
+                    <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="display:block">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                    <svg id="icon-sun" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="display:none">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
 
             <!-- Menu Button -->
             <button id="menu-btn"
@@ -364,8 +368,62 @@
                 </svg>
             </button>
 
+
+
             <!-- Dropdown -->
             <div id="dropdown-menu">
+                <!-- Mobile Only Items -->
+                <div onclick="toggleAttendancePanel()" class="ctx-item md:hidden justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                            </path>
+                        </svg> Missing Events
+                    </div>
+                    <span
+                        class="missing-count text-xs font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded-full">0</span>
+                </div>
+
+                <div onclick="openHiddenManager()" class="ctx-item md:hidden justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                            </path>
+                        </svg> Hidden Events
+                    </div>
+                    <span
+                        class="hidden-count text-xs font-bold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">0</span>
+                </div>
+
+                <div onclick="toggleShowHiddenTemp(); toggleMenu()" class="ctx-item md:hidden btn-toggle-hidden">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg> Show/Hide Hidden
+                </div>
+
+                <div onclick="exportPrintable()" class="ctx-item md:hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                        </path>
+                    </svg> Print Schedule
+                </div>
+
+                <div onclick="toggleDarkMode(); toggleMenu()" class="ctx-item md:hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg> Toggle Dark Mode
+                </div>
+
+                <div class="ctx-divider md:hidden"></div>
                 <div onclick="exportData()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -433,6 +491,9 @@
             <!-- Populated by JS -->
         </div>
     </div>
+    <!-- Context Menu Overlay (Mobile) -->
+    <div id="context-menu-overlay"></div>
+
     <!-- Context Menu -->
     <div id="context-menu">
 
@@ -528,17 +589,16 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal (High Z-Index) -->
-    <div id="confirmation-modal" class="modal-overlay" style="z-index: 5000;">
-        <div class="modal-content p-6 max-w-sm">
-            <h3 class="text-lg font-bold mb-2" id="confirm-title">Confirm</h3>
-            <p class="text-gray-600 mb-6 text-sm" id="confirm-message">Are you sure?</p>
-
-            <div class="flex justify-end gap-3">
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-overlay" style="z-index: 7500;">
+        <div class="modal-content p-6 max-w-sm text-center">
+            <h3 id="confirm-title" class="text-lg font-bold mb-2">Confirm Action</h3>
+            <p id="confirm-message" class="text-gray-600 mb-6">Are you sure?</p>
+            <div class="flex justify-center gap-4">
                 <button id="btn-confirm-cancel"
-                    class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
+                    class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">Cancel</button>
                 <button id="btn-confirm-ok"
-                    class="px-4 py-2 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700">Confirm</button>
+                    class="px-4 py-2 bg-[#AF231C] text-white rounded hover:bg-red-800">Confirm</button>
             </div>
         </div>
     </div>
@@ -735,7 +795,7 @@
                 <input type="text" id="event-note-input" class="form-input" placeholder="e.g. Meet John here" autofocus>
             </div>
             <div class="mt-6 flex justify-end gap-3">
-                <button onclick="closeAllModals()"
+                <button onclick="closeEventNoteModal()"
                     class="px-4 py-2 text-gray-500 hover:text-gray-800 text-sm font-medium">Cancel</button>
                 <button onclick="saveEventNote()"
                     class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
@@ -791,6 +851,41 @@
                 <button onclick="saveTimeBlocksUI()"
                     class="px-4 py-2 bg-[#AF231C] text-white rounded text-sm font-medium hover:bg-red-800 shadow-sm">Save</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Mobile Event Modal -->
+    <div id="mobile-event-modal" class="fixed inset-0 z-[7000] bg-white hidden flex-col md:hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+            <h3 id="mobile-modal-title" class="text-lg font-bold text-gray-800 truncate pr-4">Event Details</h3>
+            <button onclick="closeMobileEventModal()" class="p-2 -mr-2 text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div id="mobile-modal-content" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Action Bar -->
+        <div class="p-4 border-t border-gray-200 bg-white flex items-center gap-3">
+            <button id="mobile-btn-toggle"
+                class="flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2">
+                <!-- Icon & Text set by JS -->
+            </button>
+
+            <button id="mobile-btn-menu" class="p-3 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
+                    </path>
+                </svg>
+            </button>
         </div>
     </div>
     <!-- Datalist for Time Inputs -->
