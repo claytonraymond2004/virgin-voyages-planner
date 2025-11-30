@@ -4,7 +4,7 @@ import { renderApp } from './render.js';
 import { parseTimeRange, formatTimeRange, escapeHtml } from './utils.js';
 import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
-    showFullTooltip, moveTooltip, hideTooltip
+    showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
 } from './interactions.js';
 
 // --- Modals ---
@@ -506,27 +506,35 @@ export function saveEventNoteUI() {
         // Re-render the mobile modal content to show the new note
         // We need to find the event object again
         const uid = state.currentEventNoteUid;
-        // Try to find in appData or customEvents
-        let ev = state.appData.find(e => {
+        let ev = null;
+
+        // Try to find in appData
+        const appEvent = state.appData.find(e => {
             const timeData = parseTimeRange(e.timePeriod);
             if (!timeData) return false;
             const s = timeData.start + SHIFT_START_ADD;
             return `${e.date}_${e.name}_${s}` === uid;
         });
 
-        if (!ev) {
+        if (appEvent) {
+            const timeData = parseTimeRange(appEvent.timePeriod);
+            if (timeData) {
+                const s = timeData.start + SHIFT_START_ADD;
+                const e = timeData.end + SHIFT_END_ADD;
+                ev = { ...appEvent, startMins: s, endMins: e, uid: uid };
+            }
+        } else {
+            // Try custom events
             ev = state.customEvents.find(e => e.uid === uid);
         }
 
         if (ev) {
             // Refresh the mobile modal to show the new note
-            if (window.openMobileEventModal) {
-                // Determine if it was a hidden preview
-                const btnToggle = document.getElementById('mobile-btn-toggle');
-                const isHiddenPreview = btnToggle && btnToggle.classList.contains('cursor-not-allowed');
+            // Determine if it was a hidden preview
+            const btnToggle = document.getElementById('mobile-btn-toggle');
+            const isHiddenPreview = btnToggle && btnToggle.classList.contains('cursor-not-allowed');
 
-                window.openMobileEventModal(ev, isHiddenPreview);
-            }
+            openMobileEventModal(ev, isHiddenPreview);
         }
     } else {
         closeAllModals();
