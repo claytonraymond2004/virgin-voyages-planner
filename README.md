@@ -1,5 +1,7 @@
 # Virgin Voyages Visual Itinerary Planner
 
+**🚀 Live Version: [https://claytonraymond2004.github.io/virgin-voyages-planner/](https://claytonraymond2004.github.io/virgin-voyages-planner/)**
+
 A specialized, browser-based interface designed for the visual organization, temporal management, and strategic planning of cruise itineraries associated with Virgin Voyages. This application transforms a raw JSON agenda file into a coherent, interactive, and chronological grid matrix.
 
 ## Features
@@ -140,6 +142,23 @@ This method ensures a consistent environment isolated from your system. You can 
     **For the Offline version:**
     ```bash
     docker run -p 8000:8000 virgin-planner:offline
+    ```
+
+3.  Open your web browser and navigate to:
+    [http://localhost:8000](http://localhost:8000)
+
+### Option 4: Pull from GitHub Container Registry
+
+You can also pull the pre-built images directly from GitHub without building them yourself.
+
+1.  **Run the Standard (Online) version**:
+    ```bash
+    docker run -p 8000:8000 ghcr.io/claytonraymond2004/virgin-voyages-planner:latest
+    ```
+
+2.  **Run the Offline version**:
+    ```bash
+    docker run -p 8000:8000 ghcr.io/claytonraymond2004/virgin-voyages-planner:offline
     ```
 
 3.  Open your web browser and navigate to:
