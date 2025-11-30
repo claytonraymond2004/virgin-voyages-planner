@@ -694,6 +694,20 @@ body.dark .search-result-item {
     .ctx-item {
         padding: 20px 24px;
         font-size: 18px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .ctx-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Hide dividers on mobile to avoid doubling up with the new borders */
+    .ctx-divider {
+        display: none !important;
+    }
+
+    body.dark .ctx-item {
+        border-color: #374151;
     }
 }
 
