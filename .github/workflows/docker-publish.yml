@@ -1,0 +1,73 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    branches: [ "main" ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        flavor: [online, offline]
+        include:
+          - flavor: online
+            build_arg_value: "false"
+          - flavor: offline
+            build_arg_value: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Generate tags based on the flavor
+          tags: |
+            # Online tags
+            type=raw,value=latest,enable=${{ matrix.flavor == 'online' }}
+            type=sha,enable=${{ matrix.flavor == 'online' }}
+            type=ref,event=branch,enable=${{ matrix.flavor == 'online' }}
+            type=semver,pattern={{version}},enable=${{ matrix.flavor == 'online' }}
+            
+            # Offline tags
+            type=raw,value=offline,enable=${{ matrix.flavor == 'offline' }}
+            type=raw,value=latest-offline,enable=${{ matrix.flavor == 'offline' }}
+            type=sha,suffix=-offline,enable=${{ matrix.flavor == 'offline' }}
+            type=ref,event=branch,suffix=-offline,enable=${{ matrix.flavor == 'offline' }}
+            type=semver,pattern={{version}},suffix=-offline,enable=${{ matrix.flavor == 'offline' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            OFFLINE_MODE=${{ matrix.build_arg_value }}
+            APP_VERSION=${{ github.sha }}

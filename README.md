@@ -115,18 +115,33 @@ Use this option if you want to edit files locally and see changes immediately wi
 2.  Open your web browser and navigate to:
     [http://localhost:8000](http://localhost:8000)
 
-### Option 3: Docker (Standard)
+### Option 3: Docker (Production / Offline)
+This method ensures a consistent environment isolated from your system. You can build two versions:
+- **Standard (Online)**: Uses CDNs for Tailwind CSS and Google Fonts (smaller image size).
+- **Offline**: Downloads all external assets into the image, requiring no internet connection at runtime.
 
-This method ensures a consistent environment isolated from your system.
-
-1.  **Build the Docker image**:
+1.  **Build the Docker images**:
+    Use the provided script to build and tag both versions automatically:
     ```bash
-    docker build -t virgin-planner .
+    ./build_docker.sh
     ```
+    This will create the following images:
+    - `virgin-planner:latest` (Online version)
+    - `virgin-planner:offline` (Offline version)
+    - `virgin-planner:<git-sha>` (Versioned tags)
+
 2.  **Run the container**:
+    
+    **For the Standard (Online) version:**
     ```bash
-    docker run -p 8000:8000 virgin-planner
+    docker run -p 8000:8000 virgin-planner:latest
     ```
+
+    **For the Offline version:**
+    ```bash
+    docker run -p 8000:8000 virgin-planner:offline
+    ```
+
 3.  Open your web browser and navigate to:
     [http://localhost:8000](http://localhost:8000)
 
