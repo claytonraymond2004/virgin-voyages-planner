@@ -1020,7 +1020,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
             if (!isHiddenPreview && !isEffectiveHidden) {
                 if (isCurrent) {
-                    icon = `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Currently Viewing</span>`;
+                    icon = `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Viewing</span>`;
                 } else {
                     const safeUid = sib.uid.replace(/'/g, "\\'");
                     clickAction = `onclick="closeMobileEventModal(); jumpToEvent('${safeUid}')"`;
