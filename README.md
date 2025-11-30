@@ -128,20 +128,20 @@ This method ensures a consistent environment isolated from your system. You can 
     ./build_docker.sh
     ```
     This will create the following images:
-    - `virgin-planner:latest` (Online version)
-    - `virgin-planner:offline` (Offline version)
-    - `virgin-planner:<git-sha>` (Versioned tags)
+    - `virgin-voyages-planner:latest` (Online version)
+    - `virgin-voyages-planner:offline` (Offline version)
+    - `virgin-voyages-planner:<git-sha>` (Versioned tags)
 
 2.  **Run the container**:
     
     **For the Standard (Online) version:**
     ```bash
-    docker run -p 8000:8000 virgin-planner:latest
+    docker run -p 8000:8000 virgin-voyages-planner:latest
     ```
 
     **For the Offline version:**
     ```bash
-    docker run -p 8000:8000 virgin-planner:offline
+    docker run -p 8000:8000 virgin-voyages-planner:offline
     ```
 
 3.  Open your web browser and navigate to:

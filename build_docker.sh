@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-IMAGE_NAME="virgin-planner"
+IMAGE_NAME="virgin-voyages-planner"
 
 # Get the current Git commit SHA (short version)
 if git rev-parse --git-dir > /dev/null 2>&1; then

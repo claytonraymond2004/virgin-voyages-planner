@@ -15,6 +15,7 @@ COPY app_logo.svg .
 COPY virgin_api.js .
 COPY virgin_placeholder.png .
 COPY modules/ ./modules/
+COPY example_data/ ./example_data/
 COPY build_offline.py .
 
 # Build argument for cache busting (default: "v1")

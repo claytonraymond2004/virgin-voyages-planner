@@ -18,7 +18,7 @@ Beyond mere visualization, provision is made within the application for the gran
 
 To facilitate the consistent deployment of the application across varying computing environments, a Docker container definition is provided. Execution of the following command within the root directory containing Dockerfile, index.html, and server.py is required to build the container image:
 
-docker build \-t virgin-planner .
+docker build \-t virgin-voyages-planner .
 
 This process instantiates a lightweight environment based on Python 3.11-slim, copying the necessary source artifacts into the container's working directory.
 
@@ -26,7 +26,7 @@ This process instantiates a lightweight environment based on Python 3.11-slim, c
 
 Following the successful construction of the image, the container shall be initialized via the following command:
 
-docker run \-p 8000:8000 virgin-planner
+docker run \-p 8000:8000 virgin-voyages-planner
 
 Upon execution, the internal port 8000 is bound to the host machine's port 8000\. Access to the running application may subsequently be obtained via the local host address: http://localhost:8000. This encapsulation ensures that the Python runtime dependencies are isolated from the host operating system.
 
