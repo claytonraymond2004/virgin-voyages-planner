@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Cache Busting
+        run: |
+          # Get short SHA
+          SHA=$(git rev-parse --short HEAD)
+          echo "Busting cache with SHA: $SHA"
+          
+          # Update styles.css in index.html
+          # Handles both existing query params and no query params
+          sed -i "s|styles.css?v=[^\"]*|styles.css?v=$SHA|g" index.html
+          sed -i "s|styles.css\"|styles.css?v=$SHA\"|g" index.html
+          
+          # Update JS entry points in index.html
+          sed -i "s|virgin_api.js\"|virgin_api.js?v=$SHA\"|g" index.html
+          sed -i "s|modules/main.js\"|modules/main.js?v=$SHA\"|g" index.html
+          
+          # Update internal module imports
+          # This ensures that when main.js reloads, it also fetches new versions of its dependencies
+          # Matches: from './filename.js' -> from './filename.js?v=SHA'
+          sed -i "s|from '\./\([^']*\)\.js'|from './\1.js?v=$SHA'|g" modules/*.js
+          sed -i 's|from "\./\([^"]*\)\.js"|from "./\1.js?v='$SHA'"|g' modules/*.js
+          
+          echo "Cache busting complete."
+
+      - name: Cleanup Unwanted Files
+        run: |
+          echo "Removing unwanted files..."
+          find . -type f -name "*.bak" -print -delete
+          find . -type f -name "*.md" -print -delete
+          find . -type f -name "*.py" -print -delete
+          rm -f Dockerfile
+          rm -f .gitignore
+          rm -rf .agent
+          rm -rf .github
+          echo "Cleanup complete."
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
