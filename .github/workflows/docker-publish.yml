@@ -67,6 +67,12 @@ jobs:
             type=ref,event=branch,suffix=-offline,enable=${{ matrix.flavor == 'offline' }}
             type=semver,pattern={{version}},suffix=-offline,enable=${{ matrix.flavor == 'offline' }}
 
+      - name: Inject Auth Token
+        env:
+          VV_AUTH_TOKEN: ${{ secrets.VV_AUTH_TOKEN }}
+        run: |
+          sed -i "s|__VV_AUTH_TOKEN__|$VV_AUTH_TOKEN|g" virgin_api.js
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:

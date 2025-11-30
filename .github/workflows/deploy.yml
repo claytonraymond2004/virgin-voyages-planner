@@ -27,6 +27,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Inject Auth Token
+        env:
+          VV_AUTH_TOKEN: ${{ secrets.VV_AUTH_TOKEN }}
+        run: |
+          sed -i "s|__VV_AUTH_TOKEN__|$VV_AUTH_TOKEN|g" virgin_api.js
+
       - name: Cache Busting
         run: |
           # Get short SHA

@@ -92,9 +92,21 @@ A specialized, browser-based interface designed for the visual organization, tem
 
 You can run this application locally using Python or Docker.
 
+### Environment Setup (API Token)
+
+To use the Virgin Voyages API integration, you need to provide an authorization token for the email login endpoint (this seems like a poor attempt to protect the Virgin Voyages API through obscurity). You can find this token by snooping the HTTPS traffic (you will need to break/inspect) from the Virgin Voyages app during email account login to `https://mobile.shore.virginvoyages.com/user-account-service/signin/email`. It will be in the `Authorization` header as a Basic Auth token. As far as I can tell, this is a static token that does not change between users (but it may change during app updates?).
+
+Note: This token is only needed for Options 1 - 3 of running the app. The token is already included in the Docker image for Option 4 or at [https://claytonraymond2004.github.io/virgin-voyages-planner/](https://claytonraymond2004.github.io/virgin-voyages-planner/)
+
+1.  **Create a `.env` file** in the root directory of the project.
+2.  Add your token to the file:
+    ```env
+    VV_AUTH_TOKEN=virgin_app_base64_encoded_token_here
+    ```
+
 ### Option 1: Python (Recommended for local dev)
 
-This method requires Python 3 installed on your machine.
+This method requires Python 3 installed on your machine. It will automatically load the `VV_AUTH_TOKEN` from your `.env` file.
 
 1.  Open a terminal and navigate to the project directory.
 2.  Run the included server script:
@@ -110,7 +122,7 @@ Use this option if you want to edit files locally and see changes immediately wi
 
 1.  **Run the container directly**:
     ```bash
-    docker run -p 8000:8000 -v "$(pwd):/app" python:3.11-slim python /app/server.py
+    docker run -p 8000:8000 --env-file .env -v "$(pwd):/app" python:3.11-slim python /app/server.py
     ```
     *Note: On Windows PowerShell, use `${PWD}` instead of `$(pwd)`.*
 
@@ -136,12 +148,12 @@ This method ensures a consistent environment isolated from your system. You can 
     
     **For the Standard (Online) version:**
     ```bash
-    docker run -p 8000:8000 virgin-voyages-planner:latest
+    docker run -p 8000:8000 --env-file .env virgin-voyages-planner:latest
     ```
 
     **For the Offline version:**
     ```bash
-    docker run -p 8000:8000 virgin-voyages-planner:offline
+    docker run -p 8000:8000 --env-file .env virgin-voyages-planner:offline
     ```
 
 3.  Open your web browser and navigate to:
@@ -149,7 +161,7 @@ This method ensures a consistent environment isolated from your system. You can 
 
 ### Option 4: Pull from GitHub Container Registry
 
-You can also pull the pre-built images directly from GitHub without building them yourself.
+You can also pull the pre-built images directly from GitHub without building them yourself. The VV_AUTH_TOKEN is already included in this build.
 
 1.  **Run the Standard (Online) version**:
     ```bash

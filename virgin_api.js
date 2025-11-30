@@ -26,8 +26,9 @@ const VirginAPI = {
     async login(username, password) {
         const url = `${VV_API_BASE}/user-account-service/signin/email`;
 
-        // Static Basic Auth from the curl command
-        const BASIC_AUTH = 'Basic [REDACTED_TOKEN]';
+        // Static Basic Auth from is built into the Virgin app -- Some weird attempt at obfuscation of their API
+        // This token is injected at runtime/build time
+        const BASIC_AUTH = 'Basic __VV_AUTH_TOKEN__';
 
         const response = await fetch(url, {
             method: 'POST',
