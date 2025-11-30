@@ -94,9 +94,13 @@ You can run this application locally using Python or Docker.
 
 ### Environment Setup (API Token)
 
-To use the Virgin Voyages API integration, you need to provide an authorization token for the email login endpoint (this seems like a poor attempt to protect the Virgin Voyages API through obscurity). You can find this token by snooping the HTTPS traffic (you will need to break/inspect) from the Virgin Voyages app during email account login to `https://mobile.shore.virginvoyages.com/user-account-service/signin/email`. It will be in the `Authorization` header as a Basic Auth token. As far as I can tell, this is a static token that does not change between users (but it may change during app updates?).
+To use the Virgin Voyages API integration, you need to provide an authorization token for the email login endpoint (this seems like a poor attempt to protect the Virgin Voyages API through obscurity).
+
+You can find this token by snooping the HTTPS traffic (you will need to break/inspect) from the Virgin Voyages app during email account login to `https://mobile.shore.virginvoyages.com/user-account-service/signin/email`. It will be in the `Authorization` header as a Basic Auth token. As far as I can tell, this is a static token that does not change between users (but it may change during app updates?).
 
 Note: This token is only needed for Options 1 - 3 of running the app. The token is already included in the Docker image for Option 4 or at [https://claytonraymond2004.github.io/virgin-voyages-planner/](https://claytonraymond2004.github.io/virgin-voyages-planner/)
+
+**Hint**: You can also find find the token in the `virgin_api.js` file at [https://claytonraymond2004.github.io/virgin-voyages-planner/virgin_api.js](https://claytonraymond2004.github.io/virgin-voyages-planner/virgin_api.js) around line 31 if you don't want to snoop the HTTPS traffic. 😉
 
 1.  **Create a `.env` file** in the root directory of the project.
 2.  Add your token to the file:
