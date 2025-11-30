@@ -369,7 +369,9 @@ export function renderHiddenSeriesList(container, type) {
                 const s = timeData.start + SHIFT_START_ADD;
                 const e = timeData.end + SHIFT_END_ADD;
                 const tooltipEvent = { ...repEvent, startMins: s, endMins: e, uid: 'hidden-series-preview' };
-                row.onmouseenter = (e) => showFullTooltip(e, tooltipEvent, row);
+                row.onmouseenter = (e) => {
+                    if (window.innerWidth > 768) showFullTooltip(e, tooltipEvent, row);
+                };
                 row.onmousemove = moveTooltip;
                 row.onmouseleave = () => { tooltip.style.display = 'none'; };
             }
@@ -421,7 +423,9 @@ export function renderHiddenInstances(container) {
         const row = document.createElement('div');
         row.className = 'flex justify-between items-center bg-white border border-gray-200 rounded p-3 mb-2 shadow-sm';
 
-        row.onmouseenter = (e) => showFullTooltip(e, ev, row);
+        row.onmouseenter = (e) => {
+            if (window.innerWidth > 768) showFullTooltip(e, ev, row);
+        };
         row.onmousemove = moveTooltip;
         row.onmouseleave = () => { tooltip.style.display = 'none'; };
 
