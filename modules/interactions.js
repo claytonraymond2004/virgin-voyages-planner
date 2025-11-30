@@ -773,7 +773,7 @@ export function showFullTooltip(e, ev, el) {
 
     if (allSiblings.length > 0) {
         html += `<div class="siblings-list">
-            <div class="font-bold mb-1 text-white">All Occurrences:</div>`;
+            <div class="font-bold mb-1 text-white">All Occurrences (${allSiblings.length}):</div>`;
 
         const siblings = allSiblings
             .sort((a, b) => {
@@ -783,13 +783,54 @@ export function showFullTooltip(e, ev, el) {
 
         siblings.forEach(sib => {
             const isAttending = state.attendingIds.has(sib.uid);
+            const isSeriesHidden = state.hiddenNames.has(sib.name);
+            const isInstanceHidden = state.hiddenUids.has(sib.uid);
+            const isExplicitlyShown = state.shownUids.has(sib.uid);
+
+            // Event is hidden if it's marked hidden AND NOT explicitly shown AND NOT attended
+            const isHidden = (isSeriesHidden || isInstanceHidden) && !isExplicitlyShown && !isAttending;
+            const isTempUnhidden = isHidden && state.showHiddenTemp;
+            const isEffectiveHidden = isHidden && !state.showHiddenTemp;
+            const isCurrent = sib.uid === ev.uid;
+
             const sDate = new Date(sib.date + 'T00:00:00');
             const sDateStr = sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const sH = Math.floor(sib.startMins / 60) % 24, sM = sib.startMins % 60;
-            const attendingLabel = isAttending ? ' <span class="text-green-400 font-bold ml-1">(Attending)</span>' : '';
-            const itemClass = isAttending ? 'sibling-item text-green-200' : 'sibling-item';
 
-            html += `<div class="${itemClass}">• ${sDateStr} @ ${fmt(sH, sM)}${attendingLabel}</div>`;
+            let icon = '';
+            const iconEye = `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-transparent mr-1"><svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></span>`;
+            const iconHidden = `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-transparent mr-1"><svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg></span>`;
+            const iconTemp = `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-900/50 text-blue-300 mr-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></span>`;
+
+            if (isEffectiveHidden) icon = iconHidden;
+            else if (isTempUnhidden) icon = iconTemp;
+            else icon = iconEye;
+
+            let label = '';
+            if (isAttending) {
+                label = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-900/50 text-green-300 uppercase tracking-wide ml-2 border border-green-700/50">
+                    <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Attending
+                </span>`;
+            }
+
+            let itemClass = 'sibling-item flex items-center justify-between gap-2';
+            if (isAttending) itemClass += ' text-green-200';
+            else if (isEffectiveHidden) itemClass += ' text-gray-400';
+            else if (isTempUnhidden) itemClass += ' text-blue-200';
+
+            let currentChip = '';
+            if (isCurrent) {
+                currentChip = `<span class="text-[10px] bg-blue-900/50 text-blue-200 px-1.5 py-0.5 rounded border border-blue-700/50">Current</span>`;
+            }
+
+            html += `<div class="${itemClass}">
+                <div class="flex items-center flex-wrap gap-y-1">
+                    <span class="flex items-center">${icon} ${sDateStr} @ ${fmt(sH, sM)}</span>
+                    ${label}
+                </div>
+                ${currentChip}
+            </div>`;
         });
         html += `</div>`;
     }
@@ -947,14 +988,25 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
             const sDateStr = sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const sH = Math.floor(sib.startMins / 60) % 24, sM = sib.startMins % 60;
 
-            let content = `• ${sDateStr} @ ${fmt(sH, sM)}`;
+            let iconStatus = '';
+            const iconEye = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-transparent mr-1"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></span>`;
+            const iconHidden = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-transparent mr-1"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg></span>`;
+            const iconTemp = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 mr-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></span>`;
+
+            if (isEffectiveHidden) iconStatus = iconHidden;
+            else if (isTempUnhidden) iconStatus = iconTemp;
+            else iconStatus = iconEye;
+
+            let content = `<div class="flex items-center flex-wrap gap-x-2">
+                <span class="flex items-center whitespace-nowrap">${iconStatus} ${sDateStr} @ ${fmt(sH, sM)}</span>`;
+
             if (isAttending) {
-                content += ' <span class="text-green-600 font-bold ml-1">(Attending)</span>';
-            } else if (isEffectiveHidden) {
-                content += ' <span class="text-gray-400 italic ml-1">(Hidden)</span>';
-            } else if (isTempUnhidden) {
-                content += ' <span class="text-blue-500 italic ml-1">(Temporarily Unhidden)</span>';
+                content += `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wide">
+                    <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Attending
+                </span>`;
             }
+            content += `</div>`;
 
             let itemClass = 'text-sm p-2 rounded flex items-center justify-between';
             if (isAttending) itemClass += ' text-green-700 font-medium';

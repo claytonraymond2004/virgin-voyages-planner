@@ -571,7 +571,7 @@ body.dark .search-result-item {
     padding: 12px;
     border-radius: 8px;
     font-size: 0.8rem;
-    width: 260px;
+    width: 320px;
     pointer-events: auto;
     /* Allow hovering over tooltip */
     z-index: 2000;
