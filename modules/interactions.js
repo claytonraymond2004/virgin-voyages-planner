@@ -923,7 +923,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
     if (allSiblings.length > 0) {
         html += `<div class="pt-2 border-t border-gray-100">
-            <div class="font-semibold text-gray-800 mb-2">All Occurrences</div>
+            <div class="font-semibold text-gray-800 mb-2">All Occurrences (${allSiblings.length})</div>
             <div class="space-y-1">`;
 
         const siblings = allSiblings.sort((a, b) => {
@@ -933,17 +933,54 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
         siblings.forEach(sib => {
             const isAttending = state.attendingIds.has(sib.uid);
+            const isSeriesHidden = state.hiddenNames.has(sib.name);
+            const isInstanceHidden = state.hiddenUids.has(sib.uid);
+            const isExplicitlyShown = state.shownUids.has(sib.uid);
+
+            // Event is hidden if it's marked hidden AND NOT explicitly shown AND NOT attended
+            const isHidden = (isSeriesHidden || isInstanceHidden) && !isExplicitlyShown && !isAttending;
+            const isTempUnhidden = isHidden && state.showHiddenTemp;
+            const isEffectiveHidden = isHidden && !state.showHiddenTemp;
+            const isCurrent = sib.uid === ev.uid;
+
             const sDate = new Date(sib.date + 'T00:00:00');
             const sDateStr = sDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const sH = Math.floor(sib.startMins / 60) % 24, sM = sib.startMins % 60;
-            const attendingLabel = isAttending ? ' <span class="text-green-600 font-bold ml-1">(Attending)</span>' : '';
-            const itemClass = isAttending ? 'text-sm text-green-700 font-medium cursor-pointer hover:bg-gray-50 p-1 rounded' : 'text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-1 rounded';
 
-            // If in hidden preview mode, disable jumping to event
-            const clickAction = isHiddenPreview ? '' : `onclick="closeMobileEventModal(); jumpToEvent('${sib.uid}')"`;
-            const cursorClass = isHiddenPreview ? '' : 'cursor-pointer hover:bg-gray-50';
+            let content = `• ${sDateStr} @ ${fmt(sH, sM)}`;
+            if (isAttending) {
+                content += ' <span class="text-green-600 font-bold ml-1">(Attending)</span>';
+            } else if (isEffectiveHidden) {
+                content += ' <span class="text-gray-400 italic ml-1">(Hidden)</span>';
+            } else if (isTempUnhidden) {
+                content += ' <span class="text-blue-500 italic ml-1">(Temporarily Unhidden)</span>';
+            }
 
-            html += `<div class="${itemClass.replace('cursor-pointer hover:bg-gray-50', cursorClass)}" ${clickAction}>• ${sDateStr} @ ${fmt(sH, sM)}${attendingLabel}</div>`;
+            let itemClass = 'text-sm p-2 rounded flex items-center justify-between';
+            if (isAttending) itemClass += ' text-green-700 font-medium';
+            else if (isEffectiveHidden) itemClass += ' text-gray-400';
+            else if (isTempUnhidden) itemClass += ' text-blue-600';
+            else itemClass += ' text-gray-600';
+
+            let clickAction = '';
+            let cursorClass = '';
+            let icon = '';
+
+            if (!isHiddenPreview && !isEffectiveHidden) {
+                if (isCurrent) {
+                    icon = `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Currently Viewing</span>`;
+                } else {
+                    const safeUid = sib.uid.replace(/'/g, "\\'");
+                    clickAction = `onclick="closeMobileEventModal(); jumpToEvent('${safeUid}')"`;
+                    cursorClass = 'cursor-pointer hover:bg-gray-50';
+                    icon = `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+                }
+            }
+
+            html += `<div class="${itemClass} ${cursorClass}" ${clickAction}>
+                <span>${content}</span>
+                ${icon}
+            </div>`;
         });
         html += `</div></div>`;
     }
