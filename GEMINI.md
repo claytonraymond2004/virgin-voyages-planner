@@ -114,11 +114,11 @@ To maintain referential integrity within the DOM and state management systems, e
 4. **Modal Dialogs:**  
    * **Hide/Delete/Edit Operations:** In the event of an action targeting a repeating occurrence, the user is prompted via a secondary modal to apply the action to the specific "Instance" (single UID) or the entire "Series" (matching seriesId or name).  
    * **Data Integrity:** The closure of a modal containing unsaved form modifications triggers a window.confirm validation check to prevent the accidental loss of user input.
-5. **Hidden Events Manager:** Accessible via the main menu, this interface allows users to review and restore suppressed events. It is divided into three tabs:
+5. **Hidden Events Manager:** Accessible via the main menu, this interface allows users to review and restore suppressed events. It supports horizontal swipe gestures to navigate between tabs and is divided into three tabs:
    * **Hidden Series:** Manages global suppressions based on event name. Restoring an item here unhides every instance of that event across the entire itinerary.
    * **Partially Hidden:** Shows event series that are globally hidden but have specific instances marked as "Attending" (and thus visible). This state allows users to keep the bulk of a series hidden while retaining specific bookings.
    * **Hidden Instances:** Manages specific, time-based suppressions (UIDs). Restoring an item here only unhides that single occurrence.
-6. **Attendance Panel (Missing Events):** A slide-out panel (toggled via the clipboard icon) designed to help users identify unbooked activities.
+6. **Attendance Panel (Missing Events):** A slide-out panel (toggled via the clipboard icon) designed to help users identify unbooked activities. Supports horizontal swipe gestures to navigate between tabs.
    *   **Logic:**
        *   **Required Tab:** Lists event series where *zero* instances have been marked as "Attending". This effectively shows "what I haven't scheduled yet".
        *   **Optional Tab:** Lists event series that the user has explicitly flagged as "Optional".

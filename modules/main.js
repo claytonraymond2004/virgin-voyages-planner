@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleHiddenSwipe() {
-        if (Math.abs(hiddenTouchEndX - hiddenTouchStartX) < 50) return; // Ignore small swipes
+        if (Math.abs(hiddenTouchEndX - hiddenTouchStartX) < 100) return; // Ignore small swipes
 
         const tabs = ['series', 'partial', 'instances'];
         const currentIdx = tabs.indexOf(state.activeHiddenTab);
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAttendanceSwipe() {
-        if (Math.abs(attendanceTouchEndX - attendanceTouchStartX) < 50) return;
+        if (Math.abs(attendanceTouchEndX - attendanceTouchStartX) < 100) return;
 
         const tabs = ['required', 'optional'];
         const currentIdx = tabs.indexOf(state.activePanelTab);

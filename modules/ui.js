@@ -160,14 +160,28 @@ export function openUnhideModal(ev) {
 // --- Hidden Manager ---
 
 export function switchHiddenTab(tab) {
+    const container = document.getElementById('hidden-list-container');
+    if (container) {
+        state.hiddenTabScrollPositions[state.activeHiddenTab] = container.scrollTop;
+    }
     state.activeHiddenTab = tab;
     renderHiddenContent();
+    if (container) {
+        container.scrollTop = state.hiddenTabScrollPositions[tab] || 0;
+    }
 }
 
 export function openHiddenManager(keepTab = false) {
-    if (!keepTab) state.activeHiddenTab = 'series';
+    if (!keepTab) {
+        state.activeHiddenTab = 'series';
+        state.hiddenTabScrollPositions = {};
+    }
     renderHiddenContent();
     document.getElementById('hidden-manager-modal').style.display = 'flex';
+    const container = document.getElementById('hidden-list-container');
+    if (container) {
+        container.scrollTop = state.hiddenTabScrollPositions[state.activeHiddenTab] || 0;
+    }
 }
 
 export function renderHiddenContent() {
@@ -584,14 +598,24 @@ export function toggleAttendancePanel() {
     if (isOpen) {
         panel.classList.remove('open');
     } else {
+        state.attendancePanelScrollPositions = {};
         updateAttendancePanel();
         panel.classList.add('open');
+        const content = document.getElementById('attendance-panel-content');
+        if (content) content.scrollTop = 0;
     }
 }
 
 export function switchAttendanceTab(tab) {
+    const content = document.getElementById('attendance-panel-content');
+    if (content) {
+        state.attendancePanelScrollPositions[state.activePanelTab] = content.scrollTop;
+    }
     state.activePanelTab = tab;
     updateAttendancePanel();
+    if (content) {
+        content.scrollTop = state.attendancePanelScrollPositions[tab] || 0;
+    }
 }
 
 export function toggleOptionalEvent(eventName) {

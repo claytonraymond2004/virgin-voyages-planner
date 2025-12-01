@@ -53,7 +53,11 @@ export const state = {
     justClearedSelection: false,
 
     // Confirm Callback
-    confirmCallback: null
+    confirmCallback: null,
+
+    // Scroll Positions
+    hiddenTabScrollPositions: {},
+    attendancePanelScrollPositions: {}
 };
 
 // --- State Management Functions ---
