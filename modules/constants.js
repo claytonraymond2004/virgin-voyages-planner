@@ -17,3 +17,5 @@ export const END_HOUR = 29;
 // Shifts
 export const SHIFT_START_ADD = 0;
 export const SHIFT_END_ADD = 0;
+
+export const DEFAULT_OPTIONAL_EVENTS = ["Bingo Card Sales"];

@@ -7,7 +7,7 @@ import {
     STORAGE_KEY_THEME, STORAGE_KEY_DATA, STORAGE_KEY_ATTENDANCE,
     STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_PORT_NOTES,
     STORAGE_KEY_EVENT_NOTES, STORAGE_KEY_BLACKLIST, STORAGE_KEY_OPTIONAL_EVENTS,
-    STORAGE_KEY_CUSTOM, SHIFT_START_ADD
+    STORAGE_KEY_CUSTOM, SHIFT_START_ADD, DEFAULT_OPTIONAL_EVENTS
 } from './constants.js';
 import { renderApp, updateVisualStates, renderCurrentTimeBar } from './render.js';
 import {
@@ -615,7 +615,8 @@ function saveNewData(json, newPortNotes = {}) {
 
     localStorage.removeItem(STORAGE_KEY_EVENT_NOTES);
     localStorage.removeItem(STORAGE_KEY_BLACKLIST);
-    localStorage.removeItem(STORAGE_KEY_OPTIONAL_EVENTS);
+    // Default optional events
+    localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify(DEFAULT_OPTIONAL_EVENTS));
 
     // Clear state
     state.hiddenNames.clear();

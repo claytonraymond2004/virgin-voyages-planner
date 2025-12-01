@@ -875,7 +875,6 @@ function renderPreviewStep(body, footer) {
     document.getElementById('btn-apply').onclick = () => {
         applySchedule();
         closeWizard();
-        showToast("Schedule updated successfully!");
     };
 }
 
