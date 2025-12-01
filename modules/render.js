@@ -265,36 +265,45 @@ export function renderApp() {
         });
 
         // Calculate Widths
-        let normalWidthPercent = 100;
-        let optionalWidthPercent = 0;
-        let normalStart = 0;
-        let optionalStart = 100;
-
-        if (optionalEventsList.length > 0) {
-            if (normalEvents.length > 0) {
-                normalWidthPercent = 80;
-                optionalWidthPercent = 20;
-                optionalStart = 80;
-            } else {
-                normalWidthPercent = 0;
-                optionalWidthPercent = 20;
-                optionalStart = 80;
-            }
-        }
-
-        const normalLaneWidth = normalLanes.length > 0 ? normalWidthPercent / normalLanes.length : 0;
-        const optionalLaneWidth = optionalLanes.length > 0 ? optionalWidthPercent / optionalLanes.length : 0;
 
         // Render Normal
         normalEvents.forEach(ev => {
-            renderEventCard(ev, dayCol, normalLaneWidth, ev.laneIndex * normalLaneWidth);
+            // Always max at 80% to keep right side clear/consistent
+            const baseWidth = 80;
+            const width = normalLanes.length > 0 ? baseWidth / normalLanes.length : 0;
+            renderEventCard(ev, dayCol, width, ev.laneIndex * width);
+
+            // Store calculated right edge for optional event calculation
+            ev._calculatedRight = (ev.laneIndex + 1) * width;
         });
 
         // Render Optional
         optionalEventsList.forEach(ev => {
-            // Stack from Right to Left: Lane 0 is rightmost
+            // Find overlapping normal events
+            const overlappingNormals = normalEvents.filter(norm =>
+                ev.startMins < norm.endMins && norm.startMins < ev.endMins
+            );
+
+            let maxNormalRight = 0;
+            if (overlappingNormals.length > 0) {
+                // Determine the rightmost edge of any overlapping normal event
+                overlappingNormals.forEach(norm => {
+                    if (norm._calculatedRight > maxNormalRight) {
+                        maxNormalRight = norm._calculatedRight;
+                    }
+                });
+            }
+
+            // Available space for optional events
+            // Ensure we never take more than 80% width (keep left 20% clear if no conflicts)
+            const availableStart = Math.max(maxNormalRight, 20);
+            const availableWidth = 100 - availableStart;
+
+            const width = optionalLanes.length > 0 ? availableWidth / optionalLanes.length : 0;
+
+            // Stack from Right to Left
             const rtlIndex = optionalLanes.length - 1 - ev.laneIndex;
-            renderEventCard(ev, dayCol, optionalLaneWidth, optionalStart + (rtlIndex * optionalLaneWidth), true);
+            renderEventCard(ev, dayCol, width, availableStart + (rtlIndex * width), true);
         });
 
         dayCol.style.height = `${(totalMins / 60) * 60}px`;
