@@ -53,6 +53,10 @@ jobs:
           # Matches: from './filename.js' -> from './filename.js?v=SHA'
           sed -i "s|from '\./\([^']*\)\.js'|from './\1.js?v=$SHA'|g" modules/*.js
           sed -i 's|from "\./\([^"]*\)\.js"|from "./\1.js?v='$SHA'"|g' modules/*.js
+
+          # Update Service Worker Cache Name
+          # This forces the SW to install/activate again, clearing old cache
+          sed -i "s|const CACHE_NAME = '[^']*'|const CACHE_NAME = 'vv-planner-$SHA'|g" sw.js
           
           echo "Cache busting complete."
 

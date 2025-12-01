@@ -27,7 +27,8 @@ RUN sed -i "s|styles.css?v=[^\"]*|styles.css?v=$APP_VERSION|g" index.html && \
     sed -i "s|virgin_api.js\"|virgin_api.js?v=$APP_VERSION\"|g" index.html && \
     sed -i "s|modules/main.js\"|modules/main.js?v=$APP_VERSION\"|g" index.html && \
     sed -i "s|from '\./\([^']*\)\.js'|from './\1.js?v=$APP_VERSION'|g" modules/*.js && \
-    sed -i 's|from "\./\([^"]*\)\.js"|from "./\1.js?v='$APP_VERSION'"|g' modules/*.js
+    sed -i 's|from "\./\([^"]*\)\.js"|from "./\1.js?v='$APP_VERSION'"|g' modules/*.js && \
+    sed -i "s|const CACHE_NAME = '[^']*'|const CACHE_NAME = 'vv-planner-$APP_VERSION'|g" sw.js
 
 # If OFFLINE_MODE is true, run the build_offline.py script
 RUN if [ "$OFFLINE_MODE" = "true" ]; then python build_offline.py; fi
