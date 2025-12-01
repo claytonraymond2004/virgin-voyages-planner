@@ -645,8 +645,8 @@ export function updateAttendancePanel() {
         const isOptional = state.optionalEvents.has(eventGroup.name);
         const safeName = eventGroup.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         const toggleHtml = `
-            <button class="ml-2 px-2 py-1 text-xs font-medium rounded border transition-colors focus:outline-none ${isOptional ? 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200' : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-700'}" title="${isOptional ? 'Mark as Required' : 'Mark as Optional'}" onclick="window.toggleOptionalEvent('${safeName}')">
-                ${isOptional ? 'Optional' : 'Mark Optional'}
+            <button class="ml-2 px-2 py-1 text-xs font-medium rounded border transition-colors focus:outline-none flex justify-center items-center flex-shrink-0 w-[90px] whitespace-nowrap ${isOptional ? 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200' : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-700'}" title="${isOptional ? 'Mark as Required' : 'Mark as Optional'}" onclick="window.toggleOptionalEvent('${safeName}')">
+                ${isOptional ? 'Mark Required' : 'Mark Optional'}
             </button>
         `;
 
@@ -798,15 +798,103 @@ export function getMissingEvents() {
     const missing = [];
     const optional = [];
 
-    missingEvents.forEach(ev => {
-        if (state.optionalEvents.has(ev.name)) {
-            optional.push(ev);
-        } else {
-            missing.push(ev);
-        }
+    missingEvents.forEach(group => {
+        const isOptional = state.optionalEvents.has(group.name);
+        if (isOptional) optional.push(group);
+        else missing.push(group);
     });
 
     return { missing, optional };
+}
+
+// --- PWA Install Prompt ---
+
+let deferredPrompt;
+
+export function initInstallPrompt() {
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        return; // Already installed
+    }
+
+    // Check if dismissed previously
+    if (localStorage.getItem('vv-install-dismissed')) {
+        return;
+    }
+
+    const banner = document.getElementById('install-banner');
+    const btnInstall = document.getElementById('btn-install-app');
+    const btnDismiss = document.getElementById('btn-install-dismiss');
+
+    // Android / Desktop (Chrome)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+
+        // Show the banner
+        showInstallBanner();
+    });
+
+    // iOS Detection
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        // iOS doesn't support beforeinstallprompt, so we just show the banner if not standalone
+        // However, we should be careful not to show it if they are just browsing.
+        // Maybe wait a bit or check if they are visiting frequently?
+        // For now, let's show it after a short delay to not be intrusive immediately on load
+        setTimeout(() => {
+            showInstallBanner();
+        }, 3000);
+    }
+
+    if (btnInstall) {
+        btnInstall.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Android/Desktop
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                hideInstallBanner();
+            } else if (isIOS) {
+                // iOS - Show instructions
+                document.getElementById('ios-install-modal').style.display = 'flex';
+                hideInstallBanner();
+            }
+        });
+    }
+
+    if (btnDismiss) {
+        btnDismiss.addEventListener('click', () => {
+            hideInstallBanner();
+            localStorage.setItem('vv-install-dismissed', 'true');
+        });
+    }
+}
+
+function showInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if (banner) {
+        banner.classList.remove('hidden');
+        banner.style.display = 'flex'; // Ensure flex layout
+        // Small delay to allow display:flex to apply before transition
+        requestAnimationFrame(() => {
+            banner.classList.remove('translate-y-full');
+        });
+    }
+}
+
+function hideInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if (banner) {
+        banner.classList.add('translate-y-full');
+        setTimeout(() => {
+            banner.classList.add('hidden');
+            banner.style.display = 'none';
+        }, 300); // Match transition duration
+    }
 }
 
 export function jumpToEventFromPanel(uid) {

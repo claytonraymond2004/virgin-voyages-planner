@@ -610,6 +610,63 @@
         </div>
     </div>
 
+    <!-- Install App Banner -->
+    <div id="install-banner"
+        class="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[9000] hidden flex-col sm:flex-row items-center justify-between gap-4 transition-transform duration-300 translate-y-full">
+        <div class="flex items-center gap-3">
+            <img src="icon-192.png" alt="App Icon" class="w-10 h-10 rounded-lg shadow-sm">
+            <div>
+                <h3 class="font-bold text-gray-900 dark:text-white text-sm">Install Virgin Voyages Planner</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Add to your home screen for the best experience.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button id="btn-install-dismiss"
+                class="flex-1 sm:flex-none px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">Not
+                Now</button>
+            <button id="btn-install-app"
+                class="flex-1 sm:flex-none px-4 py-2 text-sm font-bold text-white bg-[#AF231C] hover:bg-red-800 rounded shadow-sm transition-colors">Install</button>
+        </div>
+    </div>
+
+    <!-- iOS Install Instructions Modal -->
+    <div id="ios-install-modal" class="modal-overlay" style="z-index: 9100;">
+        <div class="modal-content p-6 max-w-sm text-center relative">
+            <button onclick="document.getElementById('ios-install-modal').style.display='none'"
+                class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+            <img src="icon-192.png" alt="App Icon" class="w-16 h-16 rounded-xl shadow-md mx-auto mb-4">
+            <h3 class="text-lg font-bold mb-2 text-gray-900">Install App</h3>
+            <p class="text-sm text-gray-600 mb-6">To install this app on your iPhone or iPad:</p>
+            <div class="space-y-4 text-left bg-gray-50 p-4 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <span
+                        class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold text-gray-600">1</span>
+                    <span class="text-sm text-gray-700">Tap the <span class="font-bold">Share</span> button <svg
+                            class="w-4 h-4 inline-block text-blue-500" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg> in your browser bar.</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span
+                        class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold text-gray-600">2</span>
+                    <span class="text-sm text-gray-700">Scroll down and tap <span class="font-bold">Add to Home
+                            Screen</span> <svg class="w-4 h-4 inline-block text-gray-500" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hide Options Modal -->
     <div id="hide-choice-modal" class="modal-overlay">
         <div class="modal-content p-6">
@@ -620,7 +677,7 @@
                 <button onclick="confirmHideInstance()"
                     class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
                     <div>
-                        <div class="font-semibold text-gray-800">Hide just this time</div>
+                        <div class="font-semibold text-gray-800">Hide this occurrence</div>
                         <div class="text-xs text-gray-500">Only removes this specific slot from the calendar</div>
                     </div>
                     <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor"

@@ -20,7 +20,7 @@ import {
     switchHiddenTab, restoreAllHidden, editPortNote, savePortNoteUI,
     editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
-    toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI
+    toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -369,6 +369,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.visibilityState === 'visible') {
         startTimeBarUpdater();
     }
+
+    // Initialize Install Prompt
+    initInstallPrompt();
 });
 
 let timeBarInterval = null;
