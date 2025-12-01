@@ -1,0 +1,25 @@
+{
+  "name": "Virgin Voyages Planner",
+  "short_name": "VV Planner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#AF231C",
+  "theme_color": "#AF231C",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "app_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

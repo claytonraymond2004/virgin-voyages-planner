@@ -16,11 +16,16 @@ Beyond mere visualization, provision is made within the application for the gran
 
 ### **1\. Image Construction**
 
-To facilitate the consistent deployment of the application across varying computing environments, a Docker container definition is provided. Execution of the following command within the root directory containing Dockerfile, index.html, and server.py is required to build the container image:
+To facilitate the consistent deployment of the application across varying computing environments, a Docker container definition is provided. A build script (`build_docker.sh`) is available to automate the creation of multiple image variants:
+- `virgin-voyages-planner:latest`: Standard online version.
+- `virgin-voyages-planner:offline`: Offline version with bundled assets.
+- `virgin-voyages-planner:<git-sha>`: Versioned tags for specific commits.
 
-docker build \-t virgin-voyages-planner .
+Execute the following command to build all variants:
 
-This process instantiates a lightweight environment based on Python 3.11-slim, copying the necessary source artifacts into the container's working directory.
+./build_docker.sh
+
+This process instantiates a lightweight environment based on Python 3.11-slim.
 
 ### **2\. Container Execution**
 
@@ -86,6 +91,20 @@ To maintain referential integrity within the DOM and state management systems, e
 * virginVoyagesOptionalEvents: Represents the serialized Set of event names marked as optional.
 * virginVoyagesTheme: Stores the user's preferred theme ('light' or 'dark').
 * virginVoyagesShownUids: Represents the serialized Set of UIDs for instances explicitly unhidden from a hidden series.
+* virginVoyagesTimeBlocks: Represents the serialized Object containing user-defined start times for day segments (Morning, Lunch, Afternoon, Dinner, Evening).
+
+### **7. Security Architecture**
+
+* **API Token Management:** The Virgin Voyages API authentication token is no longer hardcoded within the client-side JavaScript. It is injected into the application at runtime via environment variables (`VV_AUTH_TOKEN`).
+  * **Local Development:** Loaded from a `.env` file via `server.py`.
+  * **Docker/Production:** Passed as an environment variable to the container or injected during the build process for GitHub Pages.
+* **Secret Management:** Sensitive credentials are stored in GitHub Secrets and are never committed to the repository.
+
+### **8. Deployment & Versioning**
+
+* **Cache Busting:** A custom deployment script (`deploy_gh_pages.sh`) appends a unique timestamp query parameter (e.g., `?v=1234567890`) to all CSS and JavaScript resource links in `index.html` during the build process. This ensures that end-users always receive the most recent code version, bypassing aggressive browser caching.
+* **CI/CD Optimization:** GitHub Actions workflows are configured to run only on the latest commit of a push event, preventing redundant builds and saving computation resources.
+* **Docker Versioning:** Docker images are automatically tagged with the Git commit SHA, allowing for precise version tracking and rollback capabilities.
 
 ## **V. User Interaction Protocols**
 
@@ -124,3 +143,7 @@ To maintain referential integrity within the DOM and state management systems, e
      * A "Sibling List" showing all other occurrences of the event, with visual indicators for the currently attended instance.
 11. **Dark Mode:**
     *   The application supports a toggleable dark theme (via the Moon/Sun icon). This preference is persisted in local storage (`virginVoyagesTheme`) and defaults to the system preference if not set.
+12. **Time Block Configuration:**
+    *   Users can customize the start times for the five primary day segments: Morning, Lunch, Afternoon, Dinner, and Evening.
+    *   These settings are accessed via the main menu and are persisted in `virginVoyagesTimeBlocks`.
+    *   Changes to these times immediately trigger a re-render of the grid to reflect the new temporal boundaries.

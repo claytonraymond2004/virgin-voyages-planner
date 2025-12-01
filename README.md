@@ -20,6 +20,8 @@ A specialized, browser-based interface designed for the visual organization, tem
 - **Hidden Events Manager**: Easily view and restore events you've previously hidden, organized by series or individual instances.
 - **Missing Events Panel**: Quickly identify event series you haven't booked yet ("Required") and manage optional activities.
 - **Blacklist Events**: Permanently hide specific events from the schedule (e.g., events you know you'll never attend) to declutter your view.
+- **Time Block Configuration**: Customize the start times for Morning, Lunch, Afternoon, Dinner, and Evening blocks to match your personal schedule.
+- **Mobile Optimized**: Enhanced mobile experience with improved menus, dividers, and touch-friendly event cards.
 - **Backup & Restore**: Export your entire itinerary state (including attendance, custom events, and notes) to a JSON file for safekeeping or transfer to another device.
 
 ## How to Use
@@ -59,10 +61,14 @@ A specialized, browser-based interface designed for the visual organization, tem
 11. **Blacklist Events**:
     - Open the hamburger menu and select **Blacklist Events**.
     - Paste a list of event names (one per line) to permanently hide them from the application.
-12. **Backup & Restore**:
+12. **Configure Time Blocks**:
+    - Open the hamburger menu and select **Configure Time Blocks**.
+    - Adjust the start times for Morning, Lunch, Afternoon, Dinner, and Evening.
+    - Click **Save** to apply the changes immediately.
+13. **Backup & Restore**:
     - **Export**: Open the hamburger menu and select **Export Backup** to download your current state.
     - **Import**: Use the "Upload Data" screen (refresh the page if needed) to upload your backup file.
-13. **Dark Mode**:
+14. **Dark Mode**:
     - Toggle between Light and Dark themes using the **Moon/Sun icon** in the toolbar.
 
 ## Key Concepts & Tips
@@ -195,3 +201,4 @@ You can also pull the pre-built images directly from GitHub without building the
   - `virginVoyagesBlacklist`: Permanently blacklisted event names.
   - `virginVoyagesOptionalEvents`: Events marked as optional.
   - `virginVoyagesTheme`: User's theme preference (light/dark).
+  - `virginVoyagesTimeBlocks`: User's custom time block definitions.

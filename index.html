@@ -16,6 +16,12 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=3">
     <link rel="icon" type="image/svg+xml" href="app_logo.svg">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#AF231C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VV Planner">
 </head>
 
 <body>
@@ -1104,6 +1110,18 @@
         <!-- Scripts -->
         <script src="virgin_api.js"></script>
         <script type="module" src="modules/main.js"></script>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then((registration) => {
+                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                        }, (err) => {
+                            console.log('ServiceWorker registration failed: ', err);
+                        });
+                });
+            }
+        </script>
 </body>
 
 </html>
