@@ -14,6 +14,11 @@ COPY styles.css .
 COPY app_logo.svg .
 COPY virgin_api.js .
 COPY virgin_placeholder.png .
+COPY app_icon.svg .
+COPY icon-192.png .
+COPY icon-512.png .
+COPY manifest.json .
+COPY sw.js .
 COPY modules/ ./modules/
 COPY example_data/ ./example_data/
 COPY build_offline.py .
