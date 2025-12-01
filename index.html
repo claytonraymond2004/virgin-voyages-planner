@@ -382,7 +382,7 @@
                         </svg> Missing Events
                     </div>
                     <span
-                        class="missing-count text-xs font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded-full">0</span>
+                        class="missing-count text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
 
                 <div onclick="openHiddenManager()" class="ctx-item md:hidden justify-between">
@@ -394,7 +394,7 @@
                         </svg> Hidden Events
                     </div>
                     <span
-                        class="hidden-count text-xs font-bold bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">0</span>
+                        class="hidden-count text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
 
                 <div onclick="toggleShowHiddenTemp(); toggleMenu()" class="ctx-item md:hidden btn-toggle-hidden">
@@ -481,11 +481,12 @@
                 </svg>
             </button>
         </div>
-        <div id="attendance-panel-tabs" class="flex border-b border-gray-200 bg-gray-50">
+        <div id="attendance-panel-tabs"
+            class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <button id="tab-required" onclick="switchAttendanceTab('required')"
-                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700">Required</button>
+                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Required</button>
             <button id="tab-optional" onclick="switchAttendanceTab('optional')"
-                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700">Optional</button>
+                class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Optional</button>
         </div>
         <div id="attendance-panel-content" class="attendance-panel-content">
             <!-- Populated by JS -->
@@ -749,15 +750,16 @@
                     </svg></button>
             </div>
 
-            <div id="hidden-manager-tabs" class="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
+            <div id="hidden-manager-tabs"
+                class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-x-auto">
                 <button id="tab-hidden-series" onclick="switchHiddenTab('series')"
-                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Hidden
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap">Hidden
                     Series</button>
                 <button id="tab-hidden-partial" onclick="switchHiddenTab('partial')"
-                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Partially
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap">Partially
                     Hidden</button>
                 <button id="tab-hidden-instances" onclick="switchHiddenTab('instances')"
-                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Instances</button>
+                    class="flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap">Instances</button>
             </div>
 
             <div class="overflow-y-auto p-4 flex-1" id="hidden-list-container">
@@ -855,11 +857,14 @@
     </div>
 
     <!-- Mobile Event Modal -->
-    <div id="mobile-event-modal" class="fixed inset-0 z-[7000] bg-white hidden flex-col md:hidden">
+    <div id="mobile-event-modal" class="fixed inset-0 z-[7000] bg-white dark:bg-gray-900 hidden flex-col md:hidden">
         <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-            <h3 id="mobile-modal-title" class="text-lg font-bold text-gray-800 truncate pr-4">Event Details</h3>
-            <button onclick="closeMobileEventModal()" class="p-2 -mr-2 text-gray-500 hover:text-gray-700">
+        <div
+            class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <h3 id="mobile-modal-title" class="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-4">Event
+                Details</h3>
+            <button onclick="closeMobileEventModal()"
+                class="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>
@@ -873,13 +878,15 @@
         </div>
 
         <!-- Action Bar -->
-        <div class="p-4 border-t border-gray-200 bg-white flex items-center gap-3">
+        <div
+            class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center gap-3">
             <button id="mobile-btn-toggle"
                 class="flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2">
                 <!-- Icon & Text set by JS -->
             </button>
 
-            <button id="mobile-btn-menu" class="p-3 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">
+            <button id="mobile-btn-menu"
+                class="p-3 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">

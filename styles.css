@@ -993,6 +993,13 @@ input:checked~.toggle-bg {
     background-color: white;
 }
 
+body.dark .tab-active {
+    background-color: #1f2937;
+    color: #ef4444 !important;
+    /* Lighter red for dark mode */
+    border-bottom-color: #ef4444 !important;
+}
+
 /* --- Optional Event in Grid --- */
 .event-card.is-optional {
     opacity: 0.75;

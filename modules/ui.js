@@ -301,7 +301,7 @@ export function renderHiddenSeriesList(container, type) {
     }
 
     const restoreBtn = document.createElement('button');
-    restoreBtn.className = "w-full mb-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded hover:bg-blue-100 transition text-sm";
+    restoreBtn.className = "w-full mb-4 py-2 bg-[#F3E8F5] text-[#5C068C] font-semibold rounded hover:bg-[#eaddf0] transition text-sm dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]";
     restoreBtn.textContent = `Restore All (${seriesList.length})`;
     restoreBtn.onclick = () => restoreAllHidden(type);
     container.appendChild(restoreBtn);
@@ -378,7 +378,7 @@ export function renderHiddenSeriesList(container, type) {
         }
 
         row.innerHTML = `<span class="font-medium text-gray-800 text-sm truncate pr-4 cursor-pointer flex-1" onclick="if(window.innerWidth <= 768) openMobileEventModalFromHidden('${name}')">${name}${countText}</span>
-<button class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-semibold restore-series-btn">Restore</button>`;
+<button class="text-xs bg-[#F3E8F5] text-[#5C068C] px-3 py-1 rounded hover:bg-[#eaddf0] font-semibold restore-series-btn dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]">Restore</button>`;
 
         row.querySelector('.restore-series-btn').onclick = (e) => { e.stopPropagation(); unhideSeries(name, true); };
         container.appendChild(row);
@@ -392,7 +392,7 @@ export function renderHiddenInstances(container) {
     }
 
     const restoreBtn = document.createElement('button');
-    restoreBtn.className = "w-full mb-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded hover:bg-blue-100 transition text-sm";
+    restoreBtn.className = "w-full mb-4 py-2 bg-[#F3E8F5] text-[#5C068C] font-semibold rounded hover:bg-[#eaddf0] transition text-sm dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]";
     restoreBtn.textContent = `Restore All (${state.hiddenUids.size})`;
     restoreBtn.onclick = () => restoreAllHidden('instances');
     container.appendChild(restoreBtn);
@@ -433,7 +433,7 @@ export function renderHiddenInstances(container) {
                 <span class="font-medium text-gray-800 text-sm truncate">${ev.name}</span>
                 <span class="text-xs text-gray-500">${dateStr} @ ${timeStr}</span>
             </div>
-            <button class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 font-semibold flex-shrink-0 restore-instance-btn">Restore</button>`;
+            <button class="text-xs bg-[#F3E8F5] text-[#5C068C] px-3 py-1 rounded hover:bg-[#eaddf0] font-semibold flex-shrink-0 restore-instance-btn dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]">Restore</button>`;
 
         row.querySelector('.restore-instance-btn').onclick = (e) => { e.stopPropagation(); unhideInstance(ev.uid, true); };
         section.appendChild(row);

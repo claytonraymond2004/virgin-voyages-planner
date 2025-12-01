@@ -821,7 +821,7 @@ export function showFullTooltip(e, ev, el) {
 
             let currentChip = '';
             if (isCurrent) {
-                currentChip = `<span class="text-[10px] bg-blue-900/50 text-blue-200 px-1.5 py-0.5 rounded border border-blue-700/50">Current</span>`;
+                currentChip = `<span class="text-[10px] bg-[#5C068C]/50 text-[#F3E8F5] px-1.5 py-0.5 rounded-full border border-[#5C068C]/50 dark:bg-[#5C068C]/50 dark:text-[#F3E8F5] dark:border-[#5C068C]/50">Viewing</span>`;
             }
 
             html += `<div class="${itemClass}">
@@ -931,7 +931,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
     const myNote = state.eventNotes[ev.uid];
     if (myNote) {
-        html += `<div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
+        html += `<div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm dark:bg-yellow-900/30 dark:border-yellow-700/50 dark:text-yellow-200">
             <strong>Note:</strong> ${myNote}
         </div>`;
     }
@@ -1001,7 +1001,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
                 <span class="flex items-center whitespace-nowrap">${iconStatus} ${sDateStr} @ ${fmt(sH, sM)}</span>`;
 
             if (isAttending) {
-                content += `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wide">
+                content += `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 dark:border dark:border-green-700/50 uppercase tracking-wide">
                     <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Attending
                 </span>`;
@@ -1020,7 +1020,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
             if (!isHiddenPreview && !isEffectiveHidden) {
                 if (isCurrent) {
-                    icon = `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Viewing</span>`;
+                    icon = `<span class="text-[10px] bg-transparent text-[#7C08BD] px-1.5 py-0.5 rounded-full border border-[#7C08BD] dark:text-[#d8b4fe] dark:border-[#d8b4fe]">Viewing</span>`;
                 } else {
                     const safeUid = sib.uid.replace(/'/g, "\\'");
                     clickAction = `onclick="closeMobileEventModal(); jumpToEvent('${safeUid}')"`;
@@ -1045,7 +1045,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
     const isTempHidden = ev.isHiddenTemp;
 
     if (isHiddenPreview || isTempHidden) {
-        btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed flex justify-center items-center gap-2";
+        btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-gray-400 bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500 cursor-not-allowed flex justify-center items-center gap-2";
         btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg> Hidden Event`;
         btnToggle.onclick = null;
 
@@ -1063,7 +1063,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
 
         const isAttending = state.attendingIds.has(ev.uid);
         if (isAttending) {
-            btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2 bg-red-100 text-red-700 border border-red-200 hover:bg-red-200";
+            btnToggle.className = "flex-1 py-3 px-4 rounded font-bold transition-colors shadow-sm flex justify-center items-center gap-2 bg-[#F3E8F5] text-[#5C068C] border border-[#5C068C]/30 hover:bg-[#eaddf0] dark:bg-transparent dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700";
             btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Remove from Agenda`;
             btnToggle.onclick = () => {
                 document.getElementById('mobile-event-modal').style.display = 'none';
