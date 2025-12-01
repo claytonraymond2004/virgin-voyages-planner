@@ -3,6 +3,8 @@
   "short_name": "VV Planner",
   "start_url": "./index.html",
   "display": "standalone",
+  "background_color": "#AF231C",
+  "theme_color": "#AF231C",
   "icons": [
     {
       "src": "icon-192.png",
