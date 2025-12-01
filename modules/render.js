@@ -841,7 +841,11 @@ export function renderCurrentTimeBar(shouldCenter = false) {
 
     if (totalMinutes < validStartMins || totalMinutes > validEndMins) return;
 
-    const dateStr = targetDate.toISOString().split('T')[0];
+    // Use local time for date string to avoid UTC shifts
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
 
     // Find the day column
     const dayCol = document.querySelector(`.day-column[data-date="${dateStr}"]`);
