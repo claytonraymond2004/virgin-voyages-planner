@@ -596,13 +596,24 @@ export function toggleAttendancePanel() {
     const isOpen = panel.classList.contains('open');
 
     if (isOpen) {
+        // Save current scroll position before closing
+        const content = document.getElementById('attendance-panel-content');
+        if (content) {
+            state.attendancePanelScrollPositions[state.activePanelTab] = content.scrollTop;
+        }
         panel.classList.remove('open');
     } else {
-        state.attendancePanelScrollPositions = {};
+        // Initialize scroll positions object if it doesn't exist
+        if (!state.attendancePanelScrollPositions) {
+            state.attendancePanelScrollPositions = {};
+        }
         updateAttendancePanel();
         panel.classList.add('open');
+        // Restore the saved scroll position for the active tab
         const content = document.getElementById('attendance-panel-content');
-        if (content) content.scrollTop = 0;
+        if (content) {
+            content.scrollTop = state.attendancePanelScrollPositions[state.activePanelTab] || 0;
+        }
     }
 }
 
