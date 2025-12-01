@@ -509,6 +509,8 @@ body:not(.adding-event-mode) .event-card:hover {
     filter: grayscale(30%);
 }
 
+
+
 .event-card.is-sibling-highlight {
     opacity: 1 !important;
     filter: none !important;
@@ -1025,6 +1027,15 @@ body.dark .tab-active {
     opacity: 1 !important;
     filter: none !important;
     z-index: 200 !important;
+}
+
+/* Past Event Dimming (Overrides Optional and Hover) */
+.event-card.is-past,
+.event-card.is-past:hover,
+.event-card.is-optional.is-past,
+.event-card.is-optional.is-past:hover {
+    opacity: 0.5 !important;
+    filter: grayscale(70%) !important;
 }
 
 /* --- Search States (Moved to end for precedence) --- */

@@ -574,6 +574,21 @@ export function updateVisualStates() {
     const query = document.getElementById('search-input').value.toLowerCase();
     const clearBtn = document.getElementById('clear-search');
 
+    // Current Time Logic for Dimming
+    const now = new Date();
+    let currentHours = now.getHours();
+    let currentMinutes = now.getMinutes();
+    let totalMinutes = currentHours * 60 + currentMinutes;
+
+    // Adjust for "next day" logic (same as renderCurrentTimeBar)
+    if (currentHours < START_HOUR) {
+        totalMinutes += 24 * 60;
+    }
+
+    const validStartMins = (START_HOUR + 1) * 60;
+    const validEndMins = (END_HOUR - 1) * 60;
+    const isTimeBarVisible = totalMinutes >= validStartMins && totalMinutes <= validEndMins;
+
     if (query.length > 0) clearBtn.classList.remove('hidden');
     else clearBtn.classList.add('hidden');
 
@@ -682,7 +697,7 @@ export function updateVisualStates() {
         const isAttending = state.attendingIds.has(uid);
         const eventData = state.eventLookup.get(uid);
 
-        card.classList.remove('is-attending', 'is-dimmed', 'is-search-dimmed', 'is-search-match', 'is-sibling-attended');
+        card.classList.remove('is-attending', 'is-dimmed', 'is-search-dimmed', 'is-search-match', 'is-sibling-attended', 'is-past');
 
         // Base state
         if (isAttending) {
@@ -740,6 +755,16 @@ export function updateVisualStates() {
                 if (hasConflict) {
                     card.classList.add('is-dimmed');
                 }
+            }
+        }
+
+        // Past Event Dimming
+        if (isTimeBarVisible && eventData) {
+            const eventEnd = new Date(eventData.date + 'T00:00:00');
+            eventEnd.setMinutes(eventData.endMins);
+
+            if (eventEnd < now) {
+                card.classList.add('is-past');
             }
         }
 
