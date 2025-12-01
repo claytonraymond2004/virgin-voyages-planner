@@ -6,6 +6,7 @@ import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
     showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
 } from './interactions.js';
+import { initSmartScheduler } from './smartScheduler.js';
 
 // --- Modals ---
 
@@ -566,6 +567,11 @@ export function toggleMenu() {
     menu.classList.toggle('hidden');
 }
 
+export function openSmartScheduler() {
+    initSmartScheduler();
+    document.getElementById('dropdown-menu').style.display = 'none';
+}
+
 export function closeAllModals() {
     document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
     document.getElementById('context-menu').style.display = 'none';
@@ -890,7 +896,6 @@ export function initInstallPrompt() {
                 // Android/Desktop
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
                 deferredPrompt = null;
                 hideInstallBanner();
             } else if (isIOS) {

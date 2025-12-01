@@ -20,7 +20,8 @@ import {
     switchHiddenTab, restoreAllHidden, editPortNote, savePortNoteUI,
     editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
-    toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt
+    toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
+    openSmartScheduler
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -93,6 +94,7 @@ window.toggleDarkMode = toggleDarkMode;
 window.toggleShowHiddenTemp = toggleShowHiddenTemp;
 window.openTimeBlocksModal = openTimeBlocksModal;
 window.saveTimeBlocksUI = saveTimeBlocksUI;
+window.openSmartScheduler = openSmartScheduler;
 
 // --- Initialization ---
 

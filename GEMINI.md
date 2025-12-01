@@ -147,3 +147,15 @@ To maintain referential integrity within the DOM and state management systems, e
     *   Users can customize the start times for the five primary day segments: Morning, Lunch, Afternoon, Dinner, and Evening.
     *   These settings are accessed via the main menu and are persisted in `virginVoyagesTimeBlocks`.
     *   Changes to these times immediately trigger a re-render of the grid to reflect the new temporal boundaries.
+13. **Smart Scheduler:**
+    *   **Purpose:** An automated wizard that generates a proposed schedule based on the user's "Required" events (those not yet attended).
+    *   **Workflow:**
+        1.  **Intro:** Explains the process.
+        2.  **Checklist:** Ensures the user has set up their constraints (Blacklist, Custom Events, Optional Events).
+        3.  **Processing:** Runs a greedy algorithm to maximize attendance of remaining required events.
+            *   **Bingo Logic:** Treats "Bingo Card Sales" and the subsequent "Bingo" game as a single atomic block.
+        4.  **Conflict Resolution:** If the algorithm cannot find a conflict-free slot for a required event, it presents the user with a choice:
+            *   **Skip:** Do not schedule this event.
+            *   **Select Instance:** Force-schedule a specific instance (potentially creating a conflict).
+        5.  **Preview:** Shows the proposed additions before applying them to the main state.
+    *   **Algorithm:** Prioritizes events with fewer remaining opportunities (most constrained first). Respects existing "Attending" events as locked.
