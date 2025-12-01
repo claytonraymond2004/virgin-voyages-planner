@@ -506,7 +506,7 @@ export function exportPrintableGrid() {
     </style>
     </head><body>
     <div style="text-align: right; margin-bottom: 10px;" class="no-print">
-        <button onclick="window.print()" style="padding: 8px 16px; font-size: 14px; cursor: pointer;">Print Itinerary</button>
+        <button onclick="window.print()" style="background: #AF231C; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print Itinerary</button>
     </div>
     <h1>My Voyage Itinerary</h1>
     `;
