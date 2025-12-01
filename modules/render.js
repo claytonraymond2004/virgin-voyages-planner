@@ -603,7 +603,7 @@ export function updateVisualStates() {
 
     // Search Logic - Populate Dropdown
     const searchResults = document.getElementById('search-results');
-    if (query.length > 1) {
+    if (query.length > 0) {
         const matches = [];
 
         // Search official
