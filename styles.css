@@ -1200,7 +1200,13 @@ body.dark .tab-active {
     filter: grayscale(5%) !important;
 }
 
-.event-card.is-optional:hover {
+#schedule-grid.dim-mode .event-card.is-optional.is-attending:not(.is-sibling-highlight) {
+    opacity: 0.5 !important;
+}
+
+.event-card.is-optional:hover,
+.event-card.is-optional.is-attending:hover,
+.event-card.is-optional.is-attending.is-sibling-highlight {
     opacity: 1 !important;
     filter: none !important;
     z-index: 200 !important;

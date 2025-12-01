@@ -709,16 +709,15 @@ export function showFullTooltip(e, ev, el) {
     } else {
         tooltip.style.zIndex = '5000';
 
-        const hoverSiblings = state.eventNameMap.get(ev.name);
-        if (hoverSiblings && hoverSiblings.length > 1) {
-            document.getElementById('schedule-grid').classList.add('dim-mode');
-            hoverSiblings.forEach(uid => {
-                const sib = document.getElementById(`card-${uid}`);
-                if (sib) sib.classList.add('is-sibling-highlight');
-            });
-        } else {
-            document.getElementById('schedule-grid').classList.add('dim-mode');
-            el.classList.add('is-sibling-highlight');
+        document.getElementById('schedule-grid').classList.add('dim-mode');
+        el.classList.add('is-sibling-highlight');
+
+        // Also highlight the grid card if we are hovering something else (like agenda item)
+        if (ev.uid) {
+            const gridCard = document.getElementById(`card-${ev.uid}`);
+            if (gridCard && gridCard !== el) {
+                gridCard.classList.add('is-sibling-highlight');
+            }
         }
     }
 

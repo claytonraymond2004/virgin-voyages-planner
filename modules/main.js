@@ -21,7 +21,7 @@ import {
     editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
-    openSmartScheduler, toggleAgendaPanel
+    openSmartScheduler, toggleAgendaPanel, updateAgendaPanel
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -373,6 +373,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startTimeBarUpdater();
     }
 
+    // Listen for agenda updates
+    document.addEventListener('agenda-update-needed', () => {
+        updateAgendaPanel();
+    });
+
     // Initialize Install Prompt
     initInstallPrompt();
 });
@@ -385,6 +390,12 @@ function startTimeBarUpdater() {
     timeBarInterval = setInterval(() => {
         // Update position without centering to avoid annoying jumps
         renderCurrentTimeBar(false);
+
+        // Also update agenda panel to refresh "current" highlight
+        const agendaPanel = document.getElementById('agenda-panel');
+        if (agendaPanel && agendaPanel.classList.contains('open')) {
+            updateAgendaPanel();
+        }
     }, 60000);
 }
 

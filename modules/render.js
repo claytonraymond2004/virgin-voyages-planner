@@ -315,6 +315,18 @@ export function renderApp() {
     updateVisualStates();
     updateAttendancePanel();
     updateAgendaCount();
+
+    // Update agenda panel if open
+    const agendaPanel = document.getElementById('agenda-panel');
+    if (agendaPanel && agendaPanel.classList.contains('open')) {
+        // We need to import updateAgendaPanel dynamically or move it to a shared module to avoid circular deps.
+        // However, ui.js imports render.js, so render.js cannot import ui.js directly if ui.js imports render.js.
+        // This is a circular dependency.
+        // We can check if it's attached to window or use a custom event.
+        // Or we can just dispatch a custom event that ui.js listens to.
+        // Let's use a custom event for cleaner architecture.
+        document.dispatchEvent(new CustomEvent('agenda-update-needed'));
+    }
     renderCurrentTimeBar(false);
 }
 
