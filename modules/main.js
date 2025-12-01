@@ -214,6 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const existingBtn = document.querySelector('.add-event-btn');
             if (existingBtn) existingBtn.remove();
+
+            const mobileModal = document.getElementById('mobile-event-modal');
+            if (mobileModal && getComputedStyle(mobileModal).display !== 'none') {
+                closeMobileEventModal();
+            }
         }
     });
 
