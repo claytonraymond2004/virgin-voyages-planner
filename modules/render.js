@@ -154,6 +154,7 @@ export function renderApp() {
     state.availableDates.forEach(date => {
         const dayCol = document.createElement('div');
         dayCol.className = 'day-column';
+        dayCol.dataset.date = date;
         initDrag(dayCol, date);
 
         dayCol.addEventListener('contextmenu', (e) => {
@@ -302,7 +303,9 @@ export function renderApp() {
     });
 
     updateVisualStates();
+    updateVisualStates();
     updateAttendancePanel();
+    renderCurrentTimeBar(false);
 }
 
 export function renderEventCard(ev, dayCol, widthPercent, leftPercent, isOptional = false) {
@@ -785,4 +788,52 @@ function renderTimeBlocks(container) {
 
         container.appendChild(div);
     });
+}
+
+export function renderCurrentTimeBar(shouldCenter = false) {
+    // Remove existing bar
+    const existing = document.querySelector('.current-time-bar');
+    if (existing) existing.remove();
+
+    const now = new Date();
+    let currentHours = now.getHours();
+    let currentMinutes = now.getMinutes();
+    let totalMinutes = currentHours * 60 + currentMinutes;
+
+    // Adjust for "next day" logic
+    // If time is < START_HOUR, it belongs to the previous "day" in our logic (late night)
+    let targetDate = new Date(now);
+
+    if (currentHours < START_HOUR) {
+        targetDate.setDate(targetDate.getDate() - 1);
+        totalMinutes += 24 * 60;
+    }
+
+    // Check if time is within bounds
+    // User requested to ignore times outside START_HOUR (+1) and END_HOUR (-1)
+    const validStartMins = (START_HOUR + 1) * 60;
+    const validEndMins = (END_HOUR - 1) * 60;
+
+    if (totalMinutes < validStartMins || totalMinutes > validEndMins) return;
+
+    const dateStr = targetDate.toISOString().split('T')[0];
+
+    // Find the day column
+    const dayCol = document.querySelector(`.day-column[data-date="${dateStr}"]`);
+    if (!dayCol) return;
+
+    // Calculate top position
+    const startOffset = totalMinutes - (START_HOUR * 60);
+    const top = (startOffset / 60) * 60;
+
+    const bar = document.createElement('div');
+    bar.className = 'current-time-bar';
+    bar.style.top = `${top}px`;
+    bar.title = `Current Time: ${now.toLocaleTimeString()}`;
+
+    dayCol.appendChild(bar);
+
+    if (shouldCenter) {
+        bar.scrollIntoView({ block: 'center', inline: 'center' });
+    }
 }

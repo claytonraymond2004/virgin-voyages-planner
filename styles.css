@@ -1216,3 +1216,26 @@ body.dark .time-block::after {
         font-size: 16px;
     }
 }
+
+/* --- Current Time Bar --- */
+.current-time-bar {
+    position: absolute;
+    height: 2px;
+    background-color: var(--virgin-red);
+    width: 100%;
+    z-index: 500;
+    pointer-events: none;
+    left: 0;
+    box-shadow: 0 0 4px rgba(175, 35, 28, 0.6);
+}
+
+.current-time-bar::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--virgin-red);
+    border-radius: 50%;
+}

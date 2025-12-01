@@ -9,7 +9,7 @@ import {
     STORAGE_KEY_EVENT_NOTES, STORAGE_KEY_BLACKLIST, STORAGE_KEY_OPTIONAL_EVENTS,
     STORAGE_KEY_CUSTOM, SHIFT_START_ADD
 } from './constants.js';
-import { renderApp, updateVisualStates } from './render.js';
+import { renderApp, updateVisualStates, renderCurrentTimeBar } from './render.js';
 import {
     initDrag, toggleAttendance, performToggleAttendance, jumpToEvent,
     showContextMenu, hideTooltip, lastTouchTime, closeMobileEventModal,
@@ -354,7 +354,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Toolbar Tooltips
     initTooltips();
+
+    // Visibility Change for Time Bar
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            renderCurrentTimeBar(true);
+            startTimeBarUpdater();
+        } else {
+            stopTimeBarUpdater();
+        }
+    });
+
+    // Start updater if initially visible
+    if (document.visibilityState === 'visible') {
+        startTimeBarUpdater();
+    }
 });
+
+let timeBarInterval = null;
+
+function startTimeBarUpdater() {
+    if (timeBarInterval) clearInterval(timeBarInterval);
+    // Update every minute (60000 ms)
+    timeBarInterval = setInterval(() => {
+        // Update position without centering to avoid annoying jumps
+        renderCurrentTimeBar(false);
+    }, 60000);
+}
+
+function stopTimeBarUpdater() {
+    if (timeBarInterval) {
+        clearInterval(timeBarInterval);
+        timeBarInterval = null;
+    }
+}
 
 function loadApp() {
     loadState();
@@ -364,6 +397,10 @@ function loadApp() {
         document.getElementById('main-header').classList.remove('hidden');
         document.getElementById('main-header').classList.add('flex');
         renderApp();
+        renderCurrentTimeBar(true);
+        if (document.visibilityState === 'visible') {
+            startTimeBarUpdater();
+        }
     }
 }
 
