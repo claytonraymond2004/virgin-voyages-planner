@@ -21,7 +21,7 @@ import {
     editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
-    openSmartScheduler
+    openSmartScheduler, toggleAgendaPanel
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -84,6 +84,7 @@ window.openMobileEventModalFromHidden = openMobileEventModalFromHidden;
 window.closeEventNoteModal = closeEventNoteModal;
 window.switchAttendanceTab = switchAttendanceTab;
 window.toggleAttendancePanel = toggleAttendancePanel;
+window.toggleAgendaPanel = toggleAgendaPanel;
 window.exportData = exportData;
 window.confirmResetData = confirmResetData;
 window.loadSampleData = loadSampleData;

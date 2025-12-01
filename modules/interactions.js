@@ -707,7 +707,7 @@ export function showFullTooltip(e, ev, el) {
     if (isModalOpen) {
         tooltip.style.zIndex = '8000';
     } else {
-        tooltip.style.zIndex = '2000';
+        tooltip.style.zIndex = '5000';
 
         const hoverSiblings = state.eventNameMap.get(ev.name);
         if (hoverSiblings && hoverSiblings.length > 1) {

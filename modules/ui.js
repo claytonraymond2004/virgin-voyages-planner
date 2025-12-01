@@ -734,6 +734,294 @@ export function updateAttendancePanel() {
     content.innerHTML = html;
 }
 
+// --- Agenda Panel ---
+
+export function toggleAgendaPanel() {
+    const ctxOverlay = document.getElementById('context-menu-overlay');
+    if (ctxOverlay) ctxOverlay.classList.remove('active');
+
+    const menuOverlay = document.getElementById('menu-overlay');
+    if (menuOverlay) menuOverlay.classList.remove('active');
+    document.getElementById('dropdown-menu').classList.add('hidden');
+
+    // Close mobile event modal
+    closeMobileEventModal();
+
+    // Close Attendance Panel if open
+    const attendancePanel = document.getElementById('attendance-panel');
+    if (attendancePanel && attendancePanel.classList.contains('open')) {
+        toggleAttendancePanel();
+    }
+
+    const panel = document.getElementById('agenda-panel');
+    const isOpen = panel.classList.contains('open');
+
+    if (isOpen) {
+        panel.classList.remove('open');
+    } else {
+        updateAgendaPanel();
+        panel.classList.add('open');
+    }
+}
+
+export function updateAgendaPanel() {
+    const content = document.getElementById('agenda-panel-content');
+    content.innerHTML = ''; // Clear
+
+    // Current Time Calculation
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const currentDateStr = `${year}-${month}-${day}`;
+    const currentMins = (now.getHours() * 60) + now.getMinutes();
+
+    // Get all attending events
+    const events = [];
+    state.attendingIds.forEach(uid => {
+        const ev = state.eventLookup.get(uid);
+        if (ev) events.push(ev);
+    });
+
+    if (events.length === 0) {
+        content.innerHTML = `
+            <div class="text-center text-gray-500 py-8">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <p class="font-semibold">Your agenda is empty.</p>
+                <p class="text-sm mt-2">Mark events as attending to see them here.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Sort by Date then Time
+    events.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return (a.startMins ?? a.startMinutes) - (b.startMins ?? b.startMinutes);
+    });
+
+    // Group by Date
+    const byDay = {};
+    events.forEach(ev => {
+        if (!byDay[ev.date]) byDay[ev.date] = [];
+        byDay[ev.date].push(ev);
+    });
+
+    Object.keys(byDay).sort().forEach(date => {
+        const dayEvents = byDay[date];
+
+        // Date Header
+        const dateObj = new Date(date + 'T00:00:00');
+        const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+        const dayContainer = document.createElement('div');
+        dayContainer.className = 'mb-6';
+
+        const header = document.createElement('h4');
+        header.className = 'font-bold text-gray-800 border-b border-gray-200 px-6 py-3 sticky top-0 bg-white z-10 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700';
+        header.textContent = dateStr;
+        dayContainer.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = 'space-y-3 px-6 pt-3';
+
+        dayEvents.forEach(ev => {
+            const start = ev.startMins ?? ev.startMinutes;
+            const end = ev.endMins ?? ev.endMinutes;
+            const timeStr = formatTimeRange(start, end);
+            const location = ev.location ? ev.location : '';
+            const isOptional = state.optionalEvents.has(ev.name);
+
+            // Check Conflicts
+            const conflicts = [];
+            state.attendingIds.forEach(otherUid => {
+                if (otherUid === ev.uid) return;
+                const other = state.eventLookup.get(otherUid);
+                if (other && other.date === ev.date) {
+                    const otherStart = other.startMins ?? other.startMinutes;
+                    const otherEnd = other.endMins ?? other.endMinutes;
+                    if (start < otherEnd && end > otherStart) {
+                        conflicts.push(other.name);
+                    }
+                }
+            });
+
+            const card = document.createElement('div');
+            const hasConflict = conflicts.length > 0;
+            const isCurrent = ev.date === currentDateStr && currentMins >= start && currentMins < end;
+            card.className = `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${hasConflict ? 'agenda-conflict' : ''} ${isCurrent ? 'agenda-current' : ''}`;
+            card.style.scrollMarginTop = '60px'; // Ensure sticky header doesn't cover card on scroll
+
+            // Click handler
+            // Click handler
+            card.onclick = () => {
+                if (window.innerWidth <= 768) {
+                    openMobileEventModal(ev);
+                } else {
+                    jumpToEventFromPanel(ev.uid);
+                }
+            };
+
+            // Hover handlers
+            // Hover handlers
+            card.onmouseenter = (e) => {
+                if (window.innerWidth > 768) {
+                    showFullTooltip(e, ev, card);
+                    moveTooltipFromPanel(e);
+                }
+            };
+            card.onmousemove = (e) => {
+                if (window.innerWidth > 768) moveTooltipFromPanel(e);
+            };
+            card.onmouseleave = hideTooltip;
+
+            let cardHtml = `
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100 text-sm pr-2">${escapeHtml(ev.name)}</div>
+                    ${isOptional ? `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-gray-200 dark:border-gray-600">Optional</span>` : ''}
+                </div>
+                
+                <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ${timeStr}
+                </div>
+                
+                ${location ? `
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    ${escapeHtml(location)}
+                </div>` : ''}
+            `;
+
+            card.id = `agenda-card-${ev.uid}`;
+            card.innerHTML = cardHtml;
+            list.appendChild(card);
+        });
+
+        dayContainer.appendChild(list);
+        content.appendChild(dayContainer);
+    });
+
+    // Auto-scroll to closest event
+    // (Time calculated at top of function)
+
+    // Find closest event
+    let targetUid = null;
+
+    // 1. Try to find event today that hasn't ended yet or is about to start
+    const todayEvents = events.filter(e => e.date === currentDateStr);
+    if (todayEvents.length > 0) {
+        // Find first event that ends after now (current or future)
+        const upcoming = todayEvents.find(e => {
+            const end = e.endMins ?? e.endMinutes;
+            return end > currentMins;
+        });
+
+        if (upcoming) {
+            targetUid = upcoming.uid;
+        } else {
+            // All events today have passed, maybe scroll to the last one? 
+            // Or just let it be. User request says "closest event".
+            // If all passed, maybe next day?
+        }
+    }
+
+    // 2. If no target yet, find first event of future dates
+    if (!targetUid) {
+        const futureEvents = events.filter(e => e.date > currentDateStr);
+        if (futureEvents.length > 0) {
+            targetUid = futureEvents[0].uid;
+        }
+    }
+
+    // 3. If still no target (e.g. all past), maybe last event of today?
+    if (!targetUid && todayEvents.length > 0) {
+        targetUid = todayEvents[todayEvents.length - 1].uid;
+    }
+
+    if (targetUid) {
+        setTimeout(() => {
+            const el = document.getElementById(`agenda-card-${targetUid}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
+}
+
+function moveTooltipFromPanel(e) {
+    const tooltip = document.getElementById('tooltip');
+    if (tooltip && tooltip.style.display === 'block') {
+        const panel = document.getElementById('agenda-panel');
+        const panelRect = panel.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        // Position to the left of the panel
+        let left = panelRect.left - tooltipRect.width - 10;
+        let top = e.clientY - (tooltipRect.height / 2);
+
+        // Ensure it doesn't go off screen
+        if (left < 10) left = 10;
+        if (top < 10) top = 10;
+        if (top + tooltipRect.height > window.innerHeight - 10) {
+            top = window.innerHeight - tooltipRect.height - 10;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    }
+}
+
+export function updateAgendaCount() {
+    const badges = document.querySelectorAll('.agenda-count');
+    if (badges.length === 0) return;
+
+    const now = new Date();
+    const currentMins = (now.getHours() * 60) + now.getMinutes();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const currentDateStr = `${year}-${month}-${day}`;
+
+    // Determine if "during cruise"
+    let isDuringCruise = false;
+    if (state.availableDates.length > 0) {
+        const firstDate = state.availableDates[0];
+        const lastDate = state.availableDates[state.availableDates.length - 1];
+
+        // Simple string comparison works for YYYY-MM-DD
+        if (currentDateStr >= firstDate && currentDateStr <= lastDate) {
+            isDuringCruise = true;
+        }
+    }
+
+    let count = 0;
+    state.attendingIds.forEach(uid => {
+        const ev = state.eventLookup.get(uid);
+        if (!ev) return;
+
+        if (isDuringCruise) {
+            // Count only if event ends in the future
+            // Check date
+            if (ev.date > currentDateStr) {
+                count++;
+            } else if (ev.date === currentDateStr) {
+                const end = ev.endMins ?? ev.endMinutes;
+                if (end > currentMins) {
+                    count++;
+                }
+            }
+        } else {
+            // Count all
+            count++;
+        }
+    });
+
+    badges.forEach(el => el.textContent = count);
+}
+
 export function getMissingEvents() {
     const eventsByName = new Map();
 
@@ -944,14 +1232,17 @@ export function jumpToEventFromPanel(uid) {
         return;
     }
 
-    const panel = document.getElementById('attendance-panel');
-    const isPanelOpen = panel && panel.classList.contains('open');
+    const attendancePanel = document.getElementById('attendance-panel');
+    const isAttendanceOpen = attendancePanel && attendancePanel.classList.contains('open');
 
-    if (isPanelOpen) {
+    const agendaPanel = document.getElementById('agenda-panel');
+    const isAgendaOpen = agendaPanel && agendaPanel.classList.contains('open');
+
+    const handlePanelClose = (toggleFunc) => {
         if (window.innerWidth <= 768) {
-            toggleAttendancePanel();
+            toggleFunc();
             setTimeout(() => jumpToEvent(uid), 100);
-            return;
+            return true;
         }
 
         const viewport = document.getElementById('schedule-viewport');
@@ -968,14 +1259,22 @@ export function jumpToEventFromPanel(uid) {
         const threshold = panelWidth * 1.0;
 
         if (distanceFromRightEdge < threshold) {
-            toggleAttendancePanel();
+            toggleFunc();
             setTimeout(() => jumpToEvent(uid), 100);
-        } else {
-            jumpToEvent(uid);
+            return true;
         }
-    } else {
-        jumpToEvent(uid);
+        return false;
+    };
+
+    if (isAttendanceOpen) {
+        if (handlePanelClose(toggleAttendancePanel)) return;
     }
+
+    if (isAgendaOpen) {
+        if (handlePanelClose(toggleAgendaPanel)) return;
+    }
+
+    jumpToEvent(uid);
 }
 
 // --- Blacklist ---

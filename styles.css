@@ -576,7 +576,7 @@ body.dark .search-result-item {
     width: 320px;
     pointer-events: auto;
     /* Allow hovering over tooltip */
-    z-index: 2000;
+    z-index: 5000;
     display: none;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     border: 1px solid #374151;
@@ -1031,6 +1031,65 @@ body.dark .missing-event-group {
     border-color: #374151;
 }
 
+/* --- Agenda Panel --- */
+.agenda-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 4500;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s ease-in-out;
+    background: white;
+    height: 100%;
+}
+
+.agenda-panel.open {
+    right: 0;
+}
+
+.agenda-panel-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+}
+
+.agenda-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.agenda-conflict {
+    background-color: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+}
+
+/* Dark Mode for Agenda Panel */
+body.dark .agenda-panel {
+    background: #1f2937;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+}
+
+body.dark .agenda-conflict {
+    background-color: #7f1d1d !important;
+    border-color: #991b1b !important;
+}
+
+body.dark .agenda-panel-header {
+    background: #111827;
+    border-color: #374151;
+}
+
+body.dark .agenda-panel-header h3 {
+    color: #f3f4f6;
+}
+
 body.dark .missing-event-header {
     background: #1f2937;
     border-color: #4b5563;
@@ -1328,7 +1387,8 @@ body.dark .time-block::after {
         width: var(--day-col-width);
     }
 
-    .attendance-panel {
+    .attendance-panel,
+    .agenda-panel {
         width: 100%;
         right: -100%;
     }
@@ -1367,4 +1427,14 @@ body.dark .time-block::after {
     height: 8px;
     background-color: var(--virgin-red);
     border-radius: 50%;
+}
+
+.agenda-current {
+    background-color: rgba(92, 6, 140, 0.1) !important;
+    border-color: rgba(92, 6, 140, 0.3) !important;
+}
+
+body.dark .agenda-current {
+    background-color: rgba(92, 6, 140, 0.4) !important;
+    border-color: rgba(92, 6, 140, 0.6) !important;
 }

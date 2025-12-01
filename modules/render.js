@@ -11,7 +11,7 @@ import {
     showFullTooltip, hideTooltip, moveTooltip, lastTouchTime,
     tooltipShowTime, activeTooltipUid, openMobileEventModal
 } from './interactions.js';
-import { editPortNote, updateAttendancePanel } from './ui.js';
+import { editPortNote, updateAttendancePanel, updateAgendaCount } from './ui.js';
 
 // --- Rendering ---
 
@@ -314,6 +314,7 @@ export function renderApp() {
     updateVisualStates();
     updateVisualStates();
     updateAttendancePanel();
+    updateAgendaCount();
     renderCurrentTimeBar(false);
 }
 
@@ -791,6 +792,7 @@ export function updateVisualStates() {
             }
         }
     });
+    updateAgendaCount();
 }
 
 function renderTimeBlocks(container) {
