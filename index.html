@@ -717,7 +717,7 @@
 
             <div class="space-y-3">
                 <button onclick="confirmHideInstance()"
-                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between group">
                     <div>
                         <div class="font-semibold text-gray-800">Hide this occurrence</div>
                         <div class="text-xs text-gray-500">Only removes this specific slot from the calendar</div>
@@ -729,7 +729,7 @@
                 </button>
 
                 <button onclick="confirmHideSeries()"
-                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between group">
                     <div>
                         <div class="font-semibold text-gray-800">Hide entire series</div>
                         <div class="text-xs text-gray-500">Removes ALL occurrences of "<span
@@ -758,7 +758,7 @@
 
             <div class="space-y-3">
                 <button onclick="confirmDeleteInstance()"
-                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between group">
                     <div>
                         <div class="font-semibold text-gray-800">Just this one</div>
                         <div class="text-xs text-gray-500">Delete only the selected date</div>
@@ -770,7 +770,7 @@
                 </button>
 
                 <button onclick="confirmDeleteSeries()"
-                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 flex items-center justify-between group">
+                    class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between group">
                     <div>
                         <div class="font-semibold text-gray-800">The entire series</div>
                         <div class="text-xs text-gray-500">Delete ALL occurrences</div>
@@ -1104,7 +1104,7 @@
     <div id="unhide-modal" class="modal-overlay" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900">Unhide Event</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Unhide Event</h3>
                 <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -1121,7 +1121,7 @@
                         Unhide Only This Instance
                     </button>
                     <button id="btn-unhide-series"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:text-sm">
                         Unhide Entire Series
                     </button>
                 </div>
@@ -1133,7 +1133,7 @@
     <div id="edit-choice-modal" class="modal-overlay" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900">Edit Event</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Edit Event</h3>
                 <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -1150,7 +1150,7 @@
                         Edit Only This Instance
                     </button>
                     <button onclick="confirmEditSeries()"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:text-sm">
                         Edit Entire Series
                     </button>
                 </div>
@@ -1184,7 +1184,7 @@
     <div id="generic-choice-modal" class="modal-overlay" style="display: none; z-index: 5000;">
         <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900" id="generic-choice-title">Title</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="generic-choice-title">Title</h3>
                 <button id="btn-generic-cancel-x" class="text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -1200,7 +1200,7 @@
                         Primary Action
                     </button>
                     <button id="btn-generic-secondary"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:text-sm">
                         Secondary Action
                     </button>
                 </div>

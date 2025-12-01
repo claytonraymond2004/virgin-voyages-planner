@@ -369,17 +369,63 @@ function runAlgorithm() {
 function findBingoSales(bingoGameEvent) {
     // Look for "Bingo Card Sales" on the same day, before the game
     // Heuristic: Sales usually start 1-2 hours before
-    const allEvents = Array.from(state.eventLookup.values());
-    const sales = allEvents.find(ev => {
-        if (ev.name !== "Bingo Card Sales") return false;
-        if (ev.date !== bingoGameEvent.date) return false;
 
-        // Use startMins if available, fallback to startMinutes
-        const salesEnd = ev.endMins ?? ev.endMinutes;
+    // We must search ALL events, even hidden ones, so we cannot rely on state.eventLookup.
+    const candidates = [];
+
+    // 1. Official Events
+    if (state.appData) {
+        state.appData.forEach(ev => {
+            if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
+                const timeData = parseTimeRange(ev.timePeriod);
+                if (timeData) {
+                    const s = timeData.start + SHIFT_START_ADD;
+                    const e = timeData.end + SHIFT_END_ADD;
+                    const uid = `${ev.date}_${ev.name}_${s}`;
+                    candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
+                }
+            }
+        });
+    }
+
+    // 2. Custom Events
+    if (state.customEvents) {
+        state.customEvents.forEach(ev => {
+            if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
+                let s, e;
+                if (ev.startMinutes !== undefined) {
+                    s = ev.startMinutes;
+                    e = ev.endMinutes;
+                } else {
+                    const timeData = parseTimeRange(ev.timePeriod);
+                    if (timeData) {
+                        s = timeData.start + SHIFT_START_ADD;
+                        e = timeData.end + SHIFT_END_ADD;
+                    }
+                }
+
+                if (s !== undefined) {
+                    // Custom events should have a UID
+                    const uid = ev.uid || `${ev.date}_${ev.name}_${s}`;
+                    candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
+                }
+            }
+        });
+    }
+
+    const sales = candidates.find(ev => {
+        const salesEnd = ev.endMins;
         const gameStart = bingoGameEvent.startMins ?? bingoGameEvent.startMinutes;
-
         return salesEnd <= gameStart && salesEnd >= gameStart - 120;
     });
+
+    // CRITICAL: If we found a hidden sales event, we MUST add it to eventLookup
+    // Otherwise, conflict detection (getConflictingEvents) will fail to see it
+    // because it relies on looking up UIDs in state.eventLookup.
+    if (sales && !state.eventLookup.has(sales.uid)) {
+        state.eventLookup.set(sales.uid, sales);
+    }
+
     return sales;
 }
 

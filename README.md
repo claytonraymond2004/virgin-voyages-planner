@@ -70,6 +70,8 @@ A specialized, browser-based interface designed for the visual organization, tem
     - Open the hamburger menu and select **Smart Scheduler**.
     - Follow the wizard to automatically fill your schedule with events you haven't booked yet.
     - Resolve any conflicts and confirm the proposed schedule.
+    - **Conflict Resolution**: Choose to skip, force-schedule specific instances, or allow overlaps.
+    - **State Persistence**: Navigate back and forth in the wizard without losing your progress.
 14. **Backup & Restore**:
     - **Export**: Open the hamburger menu and select **Export Backup** to download your current state.
     - **Import**: Use the "Upload Data" screen (refresh the page if needed) to upload your backup file.

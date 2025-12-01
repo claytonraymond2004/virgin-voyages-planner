@@ -157,5 +157,7 @@ To maintain referential integrity within the DOM and state management systems, e
         4.  **Conflict Resolution:** If the algorithm cannot find a conflict-free slot for a required event, it presents the user with a choice:
             *   **Skip:** Do not schedule this event.
             *   **Select Instance:** Force-schedule a specific instance (potentially creating a conflict).
-        5.  **Preview:** Shows the proposed additions before applying them to the main state.
+            *   **Allow Overlap:** Users can explicitly permit conflicts for specific events.
+        5.  **Preview:** Shows the proposed additions before applying them to the main state. Includes a warning section for any events that were skipped during conflict resolution.
     *   **Algorithm:** Prioritizes events with fewer remaining opportunities (most constrained first). Respects existing "Attending" events as locked.
+    *   **State Persistence:** The wizard maintains state history, allowing users to navigate "Back" from the Preview step to the Conflict step without losing their selections or schedule calculations. Navigating back further (to Checklist) resets this state to ensure a clean slate for re-runs.
