@@ -733,8 +733,37 @@ function saveNewData(json, newPortNotes = {}) {
 
     localStorage.removeItem(STORAGE_KEY_EVENT_NOTES);
     localStorage.removeItem(STORAGE_KEY_BLACKLIST);
-    // Default optional events
-    localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify(DEFAULT_OPTIONAL_EVENTS));
+    // Calculate optional events (Default + Dynamic)
+    const optionalEvents = new Set(DEFAULT_OPTIONAL_EVENTS);
+    const autoOptionalKeywords = [
+        "guest artist",
+        "pickleball",
+        "run club",
+        "you have arrived",
+        "roll call",
+        "trivia",
+        "solo sailor",
+        "$",
+        "zumba",
+        "quiz",
+        "karaoke",
+        "club",
+        "puzzle",
+        "roaming magic",
+        "aquatic club",
+        "book on board",
+        "glam station"
+    ];
+
+    json.forEach(ev => {
+        if (ev.name) {
+            const lowerName = ev.name.toLowerCase();
+            if (autoOptionalKeywords.some(keyword => lowerName.includes(keyword))) {
+                optionalEvents.add(ev.name);
+            }
+        }
+    });
+    localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify([...optionalEvents]));
 
     // Clear state
     state.hiddenNames.clear();
