@@ -41,30 +41,33 @@
                 <!-- Login Section -->
                 <div class="flex-1 w-full max-w-md mx-auto">
                     <div
-                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-full flex flex-col justify-center">
-                        <h2 class="text-lg font-bold text-gray-800 mb-1 text-center">Import from Virgin Voyages</h2>
+                        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col justify-center">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-1 text-center">Import from Virgin
+                            Voyages</h2>
                         <div id="cors-help-link" class="text-center mb-4">
                             <button onclick="openCorsHelp()"
-                                class="text-blue-600 hover:text-blue-800 text-xs underline">
-                                Browser CORS must be disabled to import. How do I disable CORS?
+                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs underline">
+                                Browser CORS may need to be disabled to import. How do I disable CORS?
                             </button>
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email /
+                                    Username</label>
                                 <input type="text" id="vv-username"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                                     placeholder="sailor@example.com">
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-1">
-                                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
                                     <button onclick="openPasswordHelp()"
-                                        class="text-xs text-blue-600 hover:text-blue-800 underline">Password
+                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Password
                                         Help</button>
                                 </div>
                                 <input type="password" id="vv-password"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                                     placeholder="••••••••">
                             </div>
                             <button onclick="handleVVLogin()" id="btn-vv-login"
