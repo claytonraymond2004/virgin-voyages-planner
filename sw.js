@@ -19,7 +19,8 @@ const ASSETS = [
     './modules/state.js',
     './modules/tooltips.js',
     './modules/ui.js',
-    './modules/utils.js'
+    './modules/utils.js',
+    'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'
 ];
 
 self.addEventListener('install', (event) => {

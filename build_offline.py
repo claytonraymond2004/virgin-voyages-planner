@@ -6,6 +6,7 @@ import sys
 # Configuration
 TAILWIND_URL = "https://cdn.tailwindcss.com"
 FONTS_CSS_URL = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap"
+CONFETTI_URL = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"
 
 ASSETS_DIR = "assets"
 FONTS_DIR = os.path.join(ASSETS_DIR, "fonts")
@@ -70,6 +71,10 @@ def process_tailwind():
     print("Processing Tailwind...")
     download_file(TAILWIND_URL, os.path.join(ASSETS_DIR, "tailwindcss.js"))
 
+def process_scripts():
+    print("Processing Scripts...")
+    download_file(CONFETTI_URL, os.path.join(ASSETS_DIR, "confetti.browser.min.js"))
+
 def patch_html():
     print("Patching index.html...")
     with open("index.html", "r") as f:
@@ -78,6 +83,9 @@ def patch_html():
     # Replace Tailwind
     html = html.replace('src="https://cdn.tailwindcss.com"', 'src="assets/tailwindcss.js"')
     
+    # Replace Confetti
+    html = html.replace('src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"', 'src="assets/confetti.browser.min.js"')
+
     # Replace Fonts
     # Regex replacement for the fonts link
     # Matches <link ... href="https://fonts.googleapis.com..." ...>
@@ -110,6 +118,7 @@ def main():
     ensure_dirs()
     process_fonts()
     process_tailwind()
+    process_scripts()
     patch_html()
     print("Offline build preparation complete.")
 
