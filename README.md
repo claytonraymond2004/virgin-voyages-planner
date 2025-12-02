@@ -14,7 +14,7 @@ A specialized, browser-based interface designed for the visual organization, tem
 - **Port Notes**: Add custom notes to each day (e.g., "Cozumel", "At Sea") by clicking on the day header.
 - **Event Notes**: Add personal notes to any specific event. These notes appear in the event tooltip and are included in the printed itinerary.
 - **Privacy & Persistence**: All data is stored locally in your browser's `localStorage`. No account creation or remote server is required.
-- **Search**: Filter events by title or description using the search bar. Use the dropdown menu to toggle between "Title Only" and "Title & Description" modes.
+- **Search**: Filter events by title or description using the search bar. Use the dropdown menu to toggle between "Title Only" and "Title & Description" modes. Navigate results with Arrow keys and select with Enter. Press `/` to instantly focus the search bar.
 - **Context Menu**: Right-click on any event to access quick actions like toggling attendance, hiding specific instances, editing custom events, blacklisting events, or searching for the event on Google/VVInsider.
 - **Printable Itinerary**: Export your schedule in a clean "Day Grid" or "Simple List" format, perfect for printing or saving as PDF.
 - **Hidden Events Manager**: Easily view and restore events you've previously hidden, organized by series or individual instances.

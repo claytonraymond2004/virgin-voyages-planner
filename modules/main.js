@@ -170,25 +170,103 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Print Shortcut (Ctrl+P / Cmd+P)
+    // Global Shortcuts
     document.addEventListener('keydown', (e) => {
+        // Print: Ctrl+P / Cmd+P
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
             e.preventDefault();
             exportPrintable();
+        }
+
+        // Search: / (Vim style)
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            // Don't trigger if user is already typing in an input
+            const tag = document.activeElement.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || document.activeElement.isContentEditable) {
+                return;
+            }
+
+            e.preventDefault();
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
         }
     });
 
     // Search Input Listeners
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        searchInput.addEventListener('input', updateVisualStates);
+        let currentSearchIndex = -1;
+
+        searchInput.addEventListener('input', () => {
+            currentSearchIndex = -1;
+            updateVisualStates();
+        });
+
         searchInput.addEventListener('focus', () => {
             if (searchInput.value.trim()) {
                 document.getElementById('search-results').style.display = 'block';
             }
         });
+
         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') clearSearch();
+            const resultsContainer = document.getElementById('search-results');
+            const items = resultsContainer.querySelectorAll('.search-result-item');
+
+            // Allow re-opening search results with arrow keys if hidden
+            if (resultsContainer.style.display === 'none') {
+                if (['ArrowUp', 'ArrowDown'].includes(e.key) && items.length > 0) {
+                    resultsContainer.style.display = 'block';
+                    // Fall through to navigation logic to move from last position
+                } else if (e.key === 'Escape') {
+                    // Allow Escape to fall through to clear search
+                } else {
+                    return;
+                }
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (items.length === 0) return;
+
+                currentSearchIndex++;
+                if (currentSearchIndex >= items.length) currentSearchIndex = 0;
+
+                updateSearchHighlight(items, currentSearchIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (items.length === 0) return;
+
+                currentSearchIndex--;
+                if (currentSearchIndex < 0) currentSearchIndex = items.length - 1;
+
+                updateSearchHighlight(items, currentSearchIndex);
+            } else if (e.key === 'Enter') {
+                if (currentSearchIndex >= 0 && currentSearchIndex < items.length) {
+                    e.preventDefault();
+                    items[currentSearchIndex].click();
+                    // Keep focus on input to allow subsequent navigation
+                }
+            } else if (e.key === 'Escape') {
+                e.stopPropagation();
+                clearSearch();
+                currentSearchIndex = -1;
+                searchInput.blur();
+            }
         });
+
+        function updateSearchHighlight(items, index) {
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('bg-gray-100', 'dark:bg-gray-700');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+                }
+            });
+        }
     }
 
     // Modal Close Logic (Escape)
@@ -210,17 +288,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const openModals = Array.from(document.querySelectorAll('.modal-overlay'))
                 .filter(el => getComputedStyle(el).display !== 'none');
-            if (openModals.length > 0) closeAllModals();
+            if (openModals.length > 0) {
+                closeAllModals();
+                return;
+            }
 
             const ctxMenu = document.getElementById('context-menu');
-            if (ctxMenu) ctxMenu.style.display = 'none';
+            if (ctxMenu && ctxMenu.style.display !== 'none') {
+                ctxMenu.style.display = 'none';
+                return;
+            }
 
             const existingBtn = document.querySelector('.add-event-btn');
-            if (existingBtn) existingBtn.remove();
+            if (existingBtn) {
+                existingBtn.remove();
+                return;
+            }
 
             const mobileModal = document.getElementById('mobile-event-modal');
             if (mobileModal && getComputedStyle(mobileModal).display !== 'none') {
                 closeMobileEventModal();
+                return;
+            }
+
+            // Close Main Menu
+            const dropdown = document.getElementById('dropdown-menu');
+            if (dropdown && dropdown.style.display === 'flex') {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            // Close Agenda Panel
+            const agendaPanel = document.getElementById('agenda-panel');
+            if (agendaPanel && agendaPanel.classList.contains('open')) {
+                toggleAgendaPanel();
+                return;
+            }
+
+            // Close Attendance Panel
+            const attendancePanel = document.getElementById('attendance-panel');
+            if (attendancePanel && attendancePanel.classList.contains('open')) {
+                toggleAttendancePanel();
+                return;
+            }
+
+            // Clear Search Filter (if not focused)
+            const searchInput = document.getElementById('search-input');
+            if (searchInput && document.activeElement !== searchInput && searchInput.value) {
+                clearSearch();
+                // Trigger input event to reset search index in local scope
+                searchInput.dispatchEvent(new Event('input'));
+                return;
             }
         }
     });
