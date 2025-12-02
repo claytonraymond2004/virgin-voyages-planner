@@ -765,6 +765,22 @@ function saveNewData(json, newPortNotes = {}) {
     });
     localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify([...optionalEvents]));
 
+    // Calculate blacklist events (Dynamic)
+    const blacklistEvents = new Set();
+    const autoBlacklistKeywords = [
+        "crew drill"
+    ];
+
+    json.forEach(ev => {
+        if (ev.name) {
+            const lowerName = ev.name.toLowerCase();
+            if (autoBlacklistKeywords.some(keyword => lowerName.includes(keyword))) {
+                blacklistEvents.add(ev.name);
+            }
+        }
+    });
+    localStorage.setItem(STORAGE_KEY_BLACKLIST, JSON.stringify([...blacklistEvents]));
+
     // Clear state
     state.hiddenNames.clear();
     state.hiddenUids.clear();
