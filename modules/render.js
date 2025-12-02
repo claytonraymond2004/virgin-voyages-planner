@@ -790,6 +790,11 @@ export function updateVisualStates() {
             }
         }
 
+        // Completed State
+        if (state.completedIds.has(uid)) {
+            card.classList.add('is-completed');
+        }
+
         // Search Dimming
         if (query.length > 0) {
             let match = name.toLowerCase().includes(query);

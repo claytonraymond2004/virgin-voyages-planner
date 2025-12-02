@@ -2,7 +2,8 @@ import {
     STORAGE_KEY_DATA, STORAGE_KEY_ATTENDANCE, STORAGE_KEY_HIDDEN_NAMES,
     STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_CUSTOM,
     STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, STORAGE_KEY_BLACKLIST,
-    STORAGE_KEY_OPTIONAL_EVENTS, STORAGE_KEY_THEME, STORAGE_KEY_TIME_BLOCKS
+    STORAGE_KEY_OPTIONAL_EVENTS, STORAGE_KEY_THEME, STORAGE_KEY_TIME_BLOCKS,
+    STORAGE_KEY_COMPLETED
 } from './constants.js';
 
 // --- State ---
@@ -10,6 +11,7 @@ export const state = {
     appData: [],
     customEvents: [],
     attendingIds: new Set(),
+    completedIds: new Set(),
     hiddenNames: new Set(),
     hiddenUids: new Set(),
     shownUids: new Set(),
@@ -74,11 +76,13 @@ export function loadFromStorage() {
     const storedBlacklist = localStorage.getItem(STORAGE_KEY_BLACKLIST);
     const storedOptional = localStorage.getItem(STORAGE_KEY_OPTIONAL_EVENTS);
     const storedTimeBlocks = localStorage.getItem(STORAGE_KEY_TIME_BLOCKS);
+    const storedCompleted = localStorage.getItem(STORAGE_KEY_COMPLETED);
 
     if (storedData) {
         try { state.appData = JSON.parse(storedData); } catch (e) { return false; }
         if (storedCustom) try { state.customEvents = JSON.parse(storedCustom); } catch (e) { state.customEvents = []; }
         if (storedAttendance) try { state.attendingIds = new Set(JSON.parse(storedAttendance)); } catch (e) { }
+        if (storedCompleted) try { state.completedIds = new Set(JSON.parse(storedCompleted)); } catch (e) { }
         if (storedNames) try { state.hiddenNames = new Set(JSON.parse(storedNames)); } catch (e) { }
         if (storedUids) try { state.hiddenUids = new Set(JSON.parse(storedUids)); } catch (e) { }
         if (storedShown) try { state.shownUids = new Set(JSON.parse(storedShown)); } catch (e) { }
@@ -108,6 +112,7 @@ export function saveData(json, newPortNotes = {}) {
     localStorage.removeItem(STORAGE_KEY_EVENT_NOTES);
     localStorage.removeItem(STORAGE_KEY_BLACKLIST);
     localStorage.removeItem(STORAGE_KEY_OPTIONAL_EVENTS);
+    localStorage.removeItem(STORAGE_KEY_COMPLETED);
 
     state.hiddenNames.clear();
     state.hiddenUids.clear();
@@ -117,6 +122,7 @@ export function saveData(json, newPortNotes = {}) {
     state.optionalEvents.clear();
     state.eventColors = {};
     state.attendingIds.clear();
+    state.completedIds.clear();
 
     loadFromStorage(); // Reload to ensure sync
 }
@@ -139,6 +145,7 @@ export function restoreBackup(json) {
     localStorage.setItem(STORAGE_KEY_EVENT_NOTES, JSON.stringify(json.eventNotes || {}));
     localStorage.setItem(STORAGE_KEY_BLACKLIST, JSON.stringify(json.blacklist || []));
     localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify(json.optionalEvents || []));
+    localStorage.setItem(STORAGE_KEY_COMPLETED, JSON.stringify(json.completedIds || []));
     localStorage.setItem(STORAGE_KEY_TIME_BLOCKS, JSON.stringify(json.timeBlocks || {}));
     loadFromStorage();
 }
@@ -185,4 +192,8 @@ export function saveTheme(theme) {
 
 export function saveTimeBlocks() {
     localStorage.setItem(STORAGE_KEY_TIME_BLOCKS, JSON.stringify(state.timeBlocks));
+}
+
+export function saveCompletedIds() {
+    localStorage.setItem(STORAGE_KEY_COMPLETED, JSON.stringify([...state.completedIds]));
 }

@@ -11,6 +11,7 @@ export const STORAGE_KEY_BLACKLIST = 'virginVoyagesBlacklist';
 export const STORAGE_KEY_OPTIONAL_EVENTS = 'virginVoyagesOptionalEvents';
 export const STORAGE_KEY_THEME = 'virginVoyagesTheme';
 export const STORAGE_KEY_TIME_BLOCKS = 'virginVoyagesTimeBlocks';
+export const STORAGE_KEY_COMPLETED = 'virginVoyagesCompleted';
 export const START_HOUR = 5;
 export const END_HOUR = 29;
 

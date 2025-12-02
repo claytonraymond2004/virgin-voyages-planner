@@ -4,7 +4,8 @@ import { renderApp } from './render.js';
 import { parseTimeRange, formatTime } from './utils.js';
 import {
     showGenericChoice, showConfirm, closeAllModals,
-    openUnhideModal, editEventNote, toggleOptionalEvent, openHiddenManager
+    openUnhideModal, editEventNote, toggleOptionalEvent, openHiddenManager,
+    toggleComplete
 } from './ui.js';
 import { populateCustomModal, deleteCustomEvent, initiateEdit } from './customEvents.js';
 
@@ -503,6 +504,24 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
             toggleOptionalEvent(ev.name);
         };
     }
+
+    // Complete Logic
+    const btnComplete = document.getElementById('ctx-complete');
+    const isCompleted = state.completedIds.has(ev.uid);
+
+    btnComplete.innerHTML = isCompleted ?
+        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Mark as Incomplete` :
+        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark as Complete`;
+
+    btnComplete.className = isCompleted ?
+        'ctx-item text-gray-600 dark:text-gray-400' :
+        'ctx-item text-green-600 dark:text-green-400';
+
+    btnComplete.onclick = (e) => {
+        e.stopPropagation();
+        closeMenu();
+        toggleComplete(ev.uid);
+    };
 
     // Note Button Logic
     btnNote.onclick = (e) => {

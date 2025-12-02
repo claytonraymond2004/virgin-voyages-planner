@@ -1,4 +1,4 @@
-import { state, saveData, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks } from './state.js';
+import { state, saveData, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks, saveCompletedIds } from './state.js';
 import { STORAGE_KEY_BLACKLIST, STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, SHIFT_START_ADD, SHIFT_END_ADD, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_OPTIONAL_EVENTS } from './constants.js';
 import { renderApp } from './render.js';
 import { parseTimeRange, formatTimeRange, escapeHtml } from './utils.js';
@@ -642,8 +642,8 @@ export function toggleOptionalEvent(eventName) {
         state.optionalEvents.add(eventName);
     }
     saveOptionalEvents();
-    renderApp();
-    updateAttendancePanel();
+    // Update agenda count badge
+    updateAgendaCount();
 }
 
 export function updateAttendancePanel() {
@@ -1484,4 +1484,41 @@ export function saveTimeBlocksUI() {
     saveTimeBlocks();
     renderApp();
     closeAllModals();
+}
+
+// --- Celebration Feature ---
+
+export function toggleComplete(uid) {
+    if (state.completedIds.has(uid)) {
+        state.completedIds.delete(uid);
+    } else {
+        state.completedIds.add(uid);
+        triggerCelebration();
+    }
+    saveCompletedIds();
+    renderApp();
+}
+
+function triggerCelebration() {
+    // Confetti
+    if (typeof confetti === 'function') {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+        const interval = setInterval(function () {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
 }

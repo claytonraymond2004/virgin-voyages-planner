@@ -632,12 +632,20 @@
 
         <div class="ctx-divider" id="ctx-hide-divider"></div>
 
-        <div class="ctx-item" id="ctx-optional">
+        <div id="ctx-optional" class="ctx-item">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg> Mark as Optional
+            </svg>
+            Mark as Optional
         </div>
+        <div id="ctx-complete" class="ctx-item text-green-600 dark:text-green-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Mark as Complete
+        </div>
+        <div class="ctx-divider"></div>
 
         <div class="ctx-item danger" id="ctx-hide">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1331,6 +1339,11 @@
         </div>
         <!-- Scripts -->
         <script src="virgin_api.js"></script>
+        <!-- Confetti & Celebration -->
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <div id="celebration-container" class="fixed inset-0 pointer-events-none z-[9999] hidden overflow-hidden">
+        </div>
+
         <script type="module" src="modules/main.js"></script>
         <script>
             if ('serviceWorker' in navigator) {
