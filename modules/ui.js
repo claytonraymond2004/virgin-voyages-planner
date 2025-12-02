@@ -799,109 +799,51 @@ export function updateAgendaPanel() {
     // Sort by Date then Time
     events.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return (a.startMins ?? a.startMinutes) - (b.startMins ?? b.startMinutes);
+        return a.startMins - b.startMins;
     });
 
-    // Group by Date
-    const byDay = {};
+    let lastDate = null;
     events.forEach(ev => {
-        if (!byDay[ev.date]) byDay[ev.date] = [];
-        byDay[ev.date].push(ev);
-    });
+        if (ev.date !== lastDate) {
+            const dateObj = new Date(ev.date + 'T00:00:00');
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            const dateHeader = document.createElement('div');
+            dateHeader.className = "agenda-date-header sticky top-0 bg-white z-10 py-2 border-b border-gray-100 font-bold text-gray-800 text-sm mt-2";
+            dateHeader.textContent = dateStr;
+            content.appendChild(dateHeader);
+            lastDate = ev.date;
+        }
 
-    Object.keys(byDay).sort().forEach(date => {
-        const dayEvents = byDay[date];
+        const timeStr = formatTimeRange(ev.startMins, ev.endMins);
+        const isCurrent = ev.date === currentDateStr && currentMins >= ev.startMins && currentMins < ev.endMins;
+        const isPast = ev.date < currentDateStr || (ev.date === currentDateStr && ev.endMins <= currentMins);
 
-        // Date Header
-        const dateObj = new Date(date + 'T00:00:00');
-        const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const row = document.createElement('div');
+        row.className = `agenda-item flex gap-3 p-3 rounded mb-2 border border-gray-100 hover:border-red-200 transition-colors cursor-pointer ${isCurrent ? 'bg-red-50 border-red-200 ring-1 ring-red-100' : 'bg-white'} ${isPast ? 'opacity-60' : ''}`;
 
-        const dayContainer = document.createElement('div');
-        dayContainer.className = 'mb-6';
+        // Add click handler to jump to event
+        row.onclick = () => window.jumpToEventFromPanel(ev.uid);
 
-        const header = document.createElement('h4');
-        header.className = 'font-bold text-gray-800 border-b border-gray-200 px-6 py-3 sticky top-0 bg-white z-10 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700';
-        header.textContent = dateStr;
-        dayContainer.appendChild(header);
+        // Color indicator
+        let colorClass = 'bg-gray-200';
+        if (ev.isCustom) colorClass = 'bg-purple-200 text-purple-700';
+        else if (ev.name.toLowerCase().includes('eat') || ev.name.toLowerCase().includes('dinner')) colorClass = 'bg-orange-200 text-orange-700';
+        else if (ev.name.toLowerCase().includes('show') || ev.name.toLowerCase().includes('entertainment')) colorClass = 'bg-blue-200 text-blue-700';
+        else if (ev.name.toLowerCase().includes('fitness') || ev.name.toLowerCase().includes('gym')) colorClass = 'bg-green-200 text-green-700';
+        else colorClass = 'bg-red-100 text-red-700'; // Default
 
-        const list = document.createElement('div');
-        list.className = 'space-y-3 px-6 pt-3';
-
-        dayEvents.forEach(ev => {
-            const start = ev.startMins ?? ev.startMinutes;
-            const end = ev.endMins ?? ev.endMinutes;
-            const timeStr = formatTimeRange(start, end);
-            const location = ev.location ? ev.location : '';
-            const isOptional = state.optionalEvents.has(ev.name);
-
-            // Check Conflicts
-            const conflicts = [];
-            state.attendingIds.forEach(otherUid => {
-                if (otherUid === ev.uid) return;
-                const other = state.eventLookup.get(otherUid);
-                if (other && other.date === ev.date) {
-                    const otherStart = other.startMins ?? other.startMinutes;
-                    const otherEnd = other.endMins ?? other.endMinutes;
-                    if (start < otherEnd && end > otherStart) {
-                        conflicts.push(other.name);
-                    }
-                }
-            });
-
-            const card = document.createElement('div');
-            const hasConflict = conflicts.length > 0;
-            const isCurrent = ev.date === currentDateStr && currentMins >= start && currentMins < end;
-            card.className = `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${hasConflict ? 'agenda-conflict' : ''} ${isCurrent ? 'agenda-current' : ''}`;
-            card.style.scrollMarginTop = '60px'; // Ensure sticky header doesn't cover card on scroll
-
-            // Click handler
-            // Click handler
-            card.onclick = () => {
-                if (window.innerWidth <= 768) {
-                    openMobileEventModal(ev);
-                } else {
-                    jumpToEventFromPanel(ev.uid);
-                }
-            };
-
-            // Hover handlers
-            // Hover handlers
-            card.onmouseenter = (e) => {
-                if (window.innerWidth > 768) {
-                    showFullTooltip(e, ev, card);
-                    moveTooltipFromPanel(e);
-                }
-            };
-            card.onmousemove = (e) => {
-                if (window.innerWidth > 768) moveTooltipFromPanel(e);
-            };
-            card.onmouseleave = hideTooltip;
-
-            let cardHtml = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100 text-sm pr-2">${escapeHtml(ev.name)}</div>
-                    ${isOptional ? `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-gray-200 dark:border-gray-600">Optional</span>` : ''}
-                </div>
-                
-                <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    ${timeStr}
-                </div>
-                
-                ${location ? `
-                <div class="flex items-center text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    ${escapeHtml(location)}
-                </div>` : ''}
-            `;
-
-            card.id = `agenda-card-${ev.uid}`;
-            card.innerHTML = cardHtml;
-            list.appendChild(card);
-        });
-
-        dayContainer.appendChild(list);
-        content.appendChild(dayContainer);
+        row.innerHTML = `
+            <div class="flex-shrink-0 w-16 text-xs text-gray-500 flex flex-col items-center justify-center border-r border-gray-100 pr-2">
+                <span class="font-bold text-gray-700">${formatTime(ev.startMins)}</span>
+                <span class="text-[10px]">${formatTime(ev.endMins)}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-bold text-sm text-gray-800 truncate">${ev.name}</div>
+                <div class="text-xs text-gray-500 truncate">${ev.location || 'No Location'}</div>
+                ${isCurrent ? '<div class="text-[10px] font-bold text-red-600 mt-1 uppercase tracking-wider">Happening Now</div>' : ''}
+            </div>
+        `;
+        content.appendChild(row);
     });
 
     // Auto-scroll to closest event
@@ -948,6 +890,168 @@ export function updateAgendaPanel() {
                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }, 100);
+    }
+}
+
+function formatTime(mins) {
+    const h = Math.floor(mins / 60) % 24;
+    const m = mins % 60;
+    const ampm = h >= 12 && h < 24 ? 'pm' : 'am';
+    const h12 = h === 0 || h === 12 ? 12 : h % 12;
+    return `${h12}:${m.toString().padStart(2, '0')}${amppm}`;
+}
+
+// --- Update Agenda Modal ---
+
+export function openUpdateAgendaModal() {
+    resetUpdateModal();
+    document.getElementById('update-agenda-modal').style.display = 'flex';
+    document.getElementById('dropdown-menu').style.display = 'none';
+
+    // Initialize file input listener for update
+    const fileInput = document.getElementById('update-file-input');
+    const dropZone = document.getElementById('update-drop-zone');
+
+    // Remove old listeners to avoid duplicates (simple way: clone and replace)
+    const newFileInput = fileInput.cloneNode(true);
+    fileInput.parentNode.replaceChild(newFileInput, fileInput);
+
+    const newDropZone = dropZone.cloneNode(true);
+    dropZone.parentNode.replaceChild(newDropZone, dropZone);
+
+    // Re-attach listeners
+    newDropZone.addEventListener('click', () => newFileInput.click());
+    newFileInput.addEventListener('change', (e) => window.handleUpdateFiles(e.target.files));
+
+    newDropZone.addEventListener('dragover', (e) => { e.preventDefault(); newDropZone.classList.add('border-red-500', 'bg-red-50'); });
+    newDropZone.addEventListener('dragleave', () => newDropZone.classList.remove('border-red-500', 'bg-red-50'));
+    newDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        newDropZone.classList.remove('border-red-500', 'bg-red-50');
+        if (e.dataTransfer.files.length) window.handleUpdateFiles(e.dataTransfer.files);
+    });
+}
+
+export function resetUpdateModal() {
+    document.getElementById('update-step-source').classList.remove('hidden');
+    document.getElementById('update-step-summary').classList.add('hidden');
+    document.getElementById('update-step-summary').classList.remove('flex');
+    document.getElementById('update-step-no-changes').classList.add('hidden');
+    document.getElementById('update-step-no-changes').classList.remove('flex');
+
+    document.getElementById('update-changes-list').innerHTML = '';
+
+    // Reset login form
+    document.getElementById('update-vv-status').textContent = '';
+    document.getElementById('btn-update-vv-login').disabled = false;
+    document.getElementById('update-vv-spinner').classList.add('hidden');
+    document.getElementById('update-vv-username').disabled = false;
+    document.getElementById('update-vv-password').disabled = false;
+}
+
+export function renderChangeSummary(changes) {
+    const list = document.getElementById('update-changes-list');
+    list.innerHTML = '';
+
+    document.getElementById('update-step-source').classList.add('hidden');
+
+    if (changes.added.length === 0 && changes.removed.length === 0 && (!changes.modified || changes.modified.length === 0)) {
+        document.getElementById('update-step-no-changes').classList.remove('hidden');
+        document.getElementById('update-step-no-changes').classList.add('flex');
+        return;
+    }
+
+    document.getElementById('update-step-summary').classList.remove('hidden');
+    document.getElementById('update-step-summary').classList.add('flex');
+
+    // Render Modified
+    if (changes.modified && changes.modified.length > 0) {
+        const modHeader = document.createElement('h5');
+        modHeader.className = "font-bold text-orange-700 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white py-1";
+        modHeader.textContent = `Modified Events (${changes.modified.length})`;
+        list.appendChild(modHeader);
+
+        changes.modified.forEach(item => {
+            const { oldEv, newEv, changes: changedFields } = item;
+            const el = document.createElement('div');
+            el.className = "bg-orange-50 border border-orange-100 rounded p-2 mb-2 text-sm";
+
+            let details = '';
+            if (changedFields.includes('Time')) {
+                details += `<div class="text-xs text-orange-800 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
+            }
+            if (changedFields.includes('Location')) {
+                details += `<div class="text-xs text-orange-800 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
+            }
+            if (changedFields.includes('Description')) {
+                details += `<div class="text-xs text-orange-800 mt-1"><span class="font-bold">Description Updated</span></div>`;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800">${escapeHtml(newEv.name)}</div>
+                <div class="text-xs text-gray-500 mb-1">${newEv.date}</div>
+                ${details}
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Removed
+    if (changes.removed.length > 0) {
+        const removedHeader = document.createElement('h5');
+        removedHeader.className = "font-bold text-red-700 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white py-1";
+        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
+        list.appendChild(removedHeader);
+
+        changes.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 border border-red-100 rounded p-2 mb-2 text-sm opacity-75";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Added
+    if (changes.added.length > 0) {
+        const addedHeader = document.createElement('h5');
+        addedHeader.className = "font-bold text-green-700 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white py-1";
+        addedHeader.textContent = `New Events (${changes.added.length})`;
+        list.appendChild(addedHeader);
+
+        changes.added.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-green-50 border border-green-100 rounded p-2 mb-2 text-sm";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                <div class="text-xs text-gray-400 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+}
+
+export function confirmUpdateApply() {
+    if (window.applyAgendaUpdate) {
+        window.applyAgendaUpdate();
+        closeAllModals();
+        showConfirm("Agenda updated successfully!", null, "Success");
+        // Hide cancel button for this success message
+        setTimeout(() => {
+            const cancelBtn = document.getElementById('btn-confirm-cancel');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const okBtn = document.getElementById('btn-confirm-ok');
+            if (okBtn) {
+                const oldOnClick = okBtn.onclick;
+                okBtn.onclick = () => {
+                    if (oldOnClick) oldOnClick();
+                    cancelBtn.style.display = 'inline-block'; // Restore
+                };
+            }
+        }, 0);
     }
 }
 

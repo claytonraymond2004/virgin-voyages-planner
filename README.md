@@ -24,6 +24,7 @@ A specialized, browser-based interface designed for the visual organization, tem
 - **Smart Scheduler**: An intelligent wizard that automatically builds a schedule for you, prioritizing events you haven't seen yet and resolving conflicts.
 - **Mobile Optimized**: Enhanced mobile experience with improved menus, dividers, and touch-friendly event cards.
 - **Backup & Restore**: Export your entire itinerary state (including attendance, custom events, and notes) to a JSON file for safekeeping or transfer to another device.
+- **Update Agenda**: Refresh your itinerary with the latest data from Virgin Voyages (via API or file upload) while preserving your personal schedule, notes, and attendance.
 
 ## How to Use
 
@@ -75,7 +76,13 @@ A specialized, browser-based interface designed for the visual organization, tem
 14. **Backup & Restore**:
     - **Export**: Open the hamburger menu and select **Export Backup** to download your current state.
     - **Import**: Use the "Upload Data" screen (refresh the page if needed) to upload your backup file.
-15. **Dark Mode**:
+15. **Update Agenda**:
+    - Open the hamburger menu and select **Update Agenda**.
+    - **Virgin API**: Log in with your Virgin credentials to fetch the latest schedule directly.
+    - **File Upload**: Upload a new `CleanAgenda.json` or raw API files.
+    - **Review Changes**: The app will compare the new data with your current schedule and show a summary of **Added**, **Removed**, and **Modified** events.
+    - **Confirm**: Click "Update Agenda" to apply changes. Your attendance, notes, and custom events are preserved!
+16. **Dark Mode**:
     - Toggle between Light and Dark themes using the **Moon/Sun icon** in the toolbar.
 
 ## Key Concepts & Tips
