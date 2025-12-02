@@ -644,6 +644,9 @@ async function handleVVLogin() {
         statusDiv.textContent = "Error: " + err.message;
         statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
 
+        // Show CORS help on error
+        document.getElementById('cors-help-link').style.display = 'block';
+
         btn.disabled = false;
         spinner.classList.add('hidden');
         usernameInput.disabled = false;

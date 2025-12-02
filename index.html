@@ -44,12 +44,7 @@
                         class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col justify-center">
                         <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-1 text-center">Import from Virgin
                             Voyages</h2>
-                        <div id="cors-help-link" class="text-center mb-4">
-                            <button onclick="openCorsHelp()"
-                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs underline">
-                                Browser CORS may need to be disabled to import. How do I disable CORS?
-                            </button>
-                        </div>
+
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email /
@@ -84,6 +79,12 @@
                                 </svg>
                             </button>
                             <div id="vv-status" class="text-center text-sm text-gray-600 min-h-[20px]"></div>
+                            <div id="cors-help-link" class="text-center" style="display: none;">
+                                <button onclick="openCorsHelp()"
+                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs underline">
+                                    Browser CORS may need to be disabled to import. How do I disable CORS?
+                                </button>
+                            </div>
                         </div>
                         <div class="mt-4 text-xs text-center text-gray-400">
                             Credentials are sent directly to Virgin Voyages and are not stored.
