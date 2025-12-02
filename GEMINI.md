@@ -72,6 +72,20 @@ To maintain referential integrity within the DOM and state management systems, e
 * **Lane Packing Algorithm:** A greedy algorithm is utilized to detect and resolve temporal overlaps within a single day column. Should Event A temporally overlap with Event B, Event B is visually displaced to a new horizontal column ("Lane") within the day container. This ensures that no two event cards obscure one another.  
 * **Coordinate Snapping:** The drag-to-create interface enforces the snapping of visual coordinates to 15-pixel increments. Given the scale where 1 pixel equates to 1 minute, this compels all user-generated events to align with standard 15-minute intervals (e.g., 10:00, 10:15, 10:30).
 
+### **5\. Update Agenda Logic**
+
+* **Comparison Algorithm:** When updating the agenda, the system compares the new dataset against the existing `appData`.
+  * **UID Generation:** Events are matched based on a generated UID (`date_name_startTime`).
+  * **Change Detection:**
+    * **Added:** New UIDs present in the new data but missing from the old.
+    * **Removed:** Old UIDs missing from the new data.
+    * **Modified:** Events with the same `date` and `name` but different times or content (Location/Description) are flagged as modified.
+* **State Migration:** To preserve user data during an update:
+  * **Attendance:** If an event is modified (time change), the `attendingIds` Set is updated to replace the old UID with the new UID.
+  * **Notes:** User notes (`eventNotes`) are similarly migrated to the new UID.
+  * **Hidden Instances:** Specific hidden instances (`hiddenUids`) are also migrated.
+  * **Preservation:** Custom events, global hidden names, blacklist, and optional events are strictly preserved as they are independent of the official agenda data.
+
 ### **5\. CSS State Classes**
 
 * .is-attending: Applied when a uid is present in attendingIds. This class applies a green background color to signify user confirmation.  
@@ -160,4 +174,14 @@ To maintain referential integrity within the DOM and state management systems, e
             *   **Allow Overlap:** Users can explicitly permit conflicts for specific events.
         5.  **Preview:** Shows the proposed additions before applying them to the main state. Includes a warning section for any events that were skipped during conflict resolution.
     *   **Algorithm:** Prioritizes events with fewer remaining opportunities (most constrained first). Respects existing "Attending" events as locked.
-    *   **State Persistence:** The wizard maintains state history, allowing users to navigate "Back" from the Preview step to the Conflict step without losing their selections or schedule calculations. Navigating back further (to Checklist) resets this state to ensure a clean slate for re-runs.
+    *   **State Persistence:** The wizard maintains state history, allowing users to navigate "Back" from the Preview step to the Conflict step without losing your selections or schedule calculations. Navigating back further (to Checklist) resets this state to ensure a clean slate for re-runs.
+14. **Update Agenda:**
+    *   **Purpose:** Allows users to refresh the official itinerary (e.g., if Virgin changes show times) without losing their personal planning work.
+    *   **Workflow:**
+        1.  **Source Selection:** User chooses to fetch data via Virgin API (requires login) or upload a new file.
+        2.  **Analysis:** The system compares the new data with the current state.
+        3.  **Summary:** A modal displays a categorized list of changes:
+            *   **New Events:** Completely new items.
+            *   **Removed Events:** Items no longer in the schedule.
+            *   **Modified Events:** Items that have moved times or changed location/description.
+        4.  **Confirmation:** Upon confirmation, the system updates the core `appData` and intelligently migrates user state (attendance, notes) to match the new event definitions.

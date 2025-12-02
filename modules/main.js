@@ -1,5 +1,5 @@
 import {
-    state, loadFromStorage as loadState, saveData as saveStateData,
+    state, loadFromStorage as loadState, saveData as saveStateData, updateAppData,
     saveCustomEvents, saveAttendance, saveHiddenNames, saveHiddenUids,
     saveShownUids, savePortNote, saveEventNotes, saveBlacklist, saveOptionalEvents
 } from './state.js';
@@ -7,7 +7,7 @@ import {
     STORAGE_KEY_THEME, STORAGE_KEY_DATA, STORAGE_KEY_ATTENDANCE,
     STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_PORT_NOTES,
     STORAGE_KEY_EVENT_NOTES, STORAGE_KEY_BLACKLIST, STORAGE_KEY_OPTIONAL_EVENTS,
-    STORAGE_KEY_CUSTOM, SHIFT_START_ADD, DEFAULT_OPTIONAL_EVENTS
+    STORAGE_KEY_CUSTOM, SHIFT_START_ADD, SHIFT_END_ADD, DEFAULT_OPTIONAL_EVENTS
 } from './constants.js';
 import { renderApp, updateVisualStates, renderCurrentTimeBar } from './render.js';
 import {
@@ -21,7 +21,8 @@ import {
     editEventNote, saveEventNoteUI, closeEventNoteModal, toggleAttendancePanel, switchAttendanceTab,
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
-    openSmartScheduler, toggleAgendaPanel, updateAgendaPanel
+    openSmartScheduler, toggleAgendaPanel, updateAgendaPanel,
+    openUpdateAgendaModal, resetUpdateModal, renderChangeSummary, confirmUpdateApply
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -96,6 +97,11 @@ window.toggleShowHiddenTemp = toggleShowHiddenTemp;
 window.openTimeBlocksModal = openTimeBlocksModal;
 window.saveTimeBlocksUI = saveTimeBlocksUI;
 window.openSmartScheduler = openSmartScheduler;
+window.openUpdateAgendaModal = openUpdateAgendaModal;
+window.handleUpdateVVLogin = handleUpdateVVLogin;
+window.handleUpdateFiles = handleUpdateFiles;
+window.applyAgendaUpdate = applyAgendaUpdate;
+window.confirmUpdateApply = confirmUpdateApply;
 
 // --- Initialization ---
 
@@ -652,6 +658,278 @@ async function handleVVLogin() {
         usernameInput.disabled = false;
         passwordInput.disabled = false;
     }
+}
+
+// --- Update Agenda Logic ---
+
+let pendingUpdateEvents = null;
+
+async function handleUpdateVVLogin() {
+    const usernameInput = document.getElementById('update-vv-username');
+    const passwordInput = document.getElementById('update-vv-password');
+    const btn = document.getElementById('btn-update-vv-login');
+    const spinner = document.getElementById('update-vv-spinner');
+    const statusDiv = document.getElementById('update-vv-status');
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+        statusDiv.textContent = "Please enter both email and password.";
+        statusDiv.className = "text-center text-xs text-red-600 min-h-[16px]";
+        return;
+    }
+
+    statusDiv.textContent = "";
+    statusDiv.className = "text-center text-xs text-gray-500 min-h-[16px]";
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    usernameInput.disabled = true;
+    passwordInput.disabled = true;
+
+    try {
+        if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
+        const events = await window.VirginAPI.fetchAllData(username, password, (msg) => {
+            statusDiv.textContent = msg;
+        });
+
+        statusDiv.textContent = "Data fetched. Comparing...";
+        statusDiv.className = "text-center text-xs text-green-600 min-h-[16px]";
+
+        checkForUpdates(events);
+
+    } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Error: " + err.message;
+        statusDiv.className = "text-center text-xs text-red-600 min-h-[16px]";
+
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+    }
+}
+
+function handleUpdateFiles(fileList) {
+    const files = Array.from(fileList);
+    if (files.length === 0) return;
+
+    const readers = files.map(file => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    resolve(json);
+                } catch (err) {
+                    reject(file.name);
+                }
+            };
+            reader.onerror = () => reject(file.name);
+            reader.readAsText(file);
+        });
+    });
+
+    Promise.all(readers)
+        .then(results => {
+            checkForUpdates(results);
+        })
+        .catch(errFileName => {
+            alert("Error processing file: " + errFileName);
+        });
+}
+
+function checkForUpdates(jsonObjects) {
+    // Flatten and clean new data
+    const newEvents = [];
+
+    // Handle if passed a single array of events (from API)
+    if (Array.isArray(jsonObjects) && jsonObjects.length > 0 && jsonObjects[0].date && jsonObjects[0].name) {
+        // It's already a flat list of events (likely from API)
+        newEvents.push(...jsonObjects);
+    } else {
+        // It's likely from file upload (array of daily objects)
+        jsonObjects.forEach(json => {
+            if (json.events && Array.isArray(json.events)) {
+                const clean = parseRawData(json);
+                newEvents.push(...clean);
+            } else if (Array.isArray(json)) {
+                // Might be a raw array of events
+                json.forEach(ev => {
+                    if (ev.date && ev.name) newEvents.push(ev);
+                });
+            }
+        });
+    }
+
+    if (newEvents.length === 0) {
+        alert("No valid agenda data found.");
+        resetUpdateModal();
+        return;
+    }
+
+    // --- Smarter Comparison Logic ---
+
+    const oldEventsByKey = new Map(); // Key: "date_name" -> [Event]
+    const newEventsByKey = new Map();
+
+    // Helper to generate key
+    const getKey = (ev) => `${ev.date}_${ev.name}`;
+
+    // Helper to get UID
+    const getUid = (ev) => {
+        const timeData = parseTimeRange(ev.timePeriod);
+        if (!timeData) return null;
+        const s = timeData.start + SHIFT_START_ADD;
+        return `${ev.date}_${ev.name}_${s}`;
+    };
+
+    // 1. Index Old Events
+    state.appData.forEach(ev => {
+        const key = getKey(ev);
+        if (!oldEventsByKey.has(key)) oldEventsByKey.set(key, []);
+        ev._uid = getUid(ev); // Temp store UID
+
+        // Calculate startMins/endMins for old events (they aren't persisted)
+        const timeData = parseTimeRange(ev.timePeriod);
+        if (timeData) {
+            ev.startMins = timeData.start + SHIFT_START_ADD;
+            ev.endMins = timeData.end + SHIFT_END_ADD;
+        }
+
+        oldEventsByKey.get(key).push(ev);
+    });
+
+    // 2. Index New Events
+    newEvents.forEach(ev => {
+        const key = getKey(ev);
+        if (!newEventsByKey.has(key)) newEventsByKey.set(key, []);
+        ev._uid = getUid(ev); // Temp store UID
+        // Add start/end mins for UI
+        const timeData = parseTimeRange(ev.timePeriod);
+        if (timeData) {
+            ev.startMins = timeData.start + SHIFT_START_ADD;
+            ev.endMins = timeData.end + SHIFT_END_ADD;
+        }
+        newEventsByKey.get(key).push(ev);
+    });
+
+    const added = [];
+    const removed = [];
+    const modified = [];
+    const unchanged = [];
+    const migrations = []; // { oldUid, newUid }
+
+    // 3. Compare by Key
+    const allKeys = new Set([...oldEventsByKey.keys(), ...newEventsByKey.keys()]);
+
+    allKeys.forEach(key => {
+        const oldList = oldEventsByKey.get(key) || [];
+        const newList = newEventsByKey.get(key) || [];
+
+        // Track matched indices
+        const oldMatched = new Set();
+        const newMatched = new Set();
+
+        // Pass 1: Exact UID Matches (Same time)
+        oldList.forEach((oldEv, oldIdx) => {
+            const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i) && newEv._uid === oldEv._uid);
+            if (newIdx !== -1) {
+                oldMatched.add(oldIdx);
+                newMatched.add(newIdx);
+
+                const newEv = newList[newIdx];
+
+                // Check for Content Changes (Location, Description)
+                const changes = [];
+                if (oldEv.location !== newEv.location) changes.push('Location');
+                // Simple description check (ignoring minor HTML diffs if possible, but strict for now)
+                if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
+
+                if (changes.length > 0) {
+                    modified.push({ type: 'content', oldEv, newEv, changes });
+                } else {
+                    unchanged.push(newEv);
+                }
+            }
+        });
+
+        // Pass 2: Remaining are potential Time Changes (Same Date/Name, Diff Time)
+        oldList.forEach((oldEv, oldIdx) => {
+            if (oldMatched.has(oldIdx)) return;
+
+            // Find an unpaired new event
+            const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i));
+            if (newIdx !== -1) {
+                // Match found! It's a time change (and possibly content change)
+                oldMatched.add(oldIdx);
+                newMatched.add(newIdx);
+                const newEv = newList[newIdx];
+
+                const changes = ['Time'];
+                if (oldEv.location !== newEv.location) changes.push('Location');
+                if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
+
+                modified.push({ type: 'time', oldEv, newEv, changes });
+                migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
+            } else {
+                // No match in new list -> Removed
+                removed.push(oldEv);
+            }
+        });
+
+        // Any remaining new events -> Added
+        newList.forEach((newEv, newIdx) => {
+            if (!newMatched.has(newIdx)) {
+                added.push(newEv);
+            }
+        });
+    });
+
+    pendingUpdateEvents = { newEvents, migrations };
+    renderChangeSummary({ added, removed, modified, unchanged });
+}
+
+function applyAgendaUpdate() {
+    if (!pendingUpdateEvents) return;
+
+    const { newEvents, migrations } = pendingUpdateEvents;
+
+    // 1. Migrate State (Attendance, Notes)
+    migrations.forEach(({ oldUid, newUid }) => {
+        if (!oldUid || !newUid) return;
+
+        // Attendance
+        if (state.attendingIds.has(oldUid)) {
+            state.attendingIds.delete(oldUid);
+            state.attendingIds.add(newUid);
+        }
+
+        // Event Notes
+        if (state.eventNotes[oldUid]) {
+            state.eventNotes[newUid] = state.eventNotes[oldUid];
+            delete state.eventNotes[oldUid];
+        }
+
+        // Hidden UIDs (Instance Hiding)
+        // If user hid the specific old instance, hide the new one
+        // Note: Hidden Names (Series) works by name, so it persists automatically
+        if (state.hiddenUids.has(oldUid)) {
+            state.hiddenUids.delete(oldUid);
+            state.hiddenUids.add(newUid);
+        }
+    });
+
+    // 2. Save Migrated State
+    saveAttendance();
+    saveEventNotes();
+    saveHiddenUids();
+
+    // 3. Update Data
+    updateAppData(newEvents);
+
+    pendingUpdateEvents = null;
+    renderApp();
 }
 
 function processLoadedData(jsonObjects) {

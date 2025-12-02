@@ -121,6 +121,14 @@ export function saveData(json, newPortNotes = {}) {
     loadFromStorage(); // Reload to ensure sync
 }
 
+export function updateAppData(newEvents) {
+    state.appData = newEvents;
+    localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(newEvents));
+    // We do NOT clear attendance, custom events, or notes here.
+    // That's the whole point of the update feature.
+    loadFromStorage();
+}
+
 export function restoreBackup(json) {
     localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(json.appData));
     localStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(json.customEvents || []));
