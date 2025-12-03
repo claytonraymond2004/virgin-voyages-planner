@@ -634,27 +634,29 @@
 
         <div class="ctx-divider" id="ctx-hide-divider"></div>
 
-        <div id="ctx-optional" class="ctx-item">
+        <div id="ctx-complete" class="ctx-item text-green-600 dark:text-green-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            Mark as Optional
+            Mark Attended
         </div>
-        <div id="ctx-unable" class="ctx-item">
+
+        <div id="ctx-unable" class="ctx-item text-purple-600 dark:text-purple-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg> Find Alternatives...
         </div>
 
-        <div id="ctx-complete" class="ctx-item text-green-600 dark:text-green-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            Mark as Complete
-        </div>
         <div class="ctx-divider"></div>
+
+        <div id="ctx-optional" class="ctx-item text-orange-600 dark:text-orange-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Mark as Optional
+        </div>
 
         <div class="ctx-item danger" id="ctx-hide">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1325,7 +1327,7 @@
     </div>
 
     <!-- Generic Choice Modal -->
-    <div id="generic-choice-modal" class="modal-overlay" style="display: none; z-index: 5000;">
+    <div id="generic-choice-modal" class="modal-overlay" style="display: none; z-index: 8000;">
         <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden transform transition-all scale-100">
             <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="generic-choice-title">Title</h3>

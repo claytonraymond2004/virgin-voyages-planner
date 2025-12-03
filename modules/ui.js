@@ -1561,23 +1561,19 @@ export function toggleComplete(uid) {
 function triggerCelebration() {
     // Confetti
     if (typeof confetti === 'function') {
-        const duration = 3000;
-        const animationEnd = Date.now() + duration;
         const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
-
         const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
-        const interval = setInterval(function () {
-            const timeLeft = animationEnd - Date.now();
+        const fire = () => {
+            confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        };
 
-            if (timeLeft <= 0) {
-                return clearInterval(interval);
-            }
-
-            const particleCount = 50 * (timeLeft / duration);
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-        }, 250);
+        // Fire a few bursts
+        fire();
+        setTimeout(fire, 200);
+        setTimeout(fire, 400);
+        setTimeout(fire, 600);
+        setTimeout(fire, 800);
     }
-
 }

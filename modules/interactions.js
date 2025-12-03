@@ -349,13 +349,15 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     // Unable to Attend Logic
     if (state.attendingIds.has(ev.uid)) {
         btnUnable.style.display = 'flex';
+        btnUnable.classList.remove('opacity-50', 'pointer-events-none');
         btnUnable.onclick = (e) => {
             e.stopPropagation();
             closeMenu();
             handleUnableToAttend(ev);
         };
     } else {
-        btnUnable.style.display = 'none';
+        btnUnable.style.display = 'flex';
+        btnUnable.classList.add('opacity-50', 'pointer-events-none');
     }
 
     if (ev.isHiddenTemp) {
@@ -526,18 +528,23 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     const isCompleted = state.completedIds.has(ev.uid);
 
     btnComplete.innerHTML = isCompleted ?
-        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Mark as Incomplete` :
-        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark as Complete`;
+        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Mark Unattended` :
+        `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark Attended`;
 
     btnComplete.className = isCompleted ?
-        'ctx-item text-gray-600 dark:text-gray-400' :
+        'ctx-item text-red-600 dark:text-red-400' :
         'ctx-item text-green-600 dark:text-green-400';
 
-    btnComplete.onclick = (e) => {
-        e.stopPropagation();
-        closeMenu();
-        toggleComplete(ev.uid);
-    };
+    if (state.attendingIds.has(ev.uid)) {
+        btnComplete.classList.remove('opacity-50', 'pointer-events-none');
+        btnComplete.onclick = (e) => {
+            e.stopPropagation();
+            closeMenu();
+            toggleComplete(ev.uid);
+        };
+    } else {
+        btnComplete.classList.add('opacity-50', 'pointer-events-none');
+    }
 
     // Note Button Logic
     btnNote.onclick = (e) => {
@@ -621,6 +628,8 @@ function handleUnableToAttend(ev) {
 
             saveAttendance();
             renderApp();
+            closeMobileEventModal();
+            jumpToEvent(result.newTargetUid);
         },
         "View Options",
         () => { initRescheduleWizard(ev.uid); }
