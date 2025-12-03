@@ -1118,6 +1118,11 @@ export function findAlternativeForEvent(eventUid) {
         return true;
     };
 
+    // Note: The search for alternatives includes both time and date.
+    // We prioritize events based on Date then Time (handled in smartReschedule).
+    // We only filter out events that are in the past relative to the current Browser Time (now).
+    // This allows rescheduling to "earlier" instances (e.g. earlier date or time) if they are still in the future relative to now.
+
     // 2. Initialize Scheduler State
     // We need to reset the module-level variables used by smartReschedule
     proposedSchedule.clear();
@@ -1198,7 +1203,10 @@ function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = nu
         instances = instances.filter(filterPredicate);
     }
 
-    instances.sort((a, b) => a.startMins - b.startMins);
+    instances.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.startMins - b.startMins;
+    });
 
     // Unified Logic: Try each instance. 
     // For each instance, identify ALL blockers (Main + Sales).

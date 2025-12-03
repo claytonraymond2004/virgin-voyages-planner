@@ -582,10 +582,22 @@ function handleUnableToAttend(ev) {
 
     // Construct confirmation message
     const newEv = state.eventLookup.get(result.newTargetUid);
-    const dateStr = newEv.date;
-    const timeStr = formatTime(newEv.startMins);
+    const eventDate = new Date(newEv.date + 'T00:00:00');
+    const today = new Date();
+    const isToday = eventDate.toDateString() === today.toDateString();
+    const isSameDay = newEv.date === ev.date;
 
-    let msg = `Found an alternative time: ${dateStr} at ${timeStr}.`;
+    const timeStr = formatTime(newEv.startMins);
+    let msg;
+
+    if (isToday) {
+        msg = `Found an alternative today at ${timeStr}.`;
+    } else if (isSameDay) {
+        msg = `Found an alternative on the same day at ${timeStr}.`;
+    } else {
+        const dateDisplay = eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        msg = `Found an alternative ${dateDisplay} at ${timeStr}.`;
+    }
 
     if (result.changes.removed.length > 0) {
         const movedNames = result.changes.removed.map(e => e.name).join(", ");
