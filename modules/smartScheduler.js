@@ -1185,6 +1185,12 @@ export function findAlternativeForEvent(eventUid) {
         }
     });
 
+    // If any events are removed (displaced), we consider this a "conflict" for the simple "Find Alternative" action.
+    // We want to force the user to the wizard to resolve this manually.
+    if (changes.removed.length > 0) {
+        return { success: false, message: "No conflict-free alternative found." };
+    }
+
     return {
         success: true,
         newTargetUid: newTargetUid,
