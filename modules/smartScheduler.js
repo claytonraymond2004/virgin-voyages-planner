@@ -34,6 +34,64 @@ export function initSmartScheduler() {
     renderWizard();
 }
 
+export function initRescheduleWizard(eventUid) {
+    const ev = state.eventLookup.get(eventUid);
+    if (!ev) {
+        alert("Event not found.");
+        return;
+    }
+
+    // 1. Initialize State
+    proposedSchedule.clear();
+    conflictList = [];
+    ignoredConflicts.clear();
+    skippedEvents.clear();
+    conflictSelectionsBackup = null;
+
+    // 2. Populate Proposed Schedule (All attending EXCEPT target)
+    state.attendingIds.forEach(uid => {
+        if (uid !== eventUid) {
+            proposedSchedule.add(uid);
+        }
+    });
+
+    // 3. Identify Candidates (Future instances of the same series)
+    const now = new Date();
+    const allInstances = Array.from(state.eventLookup.values()).filter(e => e.name === ev.name);
+
+    // Filter for future instances
+    const candidates = allInstances.filter(instance => {
+        // Must not be the exact same instance we are moving from (unless we want to allow keeping it? No, "Unable to Attend")
+        if (instance.uid === eventUid) return false;
+
+        const instanceDate = new Date(instance.date + 'T00:00:00');
+        instanceDate.setMinutes(instance.startMins);
+        return now <= instanceDate;
+    });
+
+    if (candidates.length === 0) {
+        alert("No future occurrences found for this event.");
+        return;
+    }
+
+    // Sort by time
+    candidates.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.startMins - b.startMins;
+    });
+
+    // 4. Create Conflict Entry
+    // We treat this as a "conflict" so the user is forced to choose one.
+    conflictList.push({
+        name: ev.name,
+        instances: candidates
+    });
+
+    // 5. Launch Wizard at Conflicts Step
+    currentWizardStep = WIZARD_STEPS.CONFLICTS;
+    renderWizard();
+}
+
 // --- Wizard Rendering ---
 function renderWizard() {
     // Remove existing modal if any
@@ -952,12 +1010,194 @@ function applySchedule() {
     renderApp();
 }
 
-function smartReschedule(seriesName, lockedUids, depth = 0) {
+
+
+function canMoveSeries(seriesName, lockedUids, depth) {
+    // Check if there is ANY free slot for this series (ignoring current proposed schedule for a moment? No, respecting it)
+    // Actually, we need to check if there is a slot that DOES NOT conflict with lockedUids
+    // AND does not conflict with proposedSchedule (except the ones we are about to remove? No, that's hard)
+
+    // Heuristic: Just check if there is another instance that has NO conflicts with Locked UIDs.
+    // We assume we can swap to it.
+
+    const instances = Array.from(state.eventLookup.values()).filter(e => e.name === seriesName);
+
+    return instances.some(inst => {
+        // Check conflicts with LOCKED UIDs only
+        // We assume we can displace other non-locked things if needed (recursion)
+        // But for safety, let's just check for "Free or Displaceable"
+
+        // For this check, let's just see if it conflicts with Locked UIDs.
+        const conflicts = getConflictingEvents(inst);
+        return !conflicts.some(c => lockedUids.has(c.uid));
+    });
+}
+
+// Helper to remove event and its dependencies (Bingo)
+// Returns Set of series names that were removed (for rescheduling)
+function removeEventFromSchedule(uid) {
+    const removedSeries = new Set();
+    if (!proposedSchedule.has(uid)) return removedSeries;
+
+    const ev = state.eventLookup.get(uid);
+    if (!ev) return removedSeries;
+
+    proposedSchedule.delete(uid);
+
+    if (ev.name.startsWith("Bingo with")) {
+        removedSeries.add(ev.name);
+        // Remove Sales - Aggressively remove ANY sales on this day from proposedSchedule
+        // This avoids issues where findBingoSales might pick a different instance than the one scheduled
+        const toRemove = [];
+        for (const pUid of proposedSchedule) {
+            const pEv = state.eventLookup.get(pUid);
+            if (pEv && pEv.name === "Bingo Card Sales" && pEv.date === ev.date) {
+                toRemove.push(pUid);
+            }
+        }
+        toRemove.forEach(id => proposedSchedule.delete(id));
+
+    } else if (ev.name === "Bingo Card Sales") {
+        // Remove Game - Aggressively remove ANY game on this day
+        const toRemove = [];
+        for (const pUid of proposedSchedule) {
+            const pEv = state.eventLookup.get(pUid);
+            if (pEv && pEv.name.startsWith("Bingo with") && pEv.date === ev.date) {
+                toRemove.push(pUid);
+                removedSeries.add(pEv.name);
+            }
+        }
+        toRemove.forEach(id => proposedSchedule.delete(id));
+    } else {
+        removedSeries.add(ev.name);
+    }
+
+    return removedSeries;
+}
+
+export function findAlternativeForEvent(eventUid) {
+    const ev = state.eventLookup.get(eventUid);
+    if (!ev) return { success: false, message: "Event not found." };
+
+    // 1. Determine Time Constraints
+    const now = new Date();
+    // For testing/demo purposes, we might want to use a fixed time if provided in metadata, 
+    // but the requirement says "browser time".
+    // However, we need to know if we are "during the itinerary".
+    // We can check if `now` is between start and end of available dates.
+
+    let minStartMins = -1;
+
+    if (state.availableDates.length > 0) {
+        const firstDate = new Date(state.availableDates[0] + 'T00:00:00');
+        const lastDate = new Date(state.availableDates[state.availableDates.length - 1] + 'T23:59:59');
+
+        if (now >= firstDate && now <= lastDate) {
+            // We are during the itinerary.
+            // Calculate minutes from start of itinerary? 
+            // No, our startMins are relative to 00:00 of the specific day usually?
+            // Wait, `startMins` in our app is just minutes from midnight of THAT day.
+            // But we need to filter instances that are in the future relative to NOW.
+
+            // We can just use the Date object comparison for each instance.
+            // The filterPredicate will handle this.
+        }
+    }
+
+    const filterPredicate = (instance) => {
+        // 1. Must not be the exact same instance we are moving from
+        if (instance.uid === eventUid) return false;
+
+        // 2. Future check
+        // Construct instance date object
+        const instanceDate = new Date(instance.date + 'T00:00:00');
+        instanceDate.setMinutes(instance.startMins);
+
+        if (now > instanceDate) return false; // In the past
+
+        return true;
+    };
+
+    // 2. Initialize Scheduler State
+    // We need to reset the module-level variables used by smartReschedule
+    proposedSchedule.clear();
+    conflictList = [];
+    ignoredConflicts.clear();
+    skippedEvents.clear();
+
+    // Populate proposedSchedule with ALL currently attending events EXCEPT the target one
+    state.attendingIds.forEach(uid => {
+        if (uid !== eventUid) {
+            proposedSchedule.add(uid);
+        }
+    });
+
+    // 3. Run Smart Reschedule
+    // We pass an empty set for lockedUids to allow moving other events if necessary.
+    // However, we might want to treat "Required" events as locked? 
+    // For now, let's assume everything else is movable if needed, but the algorithm prefers free slots.
+    const lockedUids = new Set();
+
+    const success = smartReschedule(ev.name, lockedUids, 0, filterPredicate);
+
+    if (!success) {
+        return { success: false, message: "No suitable alternative time found." };
+    }
+
+    // 4. Calculate Changes
+    const changes = {
+        added: [],
+        removed: [],
+        kept: []
+    };
+
+    // Identify the new instance of the target event
+    let newTargetUid = null;
+    proposedSchedule.forEach(uid => {
+        const pEv = state.eventLookup.get(uid);
+        if (pEv && pEv.name === ev.name) {
+            newTargetUid = uid;
+        }
+    });
+
+    if (!newTargetUid) {
+        // Should not happen if success is true
+        return { success: false, message: "Error identifying new slot." };
+    }
+
+    // Calculate diffs
+    // Added: in proposed but not in original attending (excluding the target swap)
+    proposedSchedule.forEach(uid => {
+        if (!state.attendingIds.has(uid)) {
+            changes.added.push(state.eventLookup.get(uid));
+        }
+    });
+
+    // Removed: in original attending but not in proposed (excluding the target swap)
+    state.attendingIds.forEach(uid => {
+        if (!proposedSchedule.has(uid) && uid !== eventUid) {
+            changes.removed.push(state.eventLookup.get(uid));
+        }
+    });
+
+    return {
+        success: true,
+        newTargetUid: newTargetUid,
+        changes: changes
+    };
+}
+
+function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = null) {
     if (depth > 5) {
         return false;
     }
 
-    const instances = Array.from(state.eventLookup.values()).filter(e => e.name === seriesName);
+    let instances = Array.from(state.eventLookup.values()).filter(e => e.name === seriesName);
+
+    if (filterPredicate) {
+        instances = instances.filter(filterPredicate);
+    }
+
     instances.sort((a, b) => a.startMins - b.startMins);
 
     // Unified Logic: Try each instance. 
@@ -1080,67 +1320,4 @@ function smartReschedule(seriesName, lockedUids, depth = 0) {
         });
     }
     return false;
-}
-
-function canMoveSeries(seriesName, lockedUids, depth) {
-    // Check if there is ANY free slot for this series (ignoring current proposed schedule for a moment? No, respecting it)
-    // Actually, we need to check if there is a slot that DOES NOT conflict with lockedUids
-    // AND does not conflict with proposedSchedule (except the ones we are about to remove? No, that's hard)
-
-    // Heuristic: Just check if there is another instance that has NO conflicts with Locked UIDs.
-    // We assume we can swap to it.
-
-    const instances = Array.from(state.eventLookup.values()).filter(e => e.name === seriesName);
-
-    return instances.some(inst => {
-        // Check conflicts with LOCKED UIDs only
-        // We assume we can displace other non-locked things if needed (recursion)
-        // But for safety, let's just check for "Free or Displaceable"
-
-        // For this check, let's just see if it conflicts with Locked UIDs.
-        const conflicts = getConflictingEvents(inst);
-        return !conflicts.some(c => lockedUids.has(c.uid));
-    });
-}
-
-// Helper to remove event and its dependencies (Bingo)
-// Returns Set of series names that were removed (for rescheduling)
-function removeEventFromSchedule(uid) {
-    const removedSeries = new Set();
-    if (!proposedSchedule.has(uid)) return removedSeries;
-
-    const ev = state.eventLookup.get(uid);
-    if (!ev) return removedSeries;
-
-    proposedSchedule.delete(uid);
-
-    if (ev.name.startsWith("Bingo with")) {
-        removedSeries.add(ev.name);
-        // Remove Sales - Aggressively remove ANY sales on this day from proposedSchedule
-        // This avoids issues where findBingoSales might pick a different instance than the one scheduled
-        const toRemove = [];
-        for (const pUid of proposedSchedule) {
-            const pEv = state.eventLookup.get(pUid);
-            if (pEv && pEv.name === "Bingo Card Sales" && pEv.date === ev.date) {
-                toRemove.push(pUid);
-            }
-        }
-        toRemove.forEach(id => proposedSchedule.delete(id));
-
-    } else if (ev.name === "Bingo Card Sales") {
-        // Remove Game - Aggressively remove ANY game on this day
-        const toRemove = [];
-        for (const pUid of proposedSchedule) {
-            const pEv = state.eventLookup.get(pUid);
-            if (pEv && pEv.name.startsWith("Bingo with") && pEv.date === ev.date) {
-                toRemove.push(pUid);
-                removedSeries.add(pEv.name);
-            }
-        }
-        toRemove.forEach(id => proposedSchedule.delete(id));
-    } else {
-        removedSeries.add(ev.name);
-    }
-
-    return removedSeries;
 }

@@ -8,6 +8,7 @@ import {
     toggleComplete
 } from './ui.js';
 import { populateCustomModal, deleteCustomEvent, initiateEdit } from './customEvents.js';
+import { findAlternativeForEvent, initRescheduleWizard } from './smartScheduler.js';
 
 // --- Drag Interaction ---
 
@@ -327,6 +328,7 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     const btnVV = document.getElementById('ctx-vvinsider');
     const btnGoogle = document.getElementById('ctx-google');
     const btnBlacklist = document.getElementById('ctx-blacklist');
+    const btnUnable = document.getElementById('ctx-unable');
 
     const dividerNav = document.getElementById('ctx-nav-divider');
     const dividerNote = document.getElementById('ctx-note-divider');
@@ -344,10 +346,23 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
         if (ctxOverlay) ctxOverlay.classList.remove('active');
     };
 
+    // Unable to Attend Logic
+    if (state.attendingIds.has(ev.uid)) {
+        btnUnable.style.display = 'flex';
+        btnUnable.onclick = (e) => {
+            e.stopPropagation();
+            closeMenu();
+            handleUnableToAttend(ev);
+        };
+    } else {
+        btnUnable.style.display = 'none';
+    }
+
     if (ev.isHiddenTemp) {
         btnHide.style.display = 'none';
         unhideOption.style.display = 'flex';
         unhideDivider.style.display = 'block';
+        btnUnable.style.display = 'none'; // Cannot attend hidden event (should not be attending anyway)
 
         unhideOption.onclick = (e) => {
             e.stopPropagation();
@@ -393,6 +408,7 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     // If hidden preview, allow unhide but hide "Hide" option
     if (isHiddenPreview) {
         btnHide.style.display = 'none';
+        btnUnable.style.display = 'none';
 
         // Show Unhide option
         unhideOption.style.display = 'flex';
@@ -549,6 +565,56 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     // VV Divider Logic
     dividerVV.style.display = (!ev.isCustom && (hasPrev || hasNext)) ? 'block' : 'none';
 }
+
+function handleUnableToAttend(ev) {
+    const result = findAlternativeForEvent(ev.uid);
+    if (!result.success) {
+        showGenericChoice(
+            "No Simple Alternative Found",
+            result.message + " Would you like to view all options and resolve conflicts manually?",
+            "View Options",
+            () => { initRescheduleWizard(ev.uid); },
+            "Cancel",
+            () => { }
+        );
+        return;
+    }
+
+    // Construct confirmation message
+    const newEv = state.eventLookup.get(result.newTargetUid);
+    const dateStr = newEv.date;
+    const timeStr = formatTime(newEv.startMins);
+
+    let msg = `Found an alternative time: ${dateStr} at ${timeStr}.`;
+
+    if (result.changes.removed.length > 0) {
+        const movedNames = result.changes.removed.map(e => e.name).join(", ");
+        msg += `\n\nWarning: This will displace the following events: ${movedNames}.`;
+    }
+
+    showGenericChoice(
+        "Reschedule Event?",
+        msg,
+        "Confirm Change",
+        () => {
+            // Apply changes
+            // Remove old target
+            state.attendingIds.delete(ev.uid);
+            // Add new target
+            state.attendingIds.add(result.newTargetUid);
+
+            // Apply other changes
+            result.changes.added.forEach(e => state.attendingIds.add(e.uid));
+            result.changes.removed.forEach(e => state.attendingIds.delete(e.uid));
+
+            saveAttendance();
+            renderApp();
+        },
+        "View Options",
+        () => { initRescheduleWizard(ev.uid); }
+    );
+}
+
 
 // --- Hiding Logic ---
 
