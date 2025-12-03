@@ -63,7 +63,6 @@ export function renderApp() {
         let isHidden = false;
         const isExplicitlyShown = state.shownUids.has(uid);
         if ((state.hiddenNames.has(ev.name) || state.hiddenUids.has(uid)) && !state.attendingIds.has(uid) && !isExplicitlyShown) {
-            if (!state.showHiddenTemp) return;
             isHidden = true;
         }
 
@@ -78,7 +77,6 @@ export function renderApp() {
         let isHidden = false;
         const isExplicitlyShown = state.shownUids.has(ev.uid);
         if ((state.hiddenNames.has(ev.name) || state.hiddenUids.has(ev.uid)) && !state.attendingIds.has(ev.uid) && !isExplicitlyShown) {
-            if (!state.showHiddenTemp) return;
             isHidden = true;
         }
         processedCustom.push({ ...ev, isHiddenTemp: isHidden });
@@ -192,7 +190,11 @@ export function renderApp() {
         renderTimeBlocks(dayCol);
 
         // Packing
-        const events = eventsByDate[date].sort((a, b) => a.startMins - b.startMins || (b.endMins - b.startMins) - (a.endMins - a.startMins));
+        let events = eventsByDate[date];
+        if (!state.showHiddenTemp) {
+            events = events.filter(ev => !ev.isHiddenTemp);
+        }
+        events.sort((a, b) => a.startMins - b.startMins || (b.endMins - b.startMins) - (a.endMins - a.startMins));
 
         // Split into normal and optional
         // 1. Identify "Anchor" events (Required OR Attending) which define the "busy" times
