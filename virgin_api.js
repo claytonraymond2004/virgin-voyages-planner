@@ -109,12 +109,46 @@ const VirginAPI = {
     },
 
     /**
+     * Get My Agenda (Booked Events) for a specific day
+     * @param {string} accessToken 
+     * @param {string} date YYYY-MM-DD
+     * @param {string} guestId 
+     * @param {string} shipCode 
+     * @returns {Promise<Object>} Agenda data
+     */
+    async getAgenda(accessToken, date, guestId, shipCode) {
+        const params = new URLSearchParams({
+            shipCode: shipCode,
+            reservationGuestId: guestId,
+            dateTime: date
+        });
+
+        const url = `${VV_API_BASE}/guest-bff/nsa/my-voyage/agenda?${params.toString()}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                ...COMMON_HEADERS,
+                'authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            console.warn(`Failed to get agenda for ${date}: ${response.status}`);
+            return { appointments: [] }; // Return empty on failure to not break the flow
+        }
+
+        return await response.json();
+    },
+
+    /**
      * Orchestrate the full data fetch
      * @param {string} username 
      * @param {string} password 
      * @param {function} onProgress Callback for status updates
+     * @param {boolean} importBooked Whether to fetch booked events
      */
-    async fetchAllData(username, password, onProgress = () => { }) {
+    async fetchAllData(username, password, onProgress = () => { }, importBooked = false) {
         try {
             onProgress('Logging in...');
             const accessToken = await this.login(username, password);
@@ -126,13 +160,14 @@ const VirginAPI = {
                 throw new Error('No active reservation found.');
             }
 
-            const { reservationGuestId, reservationNumber, voyageNumber, itineraries } = profile.reservation;
+            const { reservationGuestId, reservationNumber, voyageNumber, itineraries, shipCode } = profile.reservation;
 
             if (!itineraries || itineraries.length === 0) {
                 throw new Error('No itinerary days found.');
             }
 
             const allEvents = [];
+            const bookedEvents = [];
             const totalDays = itineraries.length;
 
             for (let i = 0; i < totalDays; i++) {
@@ -164,6 +199,20 @@ const VirginAPI = {
                     // We will pass the whole object to the existing processor.
                     allEvents.push(dayData);
 
+                    if (importBooked) {
+                        // Fetch agenda
+                        // Use shipCode from reservation, or fallback to first 2 chars of voyageNumber (e.g. BR from BR2025...)
+                        const sc = shipCode || (voyageNumber ? voyageNumber.substring(0, 2) : 'BR');
+                        try {
+                            const agendaData = await this.getAgenda(accessToken, day.date, reservationGuestId, sc);
+                            if (agendaData && agendaData.appointments) {
+                                bookedEvents.push(...agendaData.appointments);
+                            }
+                        } catch (err) {
+                            console.warn(`Error fetching agenda for ${day.date}`, err);
+                        }
+                    }
+
                 } catch (err) {
                     console.error(`Error fetching day ${day.date}`, err);
                     // Continue to next day? Or fail? Let's continue.
@@ -171,7 +220,8 @@ const VirginAPI = {
             }
 
             onProgress('Processing data...');
-            return allEvents;
+            onProgress('Processing data...');
+            return { events: allEvents, bookedEvents };
 
         } catch (error) {
             console.error("API Fetch Error:", error);

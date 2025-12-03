@@ -635,16 +635,22 @@ async function handleVVLogin() {
     usernameInput.disabled = true;
     passwordInput.disabled = true;
 
+    const importBooked = document.getElementById('vv-import-booked').checked;
+
     try {
         if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
-        const events = await window.VirginAPI.fetchAllData(username, password, (msg) => {
+        const { events, bookedEvents } = await window.VirginAPI.fetchAllData(username, password, (msg) => {
             statusDiv.textContent = msg;
-        });
+        }, importBooked);
 
         statusDiv.textContent = "Import successful! Rendering...";
         statusDiv.className = "text-center text-sm text-green-600 min-h-[20px]";
 
         processLoadedData(events);
+
+        if (bookedEvents && bookedEvents.length > 0) {
+            processBookedEvents(bookedEvents);
+        }
 
     } catch (err) {
         console.error(err);
@@ -688,16 +694,18 @@ async function handleUpdateVVLogin() {
     usernameInput.disabled = true;
     passwordInput.disabled = true;
 
+    const importBooked = document.getElementById('update-vv-import-booked').checked;
+
     try {
         if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
-        const events = await window.VirginAPI.fetchAllData(username, password, (msg) => {
+        const { events, bookedEvents } = await window.VirginAPI.fetchAllData(username, password, (msg) => {
             statusDiv.textContent = msg;
-        });
+        }, importBooked);
 
         statusDiv.textContent = "Data fetched. Comparing...";
         statusDiv.className = "text-center text-xs text-green-600 min-h-[16px]";
 
-        checkForUpdates(events);
+        checkForUpdates(events, importBooked ? bookedEvents : null);
 
     } catch (err) {
         console.error(err);
@@ -740,7 +748,7 @@ function handleUpdateFiles(fileList) {
         });
 }
 
-function checkForUpdates(jsonObjects) {
+function checkForUpdates(jsonObjects, bookedEvents = []) {
     // Flatten and clean new data
     const newEvents = [];
 
@@ -887,14 +895,100 @@ function checkForUpdates(jsonObjects) {
         });
     });
 
-    pendingUpdateEvents = { newEvents, migrations };
-    renderChangeSummary({ added, removed, modified, unchanged });
+    // 4. Check for Booked Event Changes
+    const bookedChanges = { added: [], removed: [], unattended: [] };
+
+    if (bookedEvents) { // Only if sync is enabled (bookedEvents is not null)
+        // A. Check for ADDED bookings (New Custom or New Attendance)
+        bookedEvents.forEach(booked => {
+            const bookedTime = parseTimeRange(booked.timePeriod);
+            if (!bookedTime) return;
+            const bookedStart = bookedTime.start + SHIFT_START_ADD;
+
+            // Check if matches official
+            const match = newEvents.find(ev => {
+                if (ev.date !== booked.date) return false;
+                if (ev.name !== booked.name) return false;
+                const evTime = parseTimeRange(ev.timePeriod);
+                if (!evTime) return false;
+                const evStart = evTime.start + SHIFT_START_ADD;
+                return Math.abs(evStart - bookedStart) < 15;
+            });
+
+            if (match) {
+                // Official Event Match
+                // If not currently attending, it's "Added"
+                const uid = getUid(match);
+                if (uid && !state.attendingIds.has(uid)) {
+                    bookedChanges.added.push({ ...booked, type: 'attendance', matchUid: uid });
+                }
+            } else {
+                // Custom Event
+                // Check if exists in current custom events
+                const exists = state.customEvents.find(ev =>
+                    ev.date === booked.date &&
+                    ev.name === booked.name &&
+                    ev.timePeriod === booked.timePeriod
+                );
+                if (!exists) {
+                    bookedChanges.added.push({ ...booked, type: 'custom' });
+                }
+            }
+        });
+
+        // B. Check for REMOVED bookings (Custom Only)
+        // Identify existing custom events that look like imported bookings
+        const likelyImported = state.customEvents.filter(ev =>
+            ev.longDescription === "Imported Booked Event" ||
+            ["Treatment", "Eatery", "Entertainment"].includes(ev.longDescription)
+        );
+
+        likelyImported.forEach(customEv => {
+            // Check if this customEv is present in the NEW bookedEvents list
+            const stillExists = bookedEvents.find(b =>
+                b.name === customEv.name &&
+                b.date === customEv.date &&
+                b.timePeriod === customEv.timePeriod
+            );
+
+            if (!stillExists) {
+                bookedChanges.removed.push(customEv);
+            }
+        });
+
+        // C. Check for UNATTENDED bookings (Official Events Only)
+        // If we are syncing, and an official event is marked attending but NOT in the agenda, unmark it.
+        state.attendingIds.forEach(uid => {
+            const ev = state.eventLookup.get(uid);
+            if (!ev || ev.isCustom) return; // Custom events handled in B
+
+            const evTime = parseTimeRange(ev.timePeriod);
+            if (!evTime) return;
+            const evStart = evTime.start + SHIFT_START_ADD;
+
+            const isBooked = bookedEvents.find(b => {
+                if (b.date !== ev.date) return false;
+                if (b.name !== ev.name) return false;
+                const bTime = parseTimeRange(b.timePeriod);
+                if (!bTime) return false;
+                const bStart = bTime.start + SHIFT_START_ADD;
+                return Math.abs(bStart - evStart) < 15;
+            });
+
+            if (!isBooked) {
+                bookedChanges.unattended.push(ev);
+            }
+        });
+    }
+
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges };
+    renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
 }
 
 function applyAgendaUpdate() {
     if (!pendingUpdateEvents) return;
 
-    const { newEvents, migrations } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
     migrations.forEach(({ oldUid, newUid }) => {
@@ -928,6 +1022,49 @@ function applyAgendaUpdate() {
 
     // 3. Update Data
     updateAppData(newEvents);
+
+    // 4. Process Booked Events
+    if (bookedChanges) {
+        // Remove cancelled bookings (Custom Events)
+        if (bookedChanges.removed.length > 0) {
+            const uidsToRemove = new Set(bookedChanges.removed.map(ev => ev.uid));
+            state.customEvents = state.customEvents.filter(ev => !uidsToRemove.has(ev.uid));
+            uidsToRemove.forEach(uid => state.attendingIds.delete(uid));
+            saveCustomEvents();
+        }
+
+        // Unmark unattended events (Official Events)
+        if (bookedChanges.unattended.length > 0) {
+            bookedChanges.unattended.forEach(ev => {
+                // We need to find the UID in the NEW data context if possible, 
+                // but attendingIds stores UIDs based on date/name/time which should be stable 
+                // or migrated by step 1.
+                // However, ev comes from state.eventLookup (OLD data).
+                // Step 1 migrated attendingIds from OldUID -> NewUID.
+                // So we should check if the OldUID was migrated.
+
+                let targetUid = ev.uid; // Old UID
+                // Check if this UID was migrated
+                const migration = migrations.find(m => m.oldUid === ev.uid);
+                if (migration) {
+                    targetUid = migration.newUid;
+                }
+
+                if (state.attendingIds.has(targetUid)) {
+                    state.attendingIds.delete(targetUid);
+                }
+            });
+        }
+        saveAttendance();
+    }
+
+    // Then process additions/updates
+    if (bookedEvents && bookedEvents.length > 0) {
+        processBookedEvents(bookedEvents, false);
+    }
+    if (bookedEvents && bookedEvents.length > 0) {
+        processBookedEvents(bookedEvents, false);
+    }
 
     pendingUpdateEvents = null;
     renderApp();
@@ -1050,7 +1187,9 @@ function saveNewData(json, newPortNotes = {}) {
     // Calculate blacklist events (Dynamic)
     const blacklistEvents = new Set();
     const autoBlacklistKeywords = [
-        "crew drill"
+        "crew drill",
+        "you have arrived!",
+        "roll call - assembly drill"
     ];
 
     json.forEach(ev => {
@@ -1120,4 +1259,118 @@ function confirmResetData() {
         location.reload();
     }, "Reset Data");
     document.getElementById('dropdown-menu').style.display = 'none';
+}
+
+function processBookedEvents(bookedEvents, shouldRender = true) {
+    let modified = false;
+
+    bookedEvents.forEach(booked => {
+        const bookedTime = parseTimeRange(booked.timePeriod);
+        if (!bookedTime) return;
+        const bookedStart = bookedTime.start + SHIFT_START_ADD;
+
+        // 1. Try to find in appData
+        const match = state.appData.find(ev => {
+            if (ev.date !== booked.date) return false;
+            // Exact name match preferred, but maybe loose?
+            // The API names might match exactly.
+            if (ev.name !== booked.name) return false;
+
+            const evTime = parseTimeRange(ev.timePeriod);
+            if (!evTime) return false;
+            const evStart = evTime.start + SHIFT_START_ADD;
+
+            // Allow 15 min tolerance
+            return Math.abs(evStart - bookedStart) < 15;
+        });
+
+        if (match) {
+            // Mark as attending
+            const timeData = parseTimeRange(match.timePeriod);
+            const s = timeData.start + SHIFT_START_ADD;
+            const uid = `${match.date}_${match.name}_${s}`;
+
+            if (!state.attendingIds.has(uid)) {
+                state.attendingIds.add(uid);
+                modified = true;
+            }
+
+            // Hide other occurrences (Series Hiding)
+            if (!state.hiddenNames.has(match.name)) {
+                state.hiddenNames.add(match.name);
+                modified = true;
+            }
+
+            // Ensure THIS specific instance is visible (Unhide Instance)
+            if (state.hiddenUids.has(uid)) {
+                state.hiddenUids.delete(uid);
+                modified = true;
+            }
+            // Also add to shownUids to explicitly show this instance despite series hide
+            if (!state.shownUids) state.shownUids = new Set();
+            if (!state.shownUids.has(uid)) {
+                state.shownUids.add(uid);
+                modified = true;
+            }
+        } else {
+            // Create Custom Event
+            // Check for duplicates
+            const exists = state.customEvents.find(ev =>
+                ev.date === booked.date &&
+                ev.name === booked.name &&
+                ev.timePeriod === booked.timePeriod
+            );
+
+            if (exists) {
+                // Update existing if missing fields (migration fix)
+                if (!exists.startMins || !exists.uid || !exists.seriesId) {
+                    const bookedEnd = bookedTime.end + SHIFT_END_ADD;
+                    const seriesId = Date.now() + Math.floor(Math.random() * 10000);
+                    const uid = `custom_${seriesId}`;
+
+                    exists.startMins = bookedStart;
+                    exists.endMins = bookedEnd;
+                    exists.seriesId = exists.seriesId || seriesId;
+                    exists.uid = exists.uid || uid;
+                    exists.longDescription = exists.longDescription || booked.bookableType || "Imported Booked Event";
+
+                    // Ensure it's in attending
+                    state.attendingIds.add(exists.uid);
+                    modified = true;
+                }
+            } else {
+                const bookedEnd = bookedTime.end + SHIFT_END_ADD;
+                const seriesId = Date.now() + Math.floor(Math.random() * 10000);
+                const uid = `custom_${seriesId}`;
+
+                const newCustom = {
+                    id: crypto.randomUUID(),
+                    date: booked.date,
+                    name: booked.name,
+                    location: booked.location || "",
+                    timePeriod: booked.timePeriod,
+                    longDescription: booked.bookableType || "Imported Booked Event",
+                    isCustom: true,
+                    startMins: bookedStart,
+                    endMins: bookedEnd,
+                    seriesId: seriesId,
+                    uid: uid
+                };
+                state.customEvents.push(newCustom);
+
+                // Add to attending
+                state.attendingIds.add(uid);
+
+                modified = true;
+            }
+        }
+    });
+
+    if (modified) {
+        saveAttendance();
+        saveCustomEvents();
+        saveHiddenNames();
+        saveShownUids();
+        if (shouldRender) renderApp();
+    }
 }

@@ -87,6 +87,14 @@
                                     class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                                     placeholder="••••••••">
                             </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="vv-import-booked"
+                                    class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
+                                    checked>
+                                <label for="vv-import-booked" class="text-sm text-gray-700 dark:text-gray-300">Sync
+                                    Agenda from
+                                    Virgin Voyages App</label>
+                            </div>
                             <button onclick="handleVVLogin()" id="btn-vv-login"
                                 class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition flex justify-center items-center gap-2">
                                 <span>Sign In & Import</span>
@@ -368,7 +376,7 @@
                     data-tooltip="Print Agenda">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2v4h10z">
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
                         </path>
                     </svg>
                 </button>
@@ -1256,6 +1264,14 @@
                                 <input type="password" id="update-vv-password"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                                     placeholder="Password">
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="update-vv-import-booked"
+                                        class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
+                                        checked>
+                                    <label for="update-vv-import-booked"
+                                        class="text-xs text-gray-700 dark:text-gray-300">Sync Agenda from Virgin Voyages
+                                        App</label>
+                                </div>
                                 <button onclick="handleUpdateVVLogin()" id="btn-update-vv-login"
                                     class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition text-sm flex justify-center items-center gap-2">
                                     <span>Sign In & Check</span>

@@ -644,6 +644,8 @@ export function toggleOptionalEvent(eventName) {
     saveOptionalEvents();
     // Update agenda count badge
     updateAgendaCount();
+    // Refresh the panel to move the item to the other tab
+    updateAttendancePanel();
 }
 
 export function updateAttendancePanel() {
@@ -683,10 +685,11 @@ export function updateAttendancePanel() {
     let html = '';
 
     const renderGroup = (eventGroup) => {
+        if (!eventGroup || !eventGroup.name) return '';
         const isOptional = state.optionalEvents.has(eventGroup.name);
         const safeName = eventGroup.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         const toggleHtml = `
-            <button class="ml-2 px-2 py-1 text-xs font-medium rounded border transition-colors focus:outline-none flex justify-center items-center flex-shrink-0 w-[90px] whitespace-nowrap ${isOptional ? 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200' : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-700'}" title="${isOptional ? 'Mark as Required' : 'Mark as Optional'}" onclick="window.toggleOptionalEvent('${safeName}')">
+            <button class="ml-2 px-2 py-1 text-xs font-medium rounded border transition-colors focus:outline-none flex justify-center items-center flex-shrink-0 w-[90px] whitespace-nowrap ${isOptional ? 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200' : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-700'}" title="${isOptional ? 'Mark as Required' : 'Mark as Optional'}" onclick="event.stopPropagation(); window.toggleOptionalEvent('${safeName}')">
                 ${isOptional ? 'Mark Required' : 'Mark Optional'}
             </button>
         `;
@@ -989,6 +992,19 @@ export function openUpdateAgendaModal() {
         newDropZone.classList.remove('border-red-500', 'bg-red-50');
         if (e.dataTransfer.files.length) window.handleUpdateFiles(e.dataTransfer.files);
     });
+
+    // Add Enter key support for login
+    const usernameInput = document.getElementById('update-vv-username');
+    const passwordInput = document.getElementById('update-vv-password');
+
+    const handleEnter = (e) => {
+        if (e.key === 'Enter') {
+            window.handleUpdateVVLogin();
+        }
+    };
+
+    usernameInput.onkeydown = handleEnter;
+    passwordInput.onkeydown = handleEnter;
 }
 
 export function resetUpdateModal() {
@@ -1014,7 +1030,9 @@ export function renderChangeSummary(changes) {
 
     document.getElementById('update-step-source').classList.add('hidden');
 
-    if (changes.added.length === 0 && changes.removed.length === 0 && (!changes.modified || changes.modified.length === 0)) {
+    const hasBookedChanges = changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0);
+
+    if (changes.added.length === 0 && changes.removed.length === 0 && (!changes.modified || changes.modified.length === 0) && !hasBookedChanges) {
         document.getElementById('update-step-no-changes').classList.remove('hidden');
         document.getElementById('update-step-no-changes').classList.add('flex');
         return;
@@ -1087,6 +1105,58 @@ export function renderChangeSummary(changes) {
                 <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Booked Changes
+    if (changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0)) {
+        const bookedHeader = document.createElement('h5');
+        bookedHeader.className = "font-bold text-purple-700 dark:text-purple-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        bookedHeader.textContent = `Booked Event Changes`;
+        list.appendChild(bookedHeader);
+
+        // Added Bookings
+        changes.bookedChanges.added.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4";
+            const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
+            el.innerHTML = `
+                <div class="flex justify-between">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+
+        // Removed Bookings
+        changes.bookedChanges.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.innerHTML = `
+                <div class="flex justify-between">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+            `;
+            list.appendChild(el);
+        });
+
+        // Unattended Bookings
+        changes.bookedChanges.unattended.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.innerHTML = `
+                <div class="flex justify-between">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
             `;
             list.appendChild(el);
         });
