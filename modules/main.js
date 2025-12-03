@@ -1027,15 +1027,19 @@ function applyAgendaUpdate() {
     if (bookedChanges) {
         // Remove cancelled bookings (Custom Events)
         if (bookedChanges.removed.length > 0) {
-            const uidsToRemove = new Set(bookedChanges.removed.map(ev => ev.uid));
-            state.customEvents = state.customEvents.filter(ev => !uidsToRemove.has(ev.uid));
-            uidsToRemove.forEach(uid => state.attendingIds.delete(uid));
-            saveCustomEvents();
+            const uidsToRemove = new Set(bookedChanges.removed.filter(ev => !ev.ignored).map(ev => ev.uid));
+            if (uidsToRemove.size > 0) {
+                state.customEvents = state.customEvents.filter(ev => !uidsToRemove.has(ev.uid));
+                uidsToRemove.forEach(uid => state.attendingIds.delete(uid));
+                saveCustomEvents();
+            }
         }
 
         // Unmark unattended events (Official Events)
         if (bookedChanges.unattended.length > 0) {
             bookedChanges.unattended.forEach(ev => {
+                if (ev.ignored) return; // Skip if ignored
+
                 // We need to find the UID in the NEW data context if possible, 
                 // but attendingIds stores UIDs based on date/name/time which should be stable 
                 // or migrated by step 1.
@@ -1060,7 +1064,26 @@ function applyAgendaUpdate() {
 
     // Then process additions/updates
     if (bookedEvents && bookedEvents.length > 0) {
-        processBookedEvents(bookedEvents, false);
+        // Filter out ignored additions
+        const activeBookedEvents = bookedEvents.filter(b => {
+            // Find corresponding change object to check ignored status
+            // This is a bit tricky because bookedEvents is the raw list.
+            // We need to look up in bookedChanges.added
+
+            // Check if it was an "added" change
+            const addedChange = bookedChanges.added.find(c =>
+                c.date === b.date &&
+                c.name === b.name &&
+                c.timePeriod === b.timePeriod
+            );
+
+            if (addedChange && addedChange.ignored) return false;
+            return true;
+        });
+
+        if (activeBookedEvents.length > 0) {
+            processBookedEvents(activeBookedEvents, false);
+        }
     }
     if (bookedEvents && bookedEvents.length > 0) {
         processBookedEvents(bookedEvents, false);

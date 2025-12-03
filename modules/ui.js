@@ -1118,47 +1118,65 @@ export function renderChangeSummary(changes) {
         list.appendChild(bookedHeader);
 
         // Added Bookings
-        changes.bookedChanges.added.forEach(ev => {
+        changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4";
+            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex items-start gap-2";
             const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
+            const id = `booked-add-${idx}`;
+
             el.innerHTML = `
-                <div class="flex justify-between">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+                <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
             `;
             list.appendChild(el);
+            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
         });
 
         // Removed Bookings
-        changes.bookedChanges.removed.forEach(ev => {
+        changes.bookedChanges.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            const id = `booked-rem-${idx}`;
+
             el.innerHTML = `
-                <div class="flex justify-between">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
+                <input type="checkbox" id="${id}" class="mt-1 rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
             `;
             list.appendChild(el);
+            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
         });
 
         // Unattended Bookings
-        changes.bookedChanges.unattended.forEach(ev => {
+        changes.bookedChanges.unattended.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            const id = `booked-unatt-${idx}`;
+
             el.innerHTML = `
-                <div class="flex justify-between">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
+                <input type="checkbox" id="${id}" class="mt-1 rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
             `;
             list.appendChild(el);
+            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
         });
     }
 }
