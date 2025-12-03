@@ -1093,10 +1093,25 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = "voyage-planner-backup.json";
+    a.download = "voyage-planner-backup.vvoyage";
     a.click();
     URL.revokeObjectURL(url);
     document.getElementById('dropdown-menu').style.display = 'none';
+}
+
+// --- PWA File Handling ---
+if ('launchQueue' in window) {
+    window.launchQueue.setConsumer(async (launchParams) => {
+        if (launchParams.files.length > 0) {
+            const fileHandles = launchParams.files;
+            const files = [];
+            for (const handle of fileHandles) {
+                const file = await handle.getFile();
+                files.push(file);
+            }
+            handleFiles(files);
+        }
+    });
 }
 
 function confirmResetData() {

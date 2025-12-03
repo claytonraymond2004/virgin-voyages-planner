@@ -24,5 +24,22 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
+  ],
+  "file_handlers": [
+    {
+      "action": "./index.html",
+      "accept": {
+        "application/json": [
+          ".vvoyage"
+        ]
+      },
+      "icons": [
+        {
+          "src": "icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
