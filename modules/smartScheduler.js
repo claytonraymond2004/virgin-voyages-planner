@@ -25,6 +25,7 @@ let conflictSelectionsBackup = null;
 
 // --- Main Entry Point ---
 export function initSmartScheduler() {
+    window.isRescheduleMode = false;
     currentWizardStep = WIZARD_STEPS.INTRO;
     proposedSchedule.clear();
     conflictList = [];
@@ -35,6 +36,7 @@ export function initSmartScheduler() {
 }
 
 export function initRescheduleWizard(eventUid) {
+    window.isRescheduleMode = true;
     const ev = state.eventLookup.get(eventUid);
     if (!ev) {
         alert("Event not found.");
@@ -630,6 +632,10 @@ function renderConflictsStep(body, footer) {
         <button class="btn-primary" id="btn-conflicts-next">Resolve & Continue</button>
     `;
 
+    if (window.isRescheduleMode) {
+        document.getElementById('btn-conflicts-back').style.display = 'none';
+    }
+
     document.getElementById('btn-conflicts-back').onclick = () => {
         // Clear backups if going back further
         conflictSelectionsBackup = null;
@@ -737,12 +743,33 @@ function applyDeadlockSelection() {
 
         // Define locked UIDs (User choices + Existing Attending)
         const lockedUids = new Set([...state.attendingIds]);
+        const justSelectedUids = new Set();
         selections.forEach(sel => {
-            if (sel.value !== 'skip') lockedUids.add(sel.value);
+            if (sel.value !== 'skip') {
+                lockedUids.add(sel.value);
+                justSelectedUids.add(sel.value);
+            }
         });
 
+        // Predicate to avoid circular conflicts with the user's immediate selection
+        const avoidJustSelected = (instance) => {
+            for (const uid of justSelectedUids) {
+                const lockedEvent = state.eventLookup.get(uid);
+                if (lockedEvent && checkOverlap(instance, lockedEvent)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         displacedSeries.forEach(seriesName => {
-            smartReschedule(seriesName, lockedUids);
+            const success = smartReschedule(seriesName, lockedUids, 0, avoidJustSelected);
+            if (!success) {
+                // If we failed to reschedule, we need to add it to the conflict list
+                // But smartReschedule already adds it to conflictList if it fails!
+                // So we don't need to do anything here.
+                // However, we need to ensure that the conflict list actually grew.
+            }
         });
     }
 
@@ -776,23 +803,40 @@ function applyDeadlockSelection() {
     // But wait, I can't capture it easily inside this replacement block unless I change the whole function.
     // Let's look at where I am editing.
     // I am editing the end of applyDeadlockSelection.
-
-    // I need to see the start of the function to capture length.
-    // Or I can just check if any of the *current* conflicts in the list are NOT in the 'selections' map?
-    // 'selections' contains the user's answers for the *presented* conflicts.
-    // If there is a conflict in the list that is NOT in 'selections', it must be new (or skipped?).
-    // Skipped ones are in selections (value='skip').
-    // So if there is a conflict.name that is NOT in selections.map(s => s.name), it's a new conflict.
+    // Check if we have NEW conflicts (size increased)
+    // We do NOT remove resolved conflicts from the list, so that the Back button works.
+    // We only check if the list grew (meaning new displacement conflicts were added).
 
     const handledNames = new Set(selections.map(s => s.name));
     const hasUnhandledConflicts = conflictList.some(c => !handledNames.has(c.name));
 
     if (hasUnhandledConflicts) {
         currentWizardStep = WIZARD_STEPS.CONFLICTS;
+        renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
     } else {
-        currentWizardStep = WIZARD_STEPS.PREVIEW;
+        // If we are in "Reschedule Mode" (initRescheduleWizard), skip preview and apply immediately
+        if (window.isRescheduleMode) {
+            applySchedule();
+            closeWizard();
+        } else {
+            // Actually, the user requested "Skip the schedule preview in smart scheduler if just resolving a conflict from a find alternative menu."
+            // We can add a flag to initRescheduleWizard.
+
+            if (window.isRescheduleMode) {
+                applySchedule();
+                closeWizard();
+                // Jump to the new event? We don't know the UID easily here without searching proposedSchedule.
+                // But the user asked for this in a previous step, and we handled it in interactions.js.
+                // Here we just need to close.
+                // Wait, interactions.js calls initRescheduleWizard, which opens this modal.
+                // If we close here, interactions.js callback for "View Options" is already done.
+                // So we are good.
+            } else {
+                currentWizardStep = WIZARD_STEPS.PREVIEW;
+                renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+            }
+        }
     }
-    renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
 }
 
 function getConflictingEvents(event) {
@@ -803,10 +847,14 @@ function getConflictingEvents(event) {
         const attendingEvent = state.eventLookup.get(uid);
         if (!attendingEvent) continue;
 
+        // Don't conflict with self or other instances of the same series (we are rescheduling the series)
+        if (attendingEvent.name === event.name) continue;
+
         if (checkOverlap(event, attendingEvent)) {
             conflicts.push(attendingEvent);
         }
     }
+
     return conflicts;
 }
 
@@ -821,6 +869,7 @@ function formatTime(minutes) {
 // --- Step 5: Preview ---
 function renderPreviewStep(body, footer) {
     const events = [];
+
     // 1. Add Proposed (New)
     proposedSchedule.forEach(uid => {
         const ev = state.eventLookup.get(uid);
@@ -849,11 +898,11 @@ function renderPreviewStep(body, footer) {
     const newEventsCount = events.filter(e => e.isNew).length;
 
     let html = `<div class="p-2 space-y-4 h-full flex flex-col">
-        <div class="flex items-center justify-between flex-shrink-0">
-             <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Review Your Schedule</h3>
-             <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full">Adding ${newEventsCount} Events</span>
-        </div>
-        <div class="space-y-4 overflow-y-auto pr-2 flex-grow">`;
+    <div class="flex items-center justify-between flex-shrink-0">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Review Your Schedule</h3>
+            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full">Adding ${newEventsCount} Events</span>
+    </div>
+    <div class="space-y-4 overflow-y-auto pr-2 flex-grow">`;
 
     if (events.length === 0) {
         html += `<div class="text-center py-10 text-gray-500 dark:text-gray-400 italic">No new events selected to add.</div>`;
@@ -861,18 +910,18 @@ function renderPreviewStep(body, footer) {
 
     if (skippedEvents.size > 0) {
         html += `
-            <div class="border border-yellow-200 dark:border-yellow-900/50 rounded-lg overflow-hidden shadow-sm mt-4">
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 font-semibold text-yellow-800 dark:text-yellow-200 border-b border-yellow-200 dark:border-yellow-900/50 text-sm flex items-center gap-2">
-                    <span>⚠️</span> Skipped Events
-                </div>
-                <div class="divide-y divide-yellow-100 dark:divide-yellow-900/30 bg-white dark:bg-gray-900">
-        `;
+        <div class="border border-yellow-200 dark:border-yellow-900/50 rounded-lg overflow-hidden shadow-sm mt-4">
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 font-semibold text-yellow-800 dark:text-yellow-200 border-b border-yellow-200 dark:border-yellow-900/50 text-sm flex items-center gap-2">
+                <span>⚠️</span> Skipped Events
+            </div>
+            <div class="divide-y divide-yellow-100 dark:divide-yellow-900/30 bg-white dark:bg-gray-900">
+    `;
         skippedEvents.forEach(name => {
             html += `
-                <div class="p-3 flex items-center gap-2">
-                     <div class="font-medium text-gray-700 dark:text-gray-300 text-sm">${name}</div>
-                </div>
-            `;
+            <div class="p-3 flex items-center gap-2">
+                    <div class="font-medium text-gray-700 dark:text-gray-300 text-sm">${name}</div>
+            </div>
+        `;
         });
         html += `</div></div>`;
     }
@@ -881,12 +930,12 @@ function renderPreviewStep(body, footer) {
         const dayEvents = byDay[date].sort((a, b) => a.startMins - b.startMins);
 
         html += `
-            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-2 font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 text-sm">
-                    ${date}
-                </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
-        `;
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-2 font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 text-sm">
+                ${date}
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
+    `;
 
         dayEvents.forEach(ev => {
             // Check Conflicts
@@ -922,27 +971,27 @@ function renderPreviewStep(body, footer) {
             const imgStyle = isPlaceholder ? 'transform: scale(1.4);' : '';
 
             html += `
-                <div class="p-3 ${rowClass} flex items-start hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <div class="w-12 h-12 rounded overflow-hidden mr-3 flex-shrink-0 bg-gray-200 dark:bg-gray-600 relative">
-                        <img src="${imgSrc}" 
-                             class="w-full h-full object-cover transition-transform duration-200" 
-                             style="${imgStyle}"
-                             onerror="this.src='virgin_placeholder.png'; this.style.transform='scale(1.4)';">
+            <div class="p-3 ${rowClass} flex items-start hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div class="w-12 h-12 rounded overflow-hidden mr-3 flex-shrink-0 bg-gray-200 dark:bg-gray-600 relative">
+                    <img src="${imgSrc}" 
+                            class="w-full h-full object-cover transition-transform duration-200" 
+                            style="${imgStyle}"
+                            onerror="this.src='virgin_placeholder.png'; this.style.transform='scale(1.4)';">
+                </div>
+                <div class="flex-grow min-w-0 flex justify-between items-start">
+                    <div class="mr-2">
+                        <div class="font-medium text-gray-900 dark:text-gray-100 text-sm ${hasConflict ? 'text-red-700 dark:text-red-300' : ''}">
+                            ${ev.name}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${formatTime(ev.startMins)} - ${formatTime(ev.endMins)} <span class="mx-1">•</span> ${ev.location}</div>
                     </div>
-                    <div class="flex-grow min-w-0 flex justify-between items-start">
-                        <div class="mr-2">
-                            <div class="font-medium text-gray-900 dark:text-gray-100 text-sm ${hasConflict ? 'text-red-700 dark:text-red-300' : ''}">
-                                ${ev.name}
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${formatTime(ev.startMins)} - ${formatTime(ev.endMins)} <span class="mx-1">•</span> ${ev.location}</div>
-                        </div>
-                        <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                            ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Already Scheduled</span>' : ''}
-                            ${hasConflict ? '<span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium px-2 py-0.5 rounded">Event Overlap</span>' : ''}
-                        </div>
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                        ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Already Scheduled</span>' : ''}
+                        ${hasConflict ? '<span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium px-2 py-0.5 rounded">Event Overlap</span>' : ''}
                     </div>
                 </div>
-            `;
+            </div>
+        `;
         });
 
         html += `</div></div>`;
@@ -953,9 +1002,9 @@ function renderPreviewStep(body, footer) {
     body.innerHTML = html;
 
     footer.innerHTML = `
-        <button class="btn-secondary" id="btn-preview-back">Back</button>
-        <button class="btn-primary" id="btn-apply">Confirm & Apply</button>
-    `;
+    <button class="btn-secondary" id="btn-preview-back">Back</button>
+    <button class="btn-primary" id="btn-apply">Confirm & Apply</button>
+`;
 
     document.getElementById('btn-preview-back').onclick = () => {
         // Restore state if available
@@ -997,6 +1046,7 @@ function checkOverlap(ev1, ev2) {
 }
 
 function applySchedule() {
+    state.attendingIds.clear();
     proposedSchedule.forEach(uid => {
         state.attendingIds.add(uid);
         // Hide other occurrences (as if user selected "Yes, Hide Others")
@@ -1043,9 +1093,9 @@ function removeEventFromSchedule(uid) {
     if (!ev) return removedSeries;
 
     proposedSchedule.delete(uid);
+    removedSeries.add(ev.name);
 
     if (ev.name.startsWith("Bingo with")) {
-        removedSeries.add(ev.name);
         // Remove Sales - Aggressively remove ANY sales on this day from proposedSchedule
         // This avoids issues where findBingoSales might pick a different instance than the one scheduled
         const toRemove = [];
@@ -1220,6 +1270,11 @@ function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = nu
     // If blockers > 0, try to displace ALL blockers.
 
     for (const instance of instances) {
+
+        if (filterPredicate && !filterPredicate(instance)) {
+            continue;
+        }
+
         let allConflicts = [];
         let salesEvent = null;
 
@@ -1252,6 +1307,15 @@ function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = nu
 
         if (allConflicts.length === 0) {
             // Success!
+
+            // If in Reschedule Mode (manual conflict resolution), we DO NOT want to automatically schedule.
+            // We want to force the user to choose.
+            // So we skip this "success" and continue, effectively failing to find an auto-slot.
+            // This will cause the series to be added to the conflict list.
+            if (window.isRescheduleMode && depth === 0) {
+                continue;
+            }
+
             proposedSchedule.add(instance.uid);
             if (salesEvent) proposedSchedule.add(salesEvent.uid);
             return true;
