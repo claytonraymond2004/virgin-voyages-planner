@@ -951,6 +951,169 @@ export function updateAgendaPanel() {
     }
 }
 
+
+function formatTime(mins) {
+    const h = Math.floor(mins / 60) % 24;
+    const m = mins % 60;
+    const ampm = h >= 12 && h < 24 ? 'pm' : 'am';
+    const h12 = h === 0 || h === 12 ? 12 : h % 12;
+    return `${h12}:${m.toString().padStart(2, '0')}${amppm}`;
+}
+
+// --- Update Agenda Modal ---
+
+export function openUpdateAgendaModal() {
+    resetUpdateModal();
+    document.getElementById('update-agenda-modal').style.display = 'flex';
+    document.getElementById('dropdown-menu').style.display = 'none';
+
+    // Initialize file input listener for update
+    const fileInput = document.getElementById('update-file-input');
+    const dropZone = document.getElementById('update-drop-zone');
+
+    // Remove old listeners to avoid duplicates (simple way: clone and replace)
+    const newFileInput = fileInput.cloneNode(true);
+    fileInput.parentNode.replaceChild(newFileInput, fileInput);
+
+    const newDropZone = dropZone.cloneNode(true);
+    dropZone.parentNode.replaceChild(newDropZone, dropZone);
+
+    // Re-attach listeners
+    newDropZone.addEventListener('click', () => newFileInput.click());
+    newFileInput.addEventListener('change', (e) => window.handleUpdateFiles(e.target.files));
+
+    newDropZone.addEventListener('dragover', (e) => { e.preventDefault(); newDropZone.classList.add('border-red-500', 'bg-red-50'); });
+    newDropZone.addEventListener('dragleave', () => newDropZone.classList.remove('border-red-500', 'bg-red-50'));
+    newDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        newDropZone.classList.remove('border-red-500', 'bg-red-50');
+        if (e.dataTransfer.files.length) window.handleUpdateFiles(e.dataTransfer.files);
+    });
+}
+
+export function resetUpdateModal() {
+    document.getElementById('update-step-source').classList.remove('hidden');
+    document.getElementById('update-step-summary').classList.add('hidden');
+    document.getElementById('update-step-summary').classList.remove('flex');
+    document.getElementById('update-step-no-changes').classList.add('hidden');
+    document.getElementById('update-step-no-changes').classList.remove('flex');
+
+    document.getElementById('update-changes-list').innerHTML = '';
+
+    // Reset login form
+    document.getElementById('update-vv-status').textContent = '';
+    document.getElementById('btn-update-vv-login').disabled = false;
+    document.getElementById('update-vv-spinner').classList.add('hidden');
+    document.getElementById('update-vv-username').disabled = false;
+    document.getElementById('update-vv-password').disabled = false;
+}
+
+export function renderChangeSummary(changes) {
+    const list = document.getElementById('update-changes-list');
+    list.innerHTML = '';
+
+    document.getElementById('update-step-source').classList.add('hidden');
+
+    if (changes.added.length === 0 && changes.removed.length === 0 && (!changes.modified || changes.modified.length === 0)) {
+        document.getElementById('update-step-no-changes').classList.remove('hidden');
+        document.getElementById('update-step-no-changes').classList.add('flex');
+        return;
+    }
+
+    document.getElementById('update-step-summary').classList.remove('hidden');
+    document.getElementById('update-step-summary').classList.add('flex');
+
+    // Render Modified
+    if (changes.modified && changes.modified.length > 0) {
+        const modHeader = document.createElement('h5');
+        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        modHeader.textContent = `Modified Events (${changes.modified.length})`;
+        list.appendChild(modHeader);
+
+        changes.modified.forEach(item => {
+            const { oldEv, newEv, changes: changedFields } = item;
+            const el = document.createElement('div');
+            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm";
+
+            let details = '';
+            if (changedFields.includes('Time')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
+            }
+            if (changedFields.includes('Location')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
+            }
+            if (changedFields.includes('Description')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
+                ${details}
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Removed
+    if (changes.removed.length > 0) {
+        const removedHeader = document.createElement('h5');
+        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
+        list.appendChild(removedHeader);
+
+        changes.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Added
+    if (changes.added.length > 0) {
+        const addedHeader = document.createElement('h5');
+        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        addedHeader.textContent = `New Events (${changes.added.length})`;
+        list.appendChild(addedHeader);
+
+        changes.added.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+}
+
+export function confirmUpdateApply() {
+    if (window.applyAgendaUpdate) {
+        window.applyAgendaUpdate();
+        closeAllModals();
+        showConfirm("Agenda updated successfully!", null, "Success");
+        // Hide cancel button for this success message
+        setTimeout(() => {
+            const cancelBtn = document.getElementById('btn-confirm-cancel');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const okBtn = document.getElementById('btn-confirm-ok');
+            if (okBtn) {
+                const oldOnClick = okBtn.onclick;
+                okBtn.onclick = () => {
+                    if (oldOnClick) oldOnClick();
+                    cancelBtn.style.display = 'inline-block'; // Restore
+                };
+            }
+        }, 0);
+    }
+}
+
 function moveTooltipFromPanel(e) {
     const tooltip = document.getElementById('tooltip');
     if (tooltip && tooltip.style.display === 'block') {
