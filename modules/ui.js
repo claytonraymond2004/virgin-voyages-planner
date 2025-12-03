@@ -960,7 +960,7 @@ function formatTime(mins) {
     return `${h12}:${m.toString().padStart(2, '0')}${amppm}`;
 }
 
-// --- Update Agenda Modal ---
+// --- Update Itinerary Modal ---
 
 export function openUpdateAgendaModal() {
     resetUpdateModal();
@@ -1026,14 +1026,14 @@ export function renderChangeSummary(changes) {
     // Render Modified
     if (changes.modified && changes.modified.length > 0) {
         const modHeader = document.createElement('h5');
-        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
         modHeader.textContent = `Modified Events (${changes.modified.length})`;
         list.appendChild(modHeader);
 
         changes.modified.forEach(item => {
             const { oldEv, newEv, changes: changedFields } = item;
             const el = document.createElement('div');
-            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm";
+            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
 
             let details = '';
             if (changedFields.includes('Time')) {
@@ -1058,13 +1058,13 @@ export function renderChangeSummary(changes) {
     // Render Removed
     if (changes.removed.length > 0) {
         const removedHeader = document.createElement('h5');
-        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
         removedHeader.textContent = `Removed Events (${changes.removed.length})`;
         list.appendChild(removedHeader);
 
         changes.removed.forEach(ev => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75";
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
             el.innerHTML = `
                 <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
@@ -1076,13 +1076,13 @@ export function renderChangeSummary(changes) {
     // Render Added
     if (changes.added.length > 0) {
         const addedHeader = document.createElement('h5');
-        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 mt-4 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10 shadow-sm";
+        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
         addedHeader.textContent = `New Events (${changes.added.length})`;
         list.appendChild(addedHeader);
 
         changes.added.forEach(ev => {
             const el = document.createElement('div');
-            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm";
+            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
             el.innerHTML = `
                 <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
@@ -1097,7 +1097,7 @@ export function confirmUpdateApply() {
     if (window.applyAgendaUpdate) {
         window.applyAgendaUpdate();
         closeAllModals();
-        showConfirm("Agenda updated successfully!", null, "Success");
+        showConfirm("Itinerary updated successfully!", null, "Success");
         // Hide cancel button for this success message
         setTimeout(() => {
             const cancelBtn = document.getElementById('btn-confirm-cancel');

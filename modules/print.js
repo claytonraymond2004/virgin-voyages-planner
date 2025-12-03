@@ -8,7 +8,7 @@ import { showGenericChoice } from './ui.js';
 export function exportPrintable() {
     showGenericChoice(
         "Print Format",
-        "Choose a format for your printed itinerary.",
+        "Choose a format for your printed agenda.",
         "Day Grid View",
         () => exportPrintableGrid(),
         "Simple List View",
@@ -84,7 +84,7 @@ export function exportPrintableList() {
 
     const printWindow = window.open('', '_blank');
     let html = `
-    <html><head><title>My Voyage Itinerary</title>
+    <html><head><title>My Voyage Agenda</title>
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #333; max-width: 900px; margin: 0 auto; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
@@ -191,7 +191,7 @@ export function exportPrintableList() {
     <div style="text-align: right; margin-bottom: 20px;" class="no-print">
         <button onclick="window.print()" style="background: #AF231C; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print Itinerary</button>
     </div>
-    <h1>My Voyage Itinerary</h1>
+    <h1>My Voyage Agenda</h1>
     `;
 
     sortedDates.forEach(date => {
@@ -444,7 +444,7 @@ export function exportPrintableGrid() {
 
     const printWindow = window.open('', '_blank');
     let html = `
-    <html><head><title>My Voyage Itinerary</title>
+    <html><head><title>My Voyage Agenda</title>
     <style>
         body { font-family: sans-serif; padding: 20px; color: #333; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
@@ -508,7 +508,7 @@ export function exportPrintableGrid() {
     <div style="text-align: right; margin-bottom: 10px;" class="no-print">
         <button onclick="window.print()" style="background: #AF231C; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print Itinerary</button>
     </div>
-    <h1>My Voyage Itinerary</h1>
+    <h1>My Voyage Agenda</h1>
     `;
 
     // Group by Date

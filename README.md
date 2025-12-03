@@ -12,7 +12,7 @@ A specialized, browser-based interface designed for the visual organization, tem
   - **Conflict Handling**: Conflicting events or alternative times for the same show are visually dimmed or highlighted to help you decide.
 - **Custom Events**: Create your own events (e.g., "Dinner Reservation", "Meetup") by simply dragging on the grid to define the time range.
 - **Port Notes**: Add custom notes to each day (e.g., "Cozumel", "At Sea") by clicking on the day header.
-- **Event Notes**: Add personal notes to any specific event. These notes appear in the event tooltip and are included in the printed itinerary.
+- **Event Notes**: Add personal notes to any specific event. These notes appear in the event tooltip and are included in the printed agenda.
 - **Privacy & Persistence**: All data is stored locally in your browser's `localStorage`. No account creation or remote server is required.
 - **Search**: Filter events by title or description using the search bar. Use the dropdown menu to toggle between "Title Only" and "Title & Description" modes. Navigate results with Arrow keys and select with Enter. Press `/` to instantly focus the search bar.
 - **Context Menu**: Right-click on any event to access quick actions like toggling attendance, hiding specific instances, editing custom events, blacklisting events, or searching for the event on Google/VVInsider.
@@ -24,7 +24,7 @@ A specialized, browser-based interface designed for the visual organization, tem
 - **Smart Scheduler**: An intelligent wizard that automatically builds a schedule for you, prioritizing events you haven't seen yet and resolving conflicts.
 - **Mobile Optimized**: Enhanced mobile experience with improved menus, dividers, and touch-friendly event cards.
 - **Backup & Restore**: Export your entire itinerary state (including attendance, custom events, and notes) to a JSON file for safekeeping or transfer to another device.
-- **Update Agenda**: Refresh your itinerary with the latest data from Virgin Voyages (via API or file upload) while preserving your personal schedule, notes, and attendance.
+- **Update Itinerary**: Refresh your itinerary with the latest data from Virgin Voyages (via API or file upload) while preserving your personal schedule, notes, and attendance.
 
 ## How to Use
 
@@ -48,7 +48,7 @@ A specialized, browser-based interface designed for the visual organization, tem
 7.  **Add Event Notes**:
     - Right-click on any event and select **Edit Note**.
     - Enter your personal note (e.g., "Wear white", "Meet John here").
-    - Notes are visible in the event tooltip and on the printed itinerary.
+    - Notes are visible in the event tooltip and on the printed agenda.
 8.  **Manage Hidden Events**:
     - Access the **Hidden Events Manager** (crossed through eye icon) from the menu bar to view and restore hidden event series or single instances.
 9.  **Missing Events Panel**:
@@ -76,12 +76,12 @@ A specialized, browser-based interface designed for the visual organization, tem
 14. **Backup & Restore**:
     - **Export**: Open the hamburger menu and select **Export Backup** to download your current state.
     - **Import**: Use the "Upload Data" screen (refresh the page if needed) to upload your backup file.
-15. **Update Agenda**:
-    - Open the hamburger menu and select **Update Agenda**.
+15. **Update Itinerary**:
+    - Open the hamburger menu and select **Update Itinerary**.
     - **Virgin API**: Log in with your Virgin credentials to fetch the latest schedule directly.
     - **File Upload**: Upload a new `CleanAgenda.json` or raw API files.
     - **Review Changes**: The app will compare the new data with your current schedule and show a summary of **Added**, **Removed**, and **Modified** events.
-    - **Confirm**: Click "Update Agenda" to apply changes. Your attendance, notes, and custom events are preserved!
+    - **Confirm**: Click "Update Itinerary" to apply changes. Your attendance, notes, and custom events are preserved!
 16. **Dark Mode**:
     - Toggle between Light and Dark themes using the **Moon/Sun icon** in the toolbar.
 

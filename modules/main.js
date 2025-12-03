@@ -98,6 +98,7 @@ window.openTimeBlocksModal = openTimeBlocksModal;
 window.saveTimeBlocksUI = saveTimeBlocksUI;
 window.openSmartScheduler = openSmartScheduler;
 window.openUpdateAgendaModal = openUpdateAgendaModal;
+window.resetUpdateModal = resetUpdateModal;
 window.handleUpdateVVLogin = handleUpdateVVLogin;
 window.handleUpdateFiles = handleUpdateFiles;
 window.applyAgendaUpdate = applyAgendaUpdate;
@@ -660,7 +661,7 @@ async function handleVVLogin() {
     }
 }
 
-// --- Update Agenda Logic ---
+// --- Update Itinerary Logic ---
 
 let pendingUpdateEvents = null;
 
