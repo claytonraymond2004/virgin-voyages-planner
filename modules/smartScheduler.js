@@ -554,7 +554,7 @@ function renderConflictsStep(body, footer) {
 
         // Options for each instance (even if conflicting)
         conflict.instances.forEach(instance => {
-            const timeStr = formatTime(instance.startMinutes) + ' - ' + formatTime(instance.endMinutes);
+            const timeStr = formatTime(instance.startMins ?? instance.startMinutes) + ' - ' + formatTime(instance.endMins ?? instance.endMinutes);
             const conflictsWith = getConflictingEvents(instance);
 
             // Check against other items in conflictList

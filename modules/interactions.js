@@ -347,7 +347,8 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     };
 
     // Unable to Attend Logic
-    if (state.attendingIds.has(ev.uid)) {
+    // Only enable if attending AND there are other instances (siblings > 1)
+    if (state.attendingIds.has(ev.uid) && siblings.length > 1) {
         btnUnable.style.display = 'flex';
         btnUnable.classList.remove('opacity-50', 'pointer-events-none');
         btnUnable.onclick = (e) => {
