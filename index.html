@@ -37,16 +37,16 @@
 
             <!-- Privacy Notice -->
             <div class="max-w-5xl mx-auto w-full px-4 mb-8">
-                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 dark:bg-blue-900/20 dark:border-blue-800">
                     <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0 dark:text-blue-400" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <div class="text-left">
-                            <h3 class="text-sm font-semibold text-blue-800 mb-1">Privacy Notice</h3>
-                            <p class="text-xs text-blue-700 leading-relaxed">
+                            <h3 class="text-sm font-semibold text-blue-800 mb-1 dark:text-blue-300">Privacy Notice</h3>
+                            <p class="text-xs text-blue-700 leading-relaxed dark:text-blue-200">
                                 Your data stays on your device. All files are processed locally in your browser and are
                                 never
                                 transmitted to any server.
@@ -1238,20 +1238,20 @@
             <div class="flex-1 overflow-hidden flex flex-col">
                 <!-- Step 1: Source Selection -->
                 <div id="update-step-source" class="p-6 overflow-y-auto">
-                    <p class="text-sm text-gray-600 mb-6">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                         Refresh your itinerary data. Your custom events, notes, and attendance will be preserved.
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Virgin API Option -->
-                        <div class="border rounded-lg p-4 hover:border-red-300 transition-colors">
-                            <h4 class="font-bold text-gray-800 mb-2">From Virgin Voyages</h4>
+                        <div class="border rounded-lg p-4 hover:border-red-300 transition-colors dark:border-gray-700">
+                            <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2">From Virgin Voyages</h4>
                             <div class="space-y-3">
                                 <input type="text" id="update-vv-username"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                                     placeholder="Email / Username">
                                 <input type="password" id="update-vv-password"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                                     placeholder="Password">
                                 <button onclick="handleUpdateVVLogin()" id="btn-update-vv-login"
                                     class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition text-sm flex justify-center items-center gap-2">
