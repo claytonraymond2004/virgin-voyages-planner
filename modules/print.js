@@ -88,7 +88,9 @@ export function exportPrintableList() {
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #333; max-width: 900px; margin: 0 auto; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
-        .date-section { margin-bottom: 30px; }
+        .date-section { margin-bottom: 30px; break-before: page; }
+        body.duplex-mode .date-section { break-before: right; break-before: recto; page-break-before: right; page-break-before: recto; }
+        h1 + .date-section, body.duplex-mode h1 + .date-section { break-before: auto; page-break-before: auto; }
         .date-header { 
             background: #f3f4f6; 
             padding: 12px 16px; 
@@ -184,12 +186,20 @@ export function exportPrintableList() {
         @media print { 
             .no-print { display: none; } 
             body { padding: 0; }
+            /* Hide the manual spacer checkbox when printing */
+            .date-header label { display: none !important; }
 
         }
     </style>
     </head><body>
     <div style="text-align: right; margin-bottom: 20px;" class="no-print">
         <button onclick="window.print()" style="background: #AF231C; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print Itinerary</button>
+        <div style="margin-top: 10px;">
+            <label style="cursor:pointer; font-size: 0.9em; display: inline-flex; align-items: center;">
+                <input type="checkbox" id="duplexCheck" onchange="autoCalculateDuplex()" style="margin-right: 6px;">
+                Duplex Printing (Start each day on new sheet)
+            </label>
+        </div>
     </div>
     <h1>My Voyage Agenda</h1>
     `;
@@ -198,10 +208,15 @@ export function exportPrintableList() {
         const dObj = new Date(date + 'T00:00:00');
         const portName = state.portNotes[date] ? ` <span style="font-weight:normal; font-size: 0.9em; color: #4b5563;">(${state.portNotes[date]})</span>` : '';
 
-        html += `<div class="date-section">
+        html += `<div class="date-section" id="date-${date}">
             <div class="date-header">
-                <span>${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
-                ${portName}
+                <div>
+                    <span>${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                    ${portName}
+                </div>
+                <label class="no-print" style="font-size:0.8rem; font-weight:normal; display:flex; align-items:center; cursor:pointer; margin-left: 10px;">
+                    <input type="checkbox" onchange="togglePageSpacer(this, 'date-${date}')" style="margin-right:4px;" disabled> Add Blank Page Before
+                </label>
             </div>`;
 
         const dayEvents = eventsByDate[date];
@@ -391,6 +406,66 @@ export function exportPrintableList() {
             else img.onload = applyColor;
         });
     }
+    function togglePageSpacer(cb, id) {
+        const section = document.getElementById(id);
+        if (cb.checked) {
+            const spacer = document.createElement('div');
+            spacer.id = 'spacer-' + id;
+            spacer.style.pageBreakBefore = 'always';
+            spacer.style.height = '1px'; 
+            spacer.style.visibility = 'hidden';
+            section.parentNode.insertBefore(spacer, section);
+        } else {
+            const spacer = document.getElementById('spacer-' + id);
+            if (spacer) spacer.remove();
+        }
+    }
+
+    function autoCalculateDuplex() {
+        const isDuplex = document.getElementById('duplexCheck').checked;
+        document.body.classList.toggle('duplex-mode', isDuplex);
+        
+        const checkboxes = document.querySelectorAll('.date-header input[type=checkbox]');
+        
+        // Reset all first
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                cb.checked = false;
+                // Extract ID from the section (parent's parent)
+                const sectionId = cb.closest('.date-section').id;
+                togglePageSpacer(cb, sectionId);
+            }
+            cb.disabled = !isDuplex;
+        });
+
+        if (!isDuplex) return;
+
+        const sections = document.querySelectorAll('.date-section');
+        let nextPage = 1;
+        const PAGE_HEIGHT = 980; // Approx printable height in pixels (Letter size)
+
+        sections.forEach((section, index) => {
+            let height = section.offsetHeight;
+            
+            if (index === 0) {
+                const h1 = document.querySelector('h1');
+                if (h1) height += h1.offsetHeight + 50; // + margins
+            }
+
+            // If we are on an even page, we need to insert a blank to start on odd
+            if (nextPage % 2 === 0) {
+                const cb = section.querySelector('input[type=checkbox]');
+                if (cb) {
+                    cb.checked = true;
+                    togglePageSpacer(cb, section.id);
+                    nextPage++; // The spacer consumes the even page
+                }
+            }
+
+            const pages = Math.ceil(height / PAGE_HEIGHT);
+            nextPage += pages;
+        });
+    }
     window.addEventListener('load', processListImages);
     processListImages();
     </script>
@@ -448,8 +523,10 @@ export function exportPrintableGrid() {
     <style>
         body { font-family: sans-serif; padding: 20px; color: #333; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .date-section { margin-bottom: 30px; }
-        .date-header { background: #eee; padding: 8px; font-weight: bold; border-left: 4px solid #333; margin-bottom: 10px; }
+        .date-section { margin-bottom: 30px; break-before: page; }
+        body.duplex-mode .date-section { break-before: right; break-before: recto; page-break-before: right; page-break-before: recto; }
+        h1 + .date-section, body.duplex-mode h1 + .date-section { break-before: auto; page-break-before: auto; }
+        .date-header { background: #eee; padding: 8px; font-weight: bold; border-left: 4px solid #333; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .day-grid { display: flex; border: 1px solid #ddd; position: relative; height: 1200px; } /* Approx height */
         .time-ruler { width: 50px; border-right: 1px solid #eee; position: relative; background: #fafafa; font-size: 0.75em; color: #888; }
         .time-marker { position: absolute; width: 100%; text-align: right; padding-right: 5px; border-top: 1px solid #eee; }
@@ -502,11 +579,21 @@ export function exportPrintableGrid() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-        @media print { .no-print { display: none; } }
+        @media print { 
+            .no-print { display: none; } 
+            /* Hide the manual spacer checkbox when printing */
+            .date-header label { display: none !important; }
+        }
     </style>
     </head><body>
     <div style="text-align: right; margin-bottom: 10px;" class="no-print">
         <button onclick="window.print()" style="background: #AF231C; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print Itinerary</button>
+        <div style="margin-top: 10px;">
+            <label style="cursor:pointer; font-size: 0.9em; display: inline-flex; align-items: center;">
+                <input type="checkbox" id="duplexCheck" onchange="autoCalculateDuplex()" style="margin-right: 6px;">
+                Duplex Printing (Start each day on new sheet)
+            </label>
+        </div>
     </div>
     <h1>My Voyage Agenda</h1>
     `;
@@ -545,8 +632,13 @@ export function exportPrintableGrid() {
         const portName = state.portNotes[date] ? ` <span style="font-weight:normal; color:#666;">(${state.portNotes[date]})</span>` : '';
 
         html += `
-            <div class="date-section">
-                <div class="date-header">${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${portName}</div>
+            <div class="date-section" id="date-${date}">
+                <div class="date-header">
+                    <div>${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${portName}</div>
+                    <label class="no-print" style="font-size:0.8rem; font-weight:normal; display:flex; align-items:center; cursor:pointer; margin-left: 10px;">
+                        <input type="checkbox" onchange="togglePageSpacer(this, 'date-${date}')" style="margin-right:4px;" disabled> Add Blank Page Before
+                    </label>
+                </div>
                 <div class="day-grid" style="height: ${gridHeight}px;">
                     <div class="time-ruler">
         `;
@@ -739,6 +831,65 @@ export function exportPrintableGrid() {
             } else {
                 img.onload = applyColor;
             }
+        });
+    }
+    
+    function togglePageSpacer(cb, id) {
+        const section = document.getElementById(id);
+        if (cb.checked) {
+            const spacer = document.createElement('div');
+            spacer.id = 'spacer-' + id;
+            spacer.style.pageBreakBefore = 'always';
+            spacer.style.height = '1px'; 
+            spacer.style.visibility = 'hidden';
+            section.parentNode.insertBefore(spacer, section);
+        } else {
+            const spacer = document.getElementById('spacer-' + id);
+            if (spacer) spacer.remove();
+        }
+    }
+
+    function autoCalculateDuplex() {
+        const isDuplex = document.getElementById('duplexCheck').checked;
+        document.body.classList.toggle('duplex-mode', isDuplex);
+        
+        const checkboxes = document.querySelectorAll('.date-header input[type=checkbox]');
+        
+        // Reset all first
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                cb.checked = false;
+                const sectionId = cb.closest('.date-section').id;
+                togglePageSpacer(cb, sectionId);
+            }
+            cb.disabled = !isDuplex;
+        });
+
+        if (!isDuplex) return;
+
+        const sections = document.querySelectorAll('.date-section');
+        let nextPage = 1;
+        const PAGE_HEIGHT = 980; 
+
+        sections.forEach((section, index) => {
+            let height = section.offsetHeight;
+            
+            if (index === 0) {
+                const h1 = document.querySelector('h1');
+                if (h1) height += h1.offsetHeight + 50; 
+            }
+
+            if (nextPage % 2 === 0) {
+                const cb = section.querySelector('input[type=checkbox]');
+                if (cb) {
+                    cb.checked = true;
+                    togglePageSpacer(cb, section.id);
+                    nextPage++; 
+                }
+            }
+
+            const pages = Math.ceil(height / PAGE_HEIGHT);
+            nextPage += pages;
         });
     }
     
