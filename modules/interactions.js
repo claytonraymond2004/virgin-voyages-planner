@@ -855,7 +855,21 @@ export function showFullTooltip(e, ev, el) {
         </div>`;
     }
 
+    if (ev.shortDescription) {
+        html += `<p class="italic text-gray-300 mb-2">${ev.shortDescription}</p>`;
+    }
+
     html += `<p>${ev.longDescription || "No description available."}</p>`;
+
+    if (ev.needToKnows && (!Array.isArray(ev.needToKnows) || ev.needToKnows.length > 0)) {
+        html += `<div class="mt-2 text-xs text-gray-300"><strong>Need to Know:</strong>`;
+        if (Array.isArray(ev.needToKnows)) {
+            html += `<ul class="list-disc list-outside pl-4">` + ev.needToKnows.map(k => `<li>${k}</li>`).join('') + `</ul>`;
+        } else {
+            html += `<p>${ev.needToKnows}</p>`;
+        }
+        html += `</div>`;
+    }
 
     let allSiblings = [];
 
@@ -1072,11 +1086,28 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
         </div>`;
     }
 
+    if (ev.shortDescription) {
+        html += `<div class="pt-2 border-t border-gray-100">
+            <p class="text-gray-600 text-sm leading-relaxed italic">${ev.shortDescription}</p>
+        </div>`;
+    }
+
     if (ev.longDescription) {
         html += `<div class="pt-2 border-t border-gray-100">
             <div class="font-semibold text-gray-800 mb-1">Description</div>
             <p class="text-gray-600 text-sm leading-relaxed">${ev.longDescription}</p>
         </div>`;
+    }
+
+    if (ev.needToKnows && (!Array.isArray(ev.needToKnows) || ev.needToKnows.length > 0)) {
+        html += `<div class="pt-2 border-t border-gray-100">
+            <div class="font-semibold text-gray-800 mb-1">Need to Know</div>`;
+        if (Array.isArray(ev.needToKnows)) {
+            html += `<ul class="list-disc list-outside pl-4 text-gray-600 text-xs">` + ev.needToKnows.map(k => `<li>${k}</li>`).join('') + `</ul>`;
+        } else {
+            html += `<p class="text-gray-600 text-xs leading-relaxed">${ev.needToKnows}</p>`;
+        }
+        html += `</div>`;
     }
 
     // Add All Occurrences Section
