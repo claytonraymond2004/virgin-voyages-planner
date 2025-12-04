@@ -675,7 +675,7 @@ function loadSampleData() {
     ];
 
     const promises = files.map(file =>
-        fetch(`example_data/virgin_api_samples/${file}`)
+        fetch(`example_data/virgin_api_samples/line-ups/${file}`)
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load ${file}`);
                 return response.json();
