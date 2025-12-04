@@ -990,6 +990,36 @@ export function confirmBlacklist(name) {
     showConfirm(`Are you sure you want to blacklist "${name}"? This will permanently hide all occurrences of this event. You can restore it later from the Blacklist Manager.`, () => {
         state.blacklist.add(name);
         saveBlacklist();
+
+        // Cleanup hidden lists
+        if (state.hiddenNames.has(name)) {
+            state.hiddenNames.delete(name);
+            saveHiddenNames();
+        }
+
+        let uidsRemoved = false;
+        // Optimize: Iterate hiddenUids instead of all events
+        const uidsToDelete = [];
+        state.hiddenUids.forEach(uid => {
+            const ev = state.eventLookup.get(uid);
+            if (ev && ev.name === name) {
+                uidsToDelete.push(uid);
+            } else if (!ev) {
+                // Fallback if event not in lookup (e.g. stale), try to parse UID
+                // UID format: date_name_start
+                if (uid.includes(name)) { // Simple check, might be risky if name is substring of another
+                    // Safer to rely on lookup or just leave it. 
+                    // If it's not in lookup, it's not rendered anyway.
+                }
+            }
+        });
+
+        if (uidsToDelete.length > 0) {
+            uidsToDelete.forEach(uid => state.hiddenUids.delete(uid));
+            uidsRemoved = true;
+            saveHiddenUids();
+        }
+
         renderApp();
     }, "Blacklist Event");
 }

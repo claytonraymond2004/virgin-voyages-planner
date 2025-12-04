@@ -1574,6 +1574,35 @@ export function saveBlacklistUI() {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     state.blacklist = new Set(lines);
     saveBlacklist();
+
+    // Cleanup hidden lists based on new blacklist
+    let namesRemoved = false;
+    let uidsRemoved = false;
+
+    state.blacklist.forEach(name => {
+        if (state.hiddenNames.has(name)) {
+            state.hiddenNames.delete(name);
+            namesRemoved = true;
+        }
+    });
+
+    // Optimize: Iterate hiddenUids instead of all events
+    const uidsToDelete = [];
+    state.hiddenUids.forEach(uid => {
+        const ev = state.eventLookup.get(uid);
+        if (ev && state.blacklist.has(ev.name)) {
+            uidsToDelete.push(uid);
+        }
+    });
+
+    if (uidsToDelete.length > 0) {
+        uidsToDelete.forEach(uid => state.hiddenUids.delete(uid));
+        uidsRemoved = true;
+    }
+
+    if (namesRemoved) saveHiddenNames();
+    if (uidsRemoved) saveHiddenUids();
+
     closeAllModals();
     renderApp();
 }
