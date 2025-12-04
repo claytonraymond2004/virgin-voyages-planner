@@ -438,7 +438,8 @@
                         </path>
                     </svg>
                 </div>
-                <!-- Mobile Only Items -->
+
+                <!-- 1. My Agenda (Mobile Only) -->
                 <div onclick="toggleAgendaPanel()" class="ctx-item md:hidden justify-between">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,16 +452,7 @@
                         class="agenda-count text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
 
-                <div onclick="openSmartScheduler()" class="ctx-item">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
-                        </path>
-                    </svg> Smart Scheduler
-                </div>
-                <div class="ctx-divider"></div>
-
-
+                <!-- 2. Missing Events (Mobile Only) -->
                 <div onclick="toggleAttendancePanel()" class="ctx-item md:hidden justify-between">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,6 +465,7 @@
                         class="missing-count text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
 
+                <!-- 3. Hidden Events (Mobile Only) -->
                 <div onclick="openHiddenManager()" class="ctx-item md:hidden justify-between">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -485,6 +478,7 @@
                         class="hidden-count text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
 
+                <!-- 4. Show/Hide Hidden Events (Mobile Only) -->
                 <div onclick="toggleShowHiddenTemp(); toggleMenu()" class="ctx-item md:hidden btn-toggle-hidden">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -495,17 +489,19 @@
                     </svg> Show/Hide Hidden
                 </div>
 
-                <div onclick="exportPrintable()" class="ctx-item md:hidden">
+                <div class="ctx-divider md:hidden"></div>
+
+                <!-- 5. Smart Scheduler -->
+                <div onclick="openSmartScheduler()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
                         </path>
-                    </svg> Print Agenda
+                    </svg> Smart Scheduler
                 </div>
+                <div class="ctx-divider"></div>
 
-
-
-                <div class="ctx-divider md:hidden"></div>
+                <!-- 6. Update Itinerary -->
                 <div onclick="openUpdateAgendaModal()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -514,19 +510,26 @@
                     </svg> Update Itinerary
                 </div>
                 <div class="ctx-divider"></div>
+
+                <!-- 7. Easy Transfer -->
                 <div onclick="openTransferModal()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                     </svg> Easy Transfer
                 </div>
+
+                <!-- 8. Export Backup -->
                 <div onclick="exportData()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg> Export Backup
                 </div>
+
                 <div class="ctx-divider"></div>
+
+                <!-- 9. Toggle Dark Mode -->
                 <div onclick="toggleDarkMode(); toggleMenu()" class="ctx-item">
                     <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         style="display:block">
@@ -541,13 +544,27 @@
                         </path>
                     </svg> Toggle Dark Mode
                 </div>
+
+                <!-- 10. Time Blocks -->
                 <div onclick="openTimeBlocksModal()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg> Time Blocks
                 </div>
+
+                <!-- 11. Print Agenda (Mobile Only) -->
+                <div onclick="exportPrintable()" class="ctx-item md:hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                        </path>
+                    </svg> Print Agenda
+                </div>
+
                 <div class="ctx-divider"></div>
+
+                <!-- 12. Blacklist Events -->
                 <div onclick="openBlacklistModal()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -555,7 +572,10 @@
                         </path>
                     </svg> Blacklist Events
                 </div>
+
                 <div class="ctx-divider"></div>
+
+                <!-- 13. Reset Data -->
                 <div onclick="confirmResetData()" class="ctx-item danger">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

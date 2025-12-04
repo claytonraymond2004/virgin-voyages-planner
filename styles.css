@@ -1420,10 +1420,15 @@ body.dark .time-block::after {
         width: var(--day-col-width);
     }
 
+    #time-column {
+        box-shadow: none;
+    }
+
     .attendance-panel,
     .agenda-panel {
         width: 100%;
         right: -100%;
+        box-shadow: none !important;
     }
 
     /* Wider Main Menu on Mobile */
