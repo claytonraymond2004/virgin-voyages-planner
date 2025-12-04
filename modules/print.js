@@ -88,7 +88,7 @@ export function exportPrintableList() {
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #333; max-width: 900px; margin: 0 auto; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
-        .date-section { margin-bottom: 30px; page-break-inside: avoid; }
+        .date-section { margin-bottom: 30px; }
         .date-header { 
             background: #f3f4f6; 
             padding: 12px 16px; 
@@ -101,7 +101,7 @@ export function exportPrintableList() {
             align-items: center;
             border-radius: 0 4px 4px 0;
         }
-        .event-row { display: flex; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 16px 0; page-break-inside: avoid; }
+        .event-row { display: flex; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 16px 0; }
         .event-row:last-child { border-bottom: none; }
         .event-row.optional { 
             background-color: #fafafa;
@@ -184,7 +184,7 @@ export function exportPrintableList() {
         @media print { 
             .no-print { display: none; } 
             body { padding: 0; }
-            .event-row { page-break-inside: avoid; }
+
         }
     </style>
     </head><body>
@@ -448,7 +448,7 @@ export function exportPrintableGrid() {
     <style>
         body { font-family: sans-serif; padding: 20px; color: #333; }
         h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .date-section { margin-bottom: 30px; page-break-inside: avoid; }
+        .date-section { margin-bottom: 30px; }
         .date-header { background: #eee; padding: 8px; font-weight: bold; border-left: 4px solid #333; margin-bottom: 10px; }
         .day-grid { display: flex; border: 1px solid #ddd; position: relative; height: 1200px; } /* Approx height */
         .time-ruler { width: 50px; border-right: 1px solid #eee; position: relative; background: #fafafa; font-size: 0.75em; color: #888; }
