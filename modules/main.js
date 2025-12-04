@@ -39,6 +39,10 @@ import {
 } from './interactions.js';
 import { parseTimeRange } from './utils.js';
 import { initTooltips } from './tooltips.js';
+import {
+    exportData as getTransferData, uploadData, downloadData, importData,
+    generateQR, startScanner, stopScanner
+} from './transfer.js';
 
 // --- Global Exposure ---
 
@@ -103,6 +107,13 @@ window.handleUpdateVVLogin = handleUpdateVVLogin;
 window.handleUpdateFiles = handleUpdateFiles;
 window.applyAgendaUpdate = applyAgendaUpdate;
 window.confirmUpdateApply = confirmUpdateApply;
+window.openTransferModal = openTransferModal;
+window.switchTransferTab = switchTransferTab;
+window.handleTransferSend = handleTransferSend;
+window.handleTransferReceive = handleTransferReceive;
+window.copyTransferUrl = copyTransferUrl;
+window.startTransferScanner = startTransferScanner;
+window.stopTransferScanner = stopTransferScanner;
 
 // --- Initialization ---
 
@@ -1396,4 +1407,135 @@ function processBookedEvents(bookedEvents, shouldRender = true) {
         saveShownUids();
         if (shouldRender) renderApp();
     }
+}
+
+// --- Transfer Logic ---
+
+function openTransferModal(tab = 'send') {
+    // Reset UI State
+    document.getElementById('transfer-send-result').classList.add('hidden');
+    document.getElementById('transfer-send-result').classList.remove('flex');
+    document.getElementById('transfer-send-initial').classList.remove('hidden');
+    document.getElementById('qrcode-container').innerHTML = '';
+    document.getElementById('transfer-share-url').value = '';
+    document.getElementById('transfer-receive-url').value = '';
+
+    // Reset Scanner if active
+    stopTransferScanner();
+
+    document.getElementById('transfer-modal').style.display = 'flex';
+    document.getElementById('dropdown-menu').style.display = 'none';
+    switchTransferTab(tab);
+}
+
+function switchTransferTab(tab) {
+    const sendTab = document.getElementById('tab-transfer-send');
+    const receiveTab = document.getElementById('tab-transfer-receive');
+    const sendContent = document.getElementById('transfer-content-send');
+    const receiveContent = document.getElementById('transfer-content-receive');
+
+    if (tab === 'send') {
+        sendTab.classList.add('border-red-500', 'text-red-600');
+        sendTab.classList.remove('border-transparent', 'text-gray-500');
+        receiveTab.classList.remove('border-red-500', 'text-red-600');
+        receiveTab.classList.add('border-transparent', 'text-gray-500');
+
+        sendContent.classList.remove('hidden');
+        receiveContent.classList.add('hidden');
+    } else {
+        receiveTab.classList.add('border-red-500', 'text-red-600');
+        receiveTab.classList.remove('border-transparent', 'text-gray-500');
+        sendTab.classList.remove('border-red-500', 'text-red-600');
+        sendTab.classList.add('border-transparent', 'text-gray-500');
+
+        receiveContent.classList.remove('hidden');
+        sendContent.classList.add('hidden');
+    }
+}
+
+async function handleTransferSend() {
+    const btn = document.querySelector('#transfer-send-initial button');
+    const spinner = document.getElementById('transfer-send-spinner');
+    const resultDiv = document.getElementById('transfer-send-result');
+    const qrContainer = document.getElementById('qrcode-container');
+    const urlInput = document.getElementById('transfer-share-url');
+
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    resultDiv.classList.add('hidden');
+
+    try {
+        const data = getTransferData();
+        const locationUrl = await uploadData(data);
+
+        // Generate QR
+        generateQR(locationUrl, qrContainer);
+        urlInput.value = locationUrl;
+
+        resultDiv.classList.remove('hidden');
+        resultDiv.classList.add('flex');
+        document.getElementById('transfer-send-initial').classList.add('hidden');
+
+    } catch (err) {
+        alert("Transfer failed: " + err.message);
+    } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+    }
+}
+
+async function handleTransferReceive() {
+    const urlInput = document.getElementById('transfer-receive-url');
+    const btn = document.getElementById('btn-transfer-receive');
+    const spinner = document.getElementById('transfer-receive-spinner');
+
+    const url = urlInput.value.trim();
+    if (!url) {
+        alert("Please enter a URL.");
+        return;
+    }
+
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+
+    try {
+        const data = await downloadData(url);
+        importData(data);
+    } catch (err) {
+        alert("Import failed: " + err.message);
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+    }
+}
+
+function copyTransferUrl() {
+    const urlInput = document.getElementById('transfer-share-url');
+    urlInput.select();
+    document.execCommand('copy');
+    // Or use navigator.clipboard.writeText(urlInput.value);
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = originalText, 2000);
+}
+
+function startTransferScanner() {
+    document.getElementById('transfer-receive-initial').classList.add('hidden');
+    document.getElementById('transfer-scanner-container').classList.remove('hidden');
+
+    startScanner('reader', (decodedText) => {
+        // Success
+        document.getElementById('transfer-receive-url').value = decodedText;
+        stopTransferScanner();
+        handleTransferReceive();
+    }, (errorMessage) => {
+        // Parse error, ignore
+    });
+}
+
+function stopTransferScanner() {
+    stopScanner();
+    document.getElementById('transfer-scanner-container').classList.add('hidden');
+    document.getElementById('transfer-receive-initial').classList.remove('hidden');
 }

@@ -45,6 +45,39 @@ export function showConfirm(msg, onYes, title = "Confirm") {
 
 
 
+export function showToast(message, type = 'info') {
+    let toast = document.getElementById('toast-notification');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-lg text-white text-sm font-medium z-[10000] transition-opacity duration-300 opacity-0 pointer-events-none';
+        document.body.appendChild(toast);
+    }
+
+    // Set colors based on type
+    if (type === 'error') {
+        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-lg text-white text-sm font-medium z-[10000] transition-opacity duration-300 opacity-0 pointer-events-none bg-red-600';
+    } else if (type === 'success') {
+        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-lg text-white text-sm font-medium z-[10000] transition-opacity duration-300 opacity-0 pointer-events-none bg-green-600';
+    } else {
+        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-lg text-white text-sm font-medium z-[10000] transition-opacity duration-300 opacity-0 pointer-events-none bg-gray-800';
+    }
+
+    toast.textContent = message;
+
+    // Show
+    requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0');
+        toast.classList.remove('pointer-events-none');
+    });
+
+    // Hide after 3s
+    setTimeout(() => {
+        toast.classList.add('opacity-0');
+        toast.classList.add('pointer-events-none');
+    }, 3000);
+}
+
 // --- Unhide Modal ---
 
 export function openUnhideModal(ev) {
