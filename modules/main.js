@@ -1273,6 +1273,7 @@ function parseRawData(agenda) {
                     timePeriod: item.timePeriod,
                     needToKnows: item.needToKnows,
                     type: item.type,
+                    introduction: item.introduction,
                 };
                 cleanAgenda.push(cleanItem);
             });

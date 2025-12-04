@@ -840,11 +840,14 @@ export function showFullTooltip(e, ev, el) {
     const isSeriesPreview = ev.uid === 'hidden-series-preview';
 
     html += `<div class="meta">`;
+    if (ev.shortDescription) {
+        html += `<div class="">${ev.shortDescription}</div>`;
+    }
     if (!isSeriesPreview && !isNaN(ev.startMins)) {
         html += `<div><strong>When:</strong> ${dateStr}, ${fmt(sH, sM)} - ${fmt(eH, eM)}</div>`;
     }
-    html += `<div><strong>Location:</strong> ${ev.location}</div>
-    </div>`;
+    html += `<div><strong>Location:</strong> ${ev.location}</div>`;
+    html += `</div>`;
 
     if (ev.imageUrl) html += `<img src="${ev.imageUrl}" onerror="this.style.display='none'" />`;
 
@@ -855,10 +858,11 @@ export function showFullTooltip(e, ev, el) {
         </div>`;
     }
 
-    if (ev.shortDescription) {
-        html += `<p class="italic text-gray-300 mb-2">${ev.shortDescription}</p>`;
-    }
 
+
+    if (ev.introduction) {
+        html += `<p class="text-lg italic mb-2" style="font-size: .9rem;">${ev.introduction}</p>`;
+    }
     html += `<p>${ev.longDescription || "No description available."}</p>`;
 
     if (ev.needToKnows && (!Array.isArray(ev.needToKnows) || ev.needToKnows.length > 0)) {
@@ -1063,6 +1067,13 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
     }
 
     html += `<div class="space-y-3">
+        ${ev.shortDescription ? `
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <div class="text-gray-600 italic">${ev.shortDescription}</div>
+            </div>
+        </div>` : ''}
         <div class="flex items-start gap-3">
             <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <div>
@@ -1086,17 +1097,21 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
         </div>`;
     }
 
-    if (ev.shortDescription) {
-        html += `<div class="pt-2 border-t border-gray-100">
-            <p class="text-gray-600 text-sm leading-relaxed italic">${ev.shortDescription}</p>
-        </div>`;
-    }
 
-    if (ev.longDescription) {
+
+    if (ev.longDescription || ev.introduction) {
         html += `<div class="pt-2 border-t border-gray-100">
-            <div class="font-semibold text-gray-800 mb-1">Description</div>
-            <p class="text-gray-600 text-sm leading-relaxed">${ev.longDescription}</p>
-        </div>`;
+            <div class="font-semibold text-gray-800 mb-1">Description</div>`;
+
+        if (ev.introduction) {
+            html += `<p class="text-gray-700 text-base italic leading-relaxed mb-2">${ev.introduction}</p>`;
+        }
+
+        if (ev.longDescription) {
+            html += `<p class="text-gray-600 text-sm leading-relaxed">${ev.longDescription}</p>`;
+        }
+
+        html += `</div>`;
     }
 
     if (ev.needToKnows && (!Array.isArray(ev.needToKnows) || ev.needToKnows.length > 0)) {
