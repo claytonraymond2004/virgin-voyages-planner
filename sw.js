@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vv-planner-v2';
+const CACHE_NAME = 'vv-planner-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -20,7 +20,9 @@ const ASSETS = [
     './modules/tooltips.js',
     './modules/ui.js',
     './modules/utils.js',
-    'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'
+    'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+    'https://unpkg.com/html5-qrcode'
 ];
 
 self.addEventListener('install', (event) => {

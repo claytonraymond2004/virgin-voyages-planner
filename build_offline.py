@@ -7,6 +7,8 @@ import sys
 TAILWIND_URL = "https://cdn.tailwindcss.com"
 FONTS_CSS_URL = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap"
 CONFETTI_URL = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"
+QRCODE_URL = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+HTML5_QRCODE_URL = "https://unpkg.com/html5-qrcode"
 
 ASSETS_DIR = "assets"
 FONTS_DIR = os.path.join(ASSETS_DIR, "fonts")
@@ -74,6 +76,8 @@ def process_tailwind():
 def process_scripts():
     print("Processing Scripts...")
     download_file(CONFETTI_URL, os.path.join(ASSETS_DIR, "confetti.browser.min.js"))
+    download_file(QRCODE_URL, os.path.join(ASSETS_DIR, "qrcode.min.js"))
+    download_file(HTML5_QRCODE_URL, os.path.join(ASSETS_DIR, "html5-qrcode.js"))
 
 def patch_html():
     print("Patching index.html...")
@@ -85,6 +89,10 @@ def patch_html():
     
     # Replace Confetti
     html = html.replace('src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"', 'src="assets/confetti.browser.min.js"')
+
+    # Replace QR Code Libs
+    html = html.replace('src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"', 'src="assets/qrcode.min.js"')
+    html = html.replace('src="https://unpkg.com/html5-qrcode"', 'src="assets/html5-qrcode.js"')
 
     # Replace Fonts
     # Regex replacement for the fonts link
@@ -114,12 +122,28 @@ def patch_html():
     with open("index.html", "w") as f:
         f.write(html)
 
+def patch_sw():
+    print("Patching sw.js...")
+    with open("sw.js", "r") as f:
+        js = f.read()
+
+    # Replace Confetti
+    js = js.replace('https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js', './assets/confetti.browser.min.js')
+
+    # Replace QR Code Libs
+    js = js.replace('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', './assets/qrcode.min.js')
+    js = js.replace('https://unpkg.com/html5-qrcode', './assets/html5-qrcode.js')
+
+    with open("sw.js", "w") as f:
+        f.write(js)
+
 def main():
     ensure_dirs()
     process_fonts()
     process_tailwind()
     process_scripts()
     patch_html()
+    patch_sw()
     print("Offline build preparation complete.")
 
 if __name__ == "__main__":
