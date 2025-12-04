@@ -49,7 +49,7 @@ import {
 window.toggleMenu = (e) => {
     if (e) e.stopPropagation();
     const dropdown = document.getElementById('dropdown-menu');
-    dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    dropdown.classList.toggle('open');
 };
 
 window.toggleSearchMenu = toggleSearchMenu;
@@ -70,7 +70,7 @@ window.openCustomModal = () => {
     // Default to today at 12:00 PM if no date selected, or first available date
     const date = state.availableDates.length > 0 ? state.availableDates[0] : new Date().toISOString().split('T')[0];
     populateCustomModal(date, 720, 780);
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 };
 window.saveCustomEvent = saveCustomEvent;
 window.tryCloseCustomModal = tryCloseCustomModal;
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dropdown = document.getElementById('dropdown-menu');
         const menuBtn = document.getElementById('menu-btn');
         if (dropdown && menuBtn && !menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.style.display = 'none';
+            dropdown.classList.remove('open');
         }
         // Close Search Mode Menu if clicking outside
         const searchModeMenu = document.getElementById('search-mode-menu');
@@ -331,8 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Close Main Menu
             const dropdown = document.getElementById('dropdown-menu');
-            if (dropdown && dropdown.style.display === 'flex') {
-                dropdown.style.display = 'none';
+            if (dropdown && dropdown.classList.contains('open')) {
+                dropdown.classList.remove('open');
                 return;
             }
 
@@ -1269,7 +1269,7 @@ function exportData() {
     a.download = "voyage-planner-backup.vvoyage";
     a.click();
     URL.revokeObjectURL(url);
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }
 
 // --- PWA File Handling ---
@@ -1292,7 +1292,7 @@ function confirmResetData() {
         localStorage.clear();
         location.reload();
     }, "Reset Data");
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }
 
 function processBookedEvents(bookedEvents, shouldRender = true) {
@@ -1424,7 +1424,7 @@ function openTransferModal(tab = 'send') {
     stopTransferScanner();
 
     document.getElementById('transfer-modal').style.display = 'flex';
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
     switchTransferTab(tab);
 }
 

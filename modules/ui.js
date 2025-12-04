@@ -597,12 +597,12 @@ export function saveEventNoteUI() {
 
 export function toggleMenu() {
     const menu = document.getElementById('dropdown-menu');
-    menu.classList.toggle('hidden');
+    menu.classList.toggle('open');
 }
 
 export function openSmartScheduler() {
     initSmartScheduler();
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }
 
 export function closeAllModals() {
@@ -615,7 +615,7 @@ export function closeAllModals() {
     const ctxOverlay = document.getElementById('context-menu-overlay');
     if (ctxOverlay) ctxOverlay.classList.remove('active');
 
-    document.getElementById('dropdown-menu').classList.add('hidden');
+    document.getElementById('dropdown-menu').classList.remove('open');
 
     // Close mobile event modal
     closeMobileEventModal();
@@ -627,7 +627,7 @@ export function toggleAttendancePanel() {
 
     const menuOverlay = document.getElementById('menu-overlay');
     if (menuOverlay) menuOverlay.classList.remove('active');
-    document.getElementById('dropdown-menu').classList.add('hidden');
+    document.getElementById('dropdown-menu').classList.remove('open');
 
     // Close mobile event modal
     closeMobileEventModal();
@@ -778,7 +778,7 @@ export function toggleAgendaPanel() {
 
     const menuOverlay = document.getElementById('menu-overlay');
     if (menuOverlay) menuOverlay.classList.remove('active');
-    document.getElementById('dropdown-menu').classList.add('hidden');
+    document.getElementById('dropdown-menu').classList.remove('open');
 
     // Close mobile event modal
     closeMobileEventModal();
@@ -1001,7 +1001,7 @@ function formatTime(mins) {
 export function openUpdateAgendaModal() {
     resetUpdateModal();
     document.getElementById('update-agenda-modal').style.display = 'flex';
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 
     // Initialize file input listener for update
     const fileInput = document.getElementById('update-file-input');
@@ -1566,7 +1566,7 @@ export function jumpToEventFromPanel(uid) {
 export function openBlacklistModal() {
     document.getElementById('blacklist-input').value = Array.from(state.blacklist).join('\n');
     document.getElementById('blacklist-modal').style.display = 'flex';
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }
 
 export function saveBlacklistUI() {
@@ -1665,8 +1665,7 @@ export function openTimeBlocksModal() {
         sel.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
         sel.value = state.timeBlocks[key];
     });
-
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
     modal.style.display = 'flex';
 }
 

@@ -398,7 +398,7 @@ export function exportPrintableList() {
 
     printWindow.document.write(html);
     printWindow.document.close();
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }
 
 export function exportPrintableGrid() {
@@ -749,5 +749,5 @@ export function exportPrintableGrid() {
     </body></html>`;
     printWindow.document.write(html);
     printWindow.document.close();
-    document.getElementById('dropdown-menu').style.display = 'none';
+    document.getElementById('dropdown-menu').classList.remove('open');
 }

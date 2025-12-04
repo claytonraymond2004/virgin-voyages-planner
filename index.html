@@ -429,6 +429,15 @@
 
             <!-- Dropdown -->
             <div id="dropdown-menu">
+                <!-- Mobile Header -->
+                <div onclick="toggleMenu()"
+                    class="ctx-item md:hidden justify-between bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                    <span class="font-bold text-lg">Menu</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </div>
                 <!-- Mobile Only Items -->
                 <div onclick="toggleAgendaPanel()" class="ctx-item md:hidden justify-between">
                     <div class="flex items-center gap-2">
@@ -504,18 +513,20 @@
                         </path>
                     </svg> Update Itinerary
                 </div>
+                <div class="ctx-divider"></div>
+                <div onclick="openTransferModal()" class="ctx-item">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg> Easy Transfer
+                </div>
                 <div onclick="exportData()" class="ctx-item">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg> Export Backup
                 </div>
-                <div onclick="openTransferModal()" class="ctx-item">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                    </svg> Transfer to Device
-                </div>
+                <div class="ctx-divider"></div>
                 <div onclick="toggleDarkMode(); toggleMenu()" class="ctx-item">
                     <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         style="display:block">
@@ -544,7 +555,6 @@
                         </path>
                     </svg> Blacklist Events
                 </div>
-
                 <div class="ctx-divider"></div>
                 <div onclick="confirmResetData()" class="ctx-item danger">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1385,7 +1395,7 @@
             class="modal-content p-0 flex flex-col w-full h-full md:h-auto md:max-w-md rounded-none md:rounded-lg overflow-hidden bg-white dark:bg-gray-800">
             <div
                 class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h3 class="font-bold text-gray-800 text-lg dark:text-white">Transfer to Device</h3>
+                <h3 class="font-bold text-gray-800 text-lg dark:text-white">Easy Transfer</h3>
                 <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">

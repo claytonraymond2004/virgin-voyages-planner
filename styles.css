@@ -784,6 +784,33 @@ body.dark .search-result-item {
     overflow: hidden;
 }
 
+#dropdown-menu.open {
+    display: flex;
+}
+
+@media (max-width: 768px) {
+    #dropdown-menu {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        /* Full width slide-in */
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        transition: right 0.3s ease-in-out;
+        z-index: 9000;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+
+    #dropdown-menu.open {
+        right: 0;
+    }
+}
+
 body.dark #dropdown-menu {
     background: #1f2937;
     border-color: #374151;
@@ -1400,10 +1427,7 @@ body.dark .time-block::after {
     }
 
     /* Wider Main Menu on Mobile */
-    #dropdown-menu {
-        width: 280px;
-        right: 10px;
-    }
+
 
     #dropdown-menu .ctx-item {
         padding: 16px 20px;
