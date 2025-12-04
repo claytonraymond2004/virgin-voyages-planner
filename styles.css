@@ -62,10 +62,16 @@ body.dark .text-gray-400 {
     color: #6b7280;
 }
 
-body.dark #time-column,
-body.dark #schedule-viewport,
-body.dark .day-header {
+body.dark #schedule-viewport {
     background-color: #1f2937;
+    border-color: #374151;
+}
+
+body.dark #time-column,
+body.dark .day-header {
+    background-color: rgba(31, 41, 55, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-color: #374151;
 }
 
