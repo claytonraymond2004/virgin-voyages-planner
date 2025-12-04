@@ -1329,17 +1329,36 @@
                                 <input type="password" id="update-vv-password"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                                     placeholder="Password" autocomplete="current-password">
-                                <div class="flex items-center gap-2">
-                                    <input type="checkbox" id="update-vv-import-booked"
-                                        class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
-                                        checked>
-                                    <label for="update-vv-import-booked"
-                                        class="text-xs text-gray-700 dark:text-gray-300">Sync Agenda from Virgin Voyages
-                                        App</label>
+
+                                <div
+                                    class="bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <input type="checkbox" id="update-vv-import-booked"
+                                            class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
+                                            checked onchange="toggleUpdateOptions()">
+                                        <label for="update-vv-import-booked"
+                                            class="text-xs font-bold text-gray-700 dark:text-gray-300">Enable Virgin
+                                            Voyages App Sync</label>
+                                    </div>
+
+                                    <div class="flex gap-4 ml-6">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="update-mode" value="pull" checked
+                                                class="text-[#AF231C] focus:ring-red-500"
+                                                onchange="updateUpdateBtnText()">
+                                            <span class="text-xs text-gray-600 dark:text-gray-400">Pull from App</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="update-mode" value="push"
+                                                class="text-[#AF231C] focus:ring-red-500"
+                                                onchange="updateUpdateBtnText()" disabled>
+                                            <span class="text-xs text-gray-600 dark:text-gray-400">Push to App</span>
+                                        </label>
+                                    </div>
                                 </div>
                                 <button type="submit" id="btn-update-vv-login"
                                     class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition text-sm flex justify-center items-center gap-2">
-                                    <span>Sign In & Check</span>
+                                    <span>Sign In</span>
                                     <svg id="update-vv-spinner" class="animate-spin h-4 w-4 text-white hidden"
                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
