@@ -200,6 +200,22 @@ export function exportPrintableList() {
                 Duplex Printing (Start each day on new sheet)
             </label>
         </div>
+        <div style="margin-top: 5px;">
+            <label style="font-size: 0.9em; margin-right: 6px;">Paper Size:</label>
+            <select id="paperSize" onchange="autoCalculateDuplex()" style="font-size: 0.9em; padding: 2px;">
+                <option value="1056">Letter (8.5" x 11")</option>
+                <option value="1123">A4 (210mm x 297mm)</option>
+                <option value="1344">Legal (8.5" x 14")</option>
+            </select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label style="font-size: 0.9em; margin-right: 6px;">Margins:</label>
+            <select id="printMargins" onchange="autoCalculateDuplex()" style="font-size: 0.9em; padding: 2px;">
+                <option value="0">None</option>
+                <option value="40">Minimum</option>
+                <option value="96" selected>Default</option>
+            </select>
+        </div>
     </div>
     <h1>My Voyage Agenda</h1>
     `;
@@ -442,14 +458,16 @@ export function exportPrintableList() {
 
         const sections = document.querySelectorAll('.date-section');
         let nextPage = 1;
-        const PAGE_HEIGHT = 980; // Approx printable height in pixels (Letter size)
+        const baseHeight = parseInt(document.getElementById('paperSize').value, 10);
+        const marginRed = parseInt(document.getElementById('printMargins').value, 10);
+        const PAGE_HEIGHT = baseHeight - marginRed;
 
         sections.forEach((section, index) => {
             let height = section.offsetHeight;
             
             if (index === 0) {
                 const h1 = document.querySelector('h1');
-                if (h1) height += h1.offsetHeight + 50; // + margins
+                if (h1) height += h1.offsetHeight + 20; // + margins (reduced to avoid overestimation)
             }
 
             // If we are on an even page, we need to insert a blank to start on odd
@@ -593,6 +611,22 @@ export function exportPrintableGrid() {
                 <input type="checkbox" id="duplexCheck" onchange="autoCalculateDuplex()" style="margin-right: 6px;">
                 Duplex Printing (Start each day on new sheet)
             </label>
+        </div>
+        <div style="margin-top: 5px;">
+            <label style="font-size: 0.9em; margin-right: 6px;">Paper Size:</label>
+            <select id="paperSize" onchange="autoCalculateDuplex()" style="font-size: 0.9em; padding: 2px;">
+                <option value="1056">Letter (8.5" x 11")</option>
+                <option value="1123">A4 (210mm x 297mm)</option>
+                <option value="1344">Legal (8.5" x 14")</option>
+            </select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label style="font-size: 0.9em; margin-right: 6px;">Margins:</label>
+            <select id="printMargins" onchange="autoCalculateDuplex()" style="font-size: 0.9em; padding: 2px;">
+                <option value="0">None</option>
+                <option value="40">Minimum</option>
+                <option value="96" selected>Default</option>
+            </select>
         </div>
     </div>
     <h1>My Voyage Agenda</h1>
@@ -869,14 +903,16 @@ export function exportPrintableGrid() {
 
         const sections = document.querySelectorAll('.date-section');
         let nextPage = 1;
-        const PAGE_HEIGHT = 980; 
+        const baseHeight = parseInt(document.getElementById('paperSize').value, 10);
+        const marginRed = parseInt(document.getElementById('printMargins').value, 10);
+        const PAGE_HEIGHT = baseHeight - marginRed;
 
         sections.forEach((section, index) => {
             let height = section.offsetHeight;
             
             if (index === 0) {
                 const h1 = document.querySelector('h1');
-                if (h1) height += h1.offsetHeight + 50; 
+                if (h1) height += h1.offsetHeight + 20; 
             }
 
             if (nextPage % 2 === 0) {
