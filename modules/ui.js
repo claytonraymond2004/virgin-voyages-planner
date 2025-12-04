@@ -1,4 +1,4 @@
-import { state, saveData, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks, saveCompletedIds } from './state.js';
+import { state, saveData, saveAttendance, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks, saveCompletedIds } from './state.js';
 import { STORAGE_KEY_BLACKLIST, STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, SHIFT_START_ADD, SHIFT_END_ADD, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_OPTIONAL_EVENTS } from './constants.js';
 import { renderApp } from './render.js';
 import { parseTimeRange, formatTimeRange, escapeHtml } from './utils.js';
@@ -10,6 +10,8 @@ import { initSmartScheduler, initRescheduleWizard } from './smartScheduler.js';
 import { refreshUpdateCheck } from './main.js';
 
 // --- Modals ---
+
+let updateStateSnapshot = null;
 
 export function showGenericChoice(title, message, primaryLabel, onPrimary, secondaryLabel, onSecondary) {
     document.getElementById('generic-choice-title').textContent = title;
@@ -607,14 +609,63 @@ export function openSmartScheduler() {
 }
 
 export function closeAllModals() {
+    // Check if update modal is open and cancel it properly
+    const updateModal = document.getElementById('update-agenda-modal');
+    if (updateModal && updateModal.style.display === 'flex') {
+        cancelUpdateAgenda();
+        return; // cancelUpdateAgenda calls closeAllModals again after cleanup, or handles closing itself
+    }
+
     document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.mobile-panel').forEach(el => el.classList.remove('open'));
     document.getElementById('context-menu').style.display = 'none';
+    document.getElementById('context-menu-overlay').classList.remove('active');
+
+    // Also close wizard if open
+    const wizard = document.getElementById('smart-scheduler-modal');
+    if (wizard) wizard.remove();
 
     state.currentCtxEvent = null;
     state.initialFormState = null;
 
-    const ctxOverlay = document.getElementById('context-menu-overlay');
-    if (ctxOverlay) ctxOverlay.classList.remove('active');
+    document.getElementById('dropdown-menu').classList.remove('open');
+
+    // Close mobile event modal
+    closeMobileEventModal();
+}
+
+export function cancelUpdateAgenda() {
+    if (updateStateSnapshot) {
+        // Restore state
+        state.attendingIds = new Set(updateStateSnapshot.attendingIds);
+        state.hiddenNames = new Set(updateStateSnapshot.hiddenNames);
+        state.hiddenUids = new Set(updateStateSnapshot.hiddenUids);
+
+        saveAttendance();
+        saveHiddenNames();
+        saveHiddenUids();
+        renderApp();
+
+        updateStateSnapshot = null;
+    }
+
+    // Hide modal manually to avoid infinite recursion if we called closeAllModals
+    document.getElementById('update-agenda-modal').style.display = 'none';
+
+    // Also ensure other things are closed
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        if (el.id !== 'update-agenda-modal') el.style.display = 'none';
+    });
+    document.querySelectorAll('.mobile-panel').forEach(el => el.classList.remove('open'));
+    document.getElementById('context-menu').style.display = 'none';
+    document.getElementById('context-menu-overlay').classList.remove('active');
+
+    // Also close wizard if open
+    const wizard = document.getElementById('smart-scheduler-modal');
+    if (wizard) wizard.remove();
+
+    state.currentCtxEvent = null;
+    state.initialFormState = null;
 
     document.getElementById('dropdown-menu').classList.remove('open');
 
@@ -1000,6 +1051,13 @@ function formatTime(mins) {
 // --- Update Itinerary Modal ---
 
 export function openUpdateAgendaModal() {
+    // Snapshot state for rollback
+    updateStateSnapshot = {
+        attendingIds: new Set(state.attendingIds),
+        hiddenNames: new Set(state.hiddenNames),
+        hiddenUids: new Set(state.hiddenUids)
+    };
+
     resetUpdateModal();
     document.getElementById('update-agenda-modal').style.display = 'flex';
     document.getElementById('dropdown-menu').classList.remove('open');
@@ -1274,6 +1332,7 @@ export function renderChangeSummary(changes) {
 export function confirmUpdateApply() {
     if (window.applyAgendaUpdate) {
         window.applyAgendaUpdate();
+        updateStateSnapshot = null; // Commit changes
         closeAllModals();
         showConfirm("Itinerary updated successfully!", null, "Success");
         // Hide cancel button for this success message
