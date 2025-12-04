@@ -1,0 +1,57 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "99b85570-d1dd-4431-8283-079c47838aee",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a49f2666-97c6-4090-96a6-6a19c095a819/ILL-ENT-8BIT-SaltyTrivia-120x120.png",
+            "timePeriod": "9:30am-10:15am",
+            "date": "2025-12-16",
+            "name": "Salty Trivia: Know-It-All",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "e4388889-7e89-463e-940b-1c4cf8d5567d",
+            "bookableType": "Eatery",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:0bce80f2-fd15-462b-93eb-509280e60084/IMG-FNB-the-wake-gallery-thumbnail-208x117.jpg",
+            "timePeriod": "10:45am",
+            "date": "2025-12-16",
+            "name": "The Wake",
+            "location": "The Wake, Deck 7 Aft",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "6f12cc2f-4b13-4988-bd87-270988274c82",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:6618de01-d9fb-48d5-ab8d-69685f1c03b6/IMG-ENT-Pop-Quiz-Music-Trivia-120x120.jpg",
+            "timePeriod": "5pm-6pm",
+            "date": "2025-12-16",
+            "name": "Pop Quiz: Through the Ages Music Trivia",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "eec99543-d9c7-43de-bac8-a7857f01a884",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:3ce4e55b-3666-4fda-88b5-46d8fb485df0/ILL-ENT-Happy-Holidays-with-The-Hostess-&-Friends-V2-120x120.jpg",
+            "timePeriod": "8pm-8:45pm",
+            "date": "2025-12-16",
+            "name": "Happy Holidays with The Hostess & Friends",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "eadf29c3-d69c-480b-8be4-1fecab35088b",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:16ec1301-2541-4a0f-810d-b6eee92af79d/DivaGoesWest_120x120.jpg",
+            "timePeriod": "9:30pm-10:15pm",
+            "date": "2025-12-16",
+            "name": "The Diva Goes West",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

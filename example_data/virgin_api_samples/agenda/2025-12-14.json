@@ -1,0 +1,77 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "d7e738d3-4e2d-41a3-a2ce-2ee4f13cd32b",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:43c615f3-b921-4452-826a-f073c6a855a6/VHS%20Volume%204_%20Jukebox%20Live%20120x120.png",
+            "timePeriod": "10am-11am",
+            "date": "2025-12-14",
+            "name": "VHS Volume 4: Jukebox Jive",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "746dbae5-d3de-4243-a0a5-8a3475a4bb98",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:627d0078-8b69-4ad2-add6-3f69493f5ba0/IMG-ENT-The-Charmers-Lounge-120x120.jpg",
+            "timePeriod": "11am-12pm",
+            "date": "2025-12-14",
+            "name": "Roaming Magic with The Charmer",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "aa322a5d-439f-4b9b-993f-e133eb13d5c4",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:42e582e5-cc57-4284-a41d-15c1043cca91/RDR-ENT-UK-Summer-Series-Entertainment-Bingo-Card-Sales-120x120.jpg",
+            "timePeriod": "1:30pm-2pm",
+            "date": "2025-12-14",
+            "name": "Bingo Card Sales",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "834bc347-c444-46a7-9f18-6929a64026cb",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:84a2b3e7-d91d-4ac1-be42-e93311474252/RDR-ENT-UK-Summer-Series-Entertainment-Bingo-With-The-Hostess-120x120.jpg",
+            "timePeriod": "2:30pm-3:30pm",
+            "date": "2025-12-14",
+            "name": "Bingo with the Hostess",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "3162d266-e7bd-4af9-85f1-522afb4b7b9a",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:8eacdc09-150e-47bc-a404-7fdb86ed1580/ILL-ENT-Placeholder-Graphic-120x120.jpg",
+            "timePeriod": "6:45pm-7:45pm",
+            "date": "2025-12-14",
+            "name": "Trivia Night with The Hostess and The Diva!",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "5016aa54-ed39-45dc-855a-50541d249882",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a49f2666-97c6-4090-96a6-6a19c095a819/ILL-ENT-8BIT-SaltyTrivia-120x120.png",
+            "timePeriod": "8:30pm-9:30pm",
+            "date": "2025-12-14",
+            "name": "Quirky Quiz",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "fa2ffcf9-dfcf-4c00-bcf5-6aabf54c6ed7",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:3bf7d4c1-e71a-4a57-925e-d807457c6d19/ILL-ENT-Stargazers-120x120.jpg",
+            "timePeriod": "10pm-10:45pm",
+            "date": "2025-12-14",
+            "name": "Stargazers",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

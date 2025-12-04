@@ -1,0 +1,57 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "6b162b3f-4663-4ffb-8c9a-ceb3765f6195",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:aadf6368-64e0-4b25-9a62-f7013b7c3849/ILL-APP-UK-Summer-Series-Entertainment-A-Splash-of-Scarlet-Night-120x120.jpg",
+            "timePeriod": "6pm-6:15pm",
+            "date": "2025-12-13",
+            "name": "The Myth of Scarlet Night",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "6ce2f6e4-19e7-4fb9-8a54-f9420e3ea83a",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:5b00515a-84bb-4669-9bd3-7ef64a875018/ILL-ENT-UK-Summer-Series-Entertainment-Show-Tunes-And-Video-At-The-Manor-120x120.jpg",
+            "timePeriod": "6:30pm-7:15pm",
+            "date": "2025-12-13",
+            "name": "VV Cabaret: Featuring the Diva",
+            "location": "On The Rocks, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "0563110a-bafc-4d37-9049-33c24bb44626",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:c0ff9fb0-901c-4022-8a06-266b91552282/IMG-ENT-the-manor-entrance-S18-048-v1-120x120.jpg",
+            "timePeriod": "9pm-10:45pm",
+            "date": "2025-12-13",
+            "name": "Scarlet Night",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "da9cee01-5500-4f39-8681-c1c068012766",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:19c71e97-b75e-4356-a17a-4c0f695df0d8/IMG-ENT-The-Octopus-Garden-The-Story-Of-Scarlet-Night-120x120.jpg",
+            "timePeriod": "9:15pm-9:30pm",
+            "date": "2025-12-13",
+            "name": "The Octopus Garden: The Story of Scarlet Night",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "90258ec1-04a4-4e6b-ad95-f83bfb4a6b52",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:57ef436c-f2c9-4203-8020-00a995c6f8a1/ILL-ENT-UK-Summer-Series-Entertainment-Under-the-Stars-with-a-DJ-at-the-Aquatic-Club-120x120.jpg",
+            "timePeriod": "11:30pm-2:30am",
+            "date": "2025-12-13",
+            "name": "Scarlet Night Hip-Hop Afterparty",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

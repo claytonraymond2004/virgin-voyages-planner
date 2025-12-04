@@ -1,0 +1,57 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "a7c4bf03-02c3-4f8a-852a-01b2d8d8a21f",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:9087e758-d82a-47b8-a05d-f810ae9c8f93/IMG-ENT-90s-Boy-Band-Dance-Class-120x120-100.jpg",
+            "timePeriod": "9:30am-10:30am",
+            "date": "2025-12-08",
+            "name": "90s Boy Band Dance Class",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "a20bf65b-d5d9-48aa-91ce-09939f147e8c",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:73cd7e15-2307-463f-866c-d2848a43df65/IMG-ENT-Last-One-Standing-120x120.jpg",
+            "timePeriod": "11:15am-12pm",
+            "date": "2025-12-08",
+            "name": "Last One Standing",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "72a9f873-34dd-4c65-a09e-e94d16e524d7",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:e99c9900-c7ef-4653-9294-a384cc101e32/ILL-ENT-8BIT-GottaDodgeEmAll-120x120.png",
+            "timePeriod": "3pm-4pm",
+            "date": "2025-12-08",
+            "name": "Gotta Dodge 'Em All",
+            "location": "The Sport's Court, Deck 16",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "f969684f-4110-4874-a6fc-f3f8debd6324",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ad0bb546-1b3d-47a4-9b3c-af30307f948a/redhot_120x120.png",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-08",
+            "name": "Red Hot",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "7deb3f6e-a559-4ff9-94e0-4fc6ce213779",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:df98c634-5e28-4acd-b570-b019c98bfb0c/ILL-ENT-8BIT-RiskyQuizness-120x120.png",
+            "timePeriod": "8:30pm-9:30pm",
+            "date": "2025-12-08",
+            "name": "Risky Quizness",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

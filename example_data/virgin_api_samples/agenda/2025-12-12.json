@@ -1,0 +1,27 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "df3c6f8d-a909-4849-8e0f-bfe3d7c38364",
+            "bookableType": "Eatery",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:0bce80f2-fd15-462b-93eb-509280e60084/IMG-FNB-the-wake-gallery-thumbnail-208x117.jpg",
+            "timePeriod": "11:45am",
+            "date": "2025-12-12",
+            "name": "The Wake",
+            "location": "The Wake, Deck 7 Aft",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "116420a1-ff63-48db-992d-d0a696a1e0e1",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:5b00515a-84bb-4669-9bd3-7ef64a875018/ILL-ENT-UK-Summer-Series-Entertainment-Show-Tunes-And-Video-At-The-Manor-120x120.jpg",
+            "timePeriod": "8pm-9pm",
+            "date": "2025-12-12",
+            "name": "Majority Mayhem",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

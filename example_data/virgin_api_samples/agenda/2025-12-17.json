@@ -1,0 +1,27 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "3293e7d3-e2ce-47ae-b16e-bf10965b6bab",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a330076a-cafd-4fe0-89d6-0af9d96ff701/LineDancing_120x120.jpg",
+            "timePeriod": "11:30am-12:30pm",
+            "date": "2025-12-17",
+            "name": "Line Dancing: Boot Scootin' Bash with the Diva!",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "34c5c17b-6930-4d56-bb1d-193b8576aef0",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:6d3d6b00-e81b-4ed4-b916-7ef29b2838f4/DiscoCircus_120x120.jpg",
+            "timePeriod": "11pm-2am",
+            "date": "2025-12-17",
+            "name": "Disco Circus",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}
