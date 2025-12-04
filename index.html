@@ -70,35 +70,33 @@
                         <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-1 text-center">Import from Virgin
                             Voyages</h2>
 
-                        <div class="space-y-4">
+                        <form onsubmit="event.preventDefault(); handleVVLogin();" class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email /
                                     Username</label>
                                 <input type="text" id="vv-username"
                                     class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="sailor@example.com">
+                                    placeholder="sailor@example.com" autocomplete="username">
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-1">
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                                    <button onclick="openPasswordHelp()"
-                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Password
-                                        Help</button>
+                                    <button type="button" onclick="openPasswordHelp()"
+                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Help?</button>
                                 </div>
                                 <input type="password" id="vv-password"
                                     class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="••••••••">
+                                    placeholder="••••••••" autocomplete="current-password">
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="vv-import-booked"
-                                    class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
-                                    checked>
-                                <label for="vv-import-booked" class="text-sm text-gray-700 dark:text-gray-300">Sync
-                                    Agenda from
-                                    Virgin Voyages App</label>
+                                    class="rounded text-red-600 focus:ring-red-500" checked>
+                                <label for="vv-import-booked" class="text-sm text-gray-600 dark:text-gray-400">Sync
+                                    Agenda
+                                    (Booked Events)</label>
                             </div>
-                            <button onclick="handleVVLogin()" id="btn-vv-login"
+                            <button type="submit" id="btn-vv-login"
                                 class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition flex justify-center items-center gap-2">
                                 <span>Sign In & Import</span>
                                 <svg id="vv-spinner" class="animate-spin h-4 w-4 text-white hidden"
@@ -111,17 +109,17 @@
                                     </path>
                                 </svg>
                             </button>
-                            <div id="vv-status" class="text-center text-sm text-gray-600 min-h-[20px]"></div>
-                            <div id="cors-help-link" class="text-center" style="display: none;">
-                                <button onclick="openCorsHelp()"
-                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs underline">
-                                    Browser CORS may need to be disabled to import. How do I disable CORS?
-                                </button>
-                            </div>
+                        </form>
+                        <div id="vv-status" class="text-center text-sm text-gray-600 min-h-[20px]"></div>
+                        <div id="cors-help-link" class="text-center" style="display: none;">
+                            <button onclick="openCorsHelp()"
+                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs underline">
+                                Browser CORS may need to be disabled to import. How do I disable CORS?
+                            </button>
                         </div>
-                        <div class="mt-4 text-xs text-center text-gray-400">
-                            Credentials are sent directly to Virgin Voyages and are not stored.
-                        </div>
+                    </div>
+                    <div class="mt-4 text-xs text-center text-gray-400">
+                        Credentials are sent directly to Virgin Voyages and are not stored.
                     </div>
                 </div>
 
@@ -1324,13 +1322,13 @@
                         <!-- Virgin API Option -->
                         <div class="border rounded-lg p-4 hover:border-red-300 transition-colors dark:border-gray-700">
                             <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2">From Virgin Voyages</h4>
-                            <div class="space-y-3">
+                            <form onsubmit="event.preventDefault(); handleUpdateVVLogin();" class="space-y-3">
                                 <input type="text" id="update-vv-username"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="Email / Username">
+                                    placeholder="Email / Username" autocomplete="username">
                                 <input type="password" id="update-vv-password"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="Password">
+                                    placeholder="Password" autocomplete="current-password">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="update-vv-import-booked"
                                         class="rounded text-[#AF231C] focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600"
@@ -1339,7 +1337,7 @@
                                         class="text-xs text-gray-700 dark:text-gray-300">Sync Agenda from Virgin Voyages
                                         App</label>
                                 </div>
-                                <button onclick="handleUpdateVVLogin()" id="btn-update-vv-login"
+                                <button type="submit" id="btn-update-vv-login"
                                     class="w-full bg-[#AF231C] text-white font-bold py-2 px-4 rounded hover:bg-red-800 transition text-sm flex justify-center items-center gap-2">
                                     <span>Sign In & Check</span>
                                     <svg id="update-vv-spinner" class="animate-spin h-4 w-4 text-white hidden"
@@ -1352,7 +1350,7 @@
                                     </svg>
                                 </button>
                                 <div id="update-vv-status" class="text-center text-xs text-gray-500 min-h-[16px]"></div>
-                            </div>
+                            </form>
                         </div>
 
                         <!-- File Upload Option -->
