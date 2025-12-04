@@ -1432,22 +1432,26 @@
                     class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700">Receive</button>
             </div>
 
-            <div class="p-6">
-                <!-- Warning -->
-                <div
-                    class="mt-4 mb-8 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-200">
-                    <strong>Note:</strong> This feature uses a temporary external storage service (dpaste.com) to
-                    transfer data.
-                    Your data is uploaded securely and deleted automatically after 1 day.
-                    Internet connection is required.
-                </div>
+            <div class="p-6 flex-1 overflow-y-auto">
+
 
                 <!-- Send Tab -->
                 <div id="transfer-content-send" class="space-y-4">
-                    <p class="text-sm font-bold text-gray-600 mb-4 dark:text-gray-300">Click below to generate a
-                        transfer link to share
-                        with
-                        another device.</p>
+                    <div class="text-sm text-gray-600 mb-4 dark:text-gray-300 space-y-2">
+                        <p>Transfer Virgin Voyages Event Planner data from this device to another device (e.g. Computer
+                            to Phone or vice versa).</p>
+                        <div
+                            class="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-200">
+                            <strong>Note:</strong> This feature uses a temporary external storage service (dpaste.com)
+                            to transfer data.
+                            Your data is uploaded securely and deleted automatically after 1 day.
+                            An internet connection is required to perform this transfer.
+                        </div>
+                        <p>This transfer includes all synced Virgin Voyages event data, your agenda, custom events,
+                            notes, and more. Transferred data will overwrite any existing data on the receiving device.
+                        </p>
+                        <p>Click below to generate a secure transfer link & QR code for you receiving device.</p>
+                    </div>
 
                     <div id="transfer-send-initial" class="text-center">
                         <button onclick="handleTransferSend()"

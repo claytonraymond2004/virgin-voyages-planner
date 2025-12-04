@@ -491,6 +491,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Transfer Modal Swipe Logic
+    const transferModalContent = document.querySelector('#transfer-modal .modal-content');
+    let transferTouchStartX = 0;
+    let transferTouchEndX = 0;
+
+    if (transferModalContent) {
+        transferModalContent.addEventListener('touchstart', (e) => {
+            transferTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        transferModalContent.addEventListener('touchend', (e) => {
+            transferTouchEndX = e.changedTouches[0].screenX;
+            handleTransferSwipe();
+        }, { passive: true });
+    }
+
+    function handleTransferSwipe() {
+        if (Math.abs(transferTouchEndX - transferTouchStartX) < 100) return; // Ignore small swipes
+
+        // Determine current tab based on visibility
+        const sendContent = document.getElementById('transfer-content-send');
+        const isSendVisible = sendContent && !sendContent.classList.contains('hidden');
+        const currentTab = isSendVisible ? 'send' : 'receive';
+
+        if (transferTouchEndX < transferTouchStartX) {
+            // Swipe Left -> Next Tab (Send -> Receive)
+            if (currentTab === 'send') {
+                switchTransferTab('receive');
+            }
+        } else {
+            // Swipe Right -> Prev Tab (Receive -> Send)
+            if (currentTab === 'receive') {
+                switchTransferTab('send');
+            }
+        }
+    }
+
     // Initialize Toolbar Tooltips
     initTooltips();
 
@@ -1411,7 +1448,10 @@ function processBookedEvents(bookedEvents, shouldRender = true) {
 
 // --- Transfer Logic ---
 
-function openTransferModal(tab = 'send') {
+function openTransferModal(tab) {
+    if (!tab) {
+        tab = window.innerWidth <= 768 ? 'receive' : 'send';
+    }
     // Reset UI State
     document.getElementById('transfer-send-result').classList.add('hidden');
     document.getElementById('transfer-send-result').classList.remove('flex');
