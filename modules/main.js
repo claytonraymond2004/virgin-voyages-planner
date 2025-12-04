@@ -119,12 +119,35 @@ window.stopTransferScanner = stopTransferScanner;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Dark Mode Init
+    // Dark Mode Init
     const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.body.classList.add('dark');
-        document.getElementById('icon-moon').style.display = 'none';
-        document.getElementById('icon-sun').style.display = 'block';
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = (isDark) => {
+        if (isDark) {
+            document.body.classList.add('dark');
+            document.getElementById('icon-moon').style.display = 'none';
+            document.getElementById('icon-sun').style.display = 'block';
+        } else {
+            document.body.classList.remove('dark');
+            document.getElementById('icon-moon').style.display = 'block';
+            document.getElementById('icon-sun').style.display = 'none';
+        }
+        updateThemeColor(isDark);
+    };
+
+    if (savedTheme) {
+        applyTheme(savedTheme === 'dark');
+    } else {
+        applyTheme(mediaQuery.matches);
     }
+
+    // Listen for system changes
+    mediaQuery.addEventListener('change', (e) => {
+        if (!localStorage.getItem(STORAGE_KEY_THEME)) {
+            applyTheme(e.matches);
+        }
+    });
 
     // Drag & Drop File
     const dropZone = document.getElementById('drop-zone');
@@ -594,6 +617,13 @@ function loadApp() {
     }
 }
 
+function updateThemeColor(isDark) {
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', isDark ? '#111827' : '#AF231C');
+    }
+}
+
 function toggleDarkMode() {
     document.body.classList.toggle('dark');
     const isDark = document.body.classList.contains('dark');
@@ -601,6 +631,8 @@ function toggleDarkMode() {
 
     document.getElementById('icon-moon').style.display = isDark ? 'none' : 'block';
     document.getElementById('icon-sun').style.display = isDark ? 'block' : 'none';
+
+    updateThemeColor(isDark);
 }
 
 // --- Data Handling ---
