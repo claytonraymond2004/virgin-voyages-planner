@@ -22,6 +22,7 @@ let skippedEvents = new Set(); // Set of Names
 let proposedScheduleBackup = null;
 let skippedEventsBackup = null;
 let conflictSelectionsBackup = null;
+let rescheduleCallback = null;
 
 // --- Main Entry Point ---
 export function initSmartScheduler() {
@@ -35,8 +36,9 @@ export function initSmartScheduler() {
     renderWizard();
 }
 
-export function initRescheduleWizard(eventUid) {
+export function initRescheduleWizard(eventUid, onComplete = null) {
     window.isRescheduleMode = true;
+    rescheduleCallback = onComplete;
     const ev = state.eventLookup.get(eventUid);
     if (!ev) {
         alert("Event not found.");
@@ -1057,7 +1059,12 @@ function applySchedule() {
     });
     saveAttendance();
     saveHiddenNames();
+    saveHiddenNames();
     renderApp();
+    if (rescheduleCallback) {
+        rescheduleCallback();
+        rescheduleCallback = null;
+    }
 }
 
 

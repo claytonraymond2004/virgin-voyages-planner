@@ -750,6 +750,13 @@ async function handleVVLogin() {
 // --- Update Itinerary Logic ---
 
 let pendingUpdateEvents = null;
+let lastUpdateInputs = null;
+
+export function refreshUpdateCheck() {
+    if (lastUpdateInputs) {
+        checkForUpdates(lastUpdateInputs.jsonObjects, lastUpdateInputs.bookedEvents);
+    }
+}
 
 async function handleUpdateVVLogin() {
     const usernameInput = document.getElementById('update-vv-username');
@@ -829,6 +836,7 @@ function handleUpdateFiles(fileList) {
 }
 
 function checkForUpdates(jsonObjects, bookedEvents = []) {
+    lastUpdateInputs = { jsonObjects, bookedEvents };
     // Flatten and clean new data
     const newEvents = [];
 
@@ -1000,7 +1008,29 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 // If not currently attending, it's "Added"
                 const uid = getUid(match);
                 if (uid && !state.attendingIds.has(uid)) {
-                    bookedChanges.added.push({ ...booked, type: 'attendance', matchUid: uid });
+                    // Check for conflicts
+                    const conflicts = [];
+                    const matchTime = parseTimeRange(match.timePeriod);
+                    if (matchTime) {
+                        const matchStart = matchTime.start + SHIFT_START_ADD;
+                        const matchEnd = matchTime.end + SHIFT_END_ADD;
+
+                        state.attendingIds.forEach(attUid => {
+                            const attEv = state.eventLookup.get(attUid);
+                            if (attEv && attEv.date === match.date) {
+                                const attTime = parseTimeRange(attEv.timePeriod);
+                                if (attTime) {
+                                    const attStart = attTime.start + SHIFT_START_ADD;
+                                    const attEnd = attTime.end + SHIFT_END_ADD;
+
+                                    if (matchStart < attEnd && matchEnd > attStart) {
+                                        conflicts.push(attEv);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    bookedChanges.added.push({ ...booked, type: 'attendance', matchUid: uid, conflicts });
                 }
             } else {
                 // Custom Event
@@ -1056,7 +1086,29 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             });
 
             if (!isBooked) {
-                bookedChanges.unattended.push(ev);
+                // Check if type is Informative (don't unmark these as they don't appear in booked list)
+                let isInformative = ev.type === "Informative";
+
+                // Fallback: Check new data if old data doesn't have type field yet
+                if (!isInformative) {
+                    const key = `${ev.date}_${ev.name}`;
+                    const newEvs = newEventsByKey.get(key);
+                    if (newEvs) {
+                        const evTime = parseTimeRange(ev.timePeriod);
+                        const evStart = evTime ? evTime.start + SHIFT_START_ADD : -1;
+
+                        const match = newEvs.find(ne => {
+                            const neTime = parseTimeRange(ne.timePeriod);
+                            const neStart = neTime ? neTime.start + SHIFT_START_ADD : -1;
+                            return Math.abs(neStart - evStart) < 15;
+                        });
+                        if (match && match.type === "Informative") isInformative = true;
+                    }
+                }
+
+                if (!isInformative) {
+                    bookedChanges.unattended.push(ev);
+                }
             }
         });
     }
@@ -1220,6 +1272,7 @@ function parseRawData(agenda) {
                     shortDescription: item.shortDescription,
                     timePeriod: item.timePeriod,
                     needToKnows: item.needToKnows,
+                    type: item.type,
                 };
                 cleanAgenda.push(cleanItem);
             });

@@ -6,7 +6,8 @@ import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
     showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
 } from './interactions.js';
-import { initSmartScheduler } from './smartScheduler.js';
+import { initSmartScheduler, initRescheduleWizard } from './smartScheduler.js';
+import { refreshUpdateCheck } from './main.js';
 
 // --- Modals ---
 
@@ -1151,25 +1152,81 @@ export function renderChangeSummary(changes) {
         list.appendChild(bookedHeader);
 
         // Added Bookings
+        // Added Bookings
         changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex items-start gap-2";
+            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex flex-col gap-2";
             const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
             const id = `booked-add-${idx}`;
 
-            el.innerHTML = `
-                <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                <div class="flex-1">
-                    <div class="flex justify-between">
-                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+            let conflictHtml = '';
+            if (ev.conflicts && ev.conflicts.length > 0) {
+                const conflictNames = ev.conflicts.map(c => c.name).join(', ');
+                conflictHtml = `
+                    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-1">
+                        <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Conflict with: ${escapeHtml(conflictNames)}
+                        </div>
+                        <div class="flex flex-col gap-1 ml-6">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="conflict_action_${idx}" value="overlap" checked class="text-purple-600 focus:ring-purple-500">
+                                <span class="text-xs text-gray-700 dark:text-gray-300">Add anyway (Allow Overlap)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="conflict_action_${idx}" value="skip" class="text-purple-600 focus:ring-purple-500">
+                                <span class="text-xs text-gray-700 dark:text-gray-300">Skip (Don't Add)</span>
+                            </label>
+                            <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline text-left mt-1" id="btn-resolve-${idx}">
+                                Find Alternative for ${escapeHtml(ev.conflicts[0].name)}...
+                            </button>
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                `;
+            }
+
+            el.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                        ${conflictHtml}
+                    </div>
                 </div>
             `;
             list.appendChild(el);
-            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+
+            const checkbox = document.getElementById(id);
+            checkbox.onchange = (e) => { ev.ignored = !e.target.checked; };
+
+            if (ev.conflicts && ev.conflicts.length > 0) {
+                // Handle radio buttons
+                const radios = el.querySelectorAll(`input[name="conflict_action_${idx}"]`);
+                radios.forEach(radio => {
+                    radio.onchange = (e) => {
+                        if (e.target.value === 'skip') {
+                            ev.ignored = true;
+                            checkbox.checked = false;
+                        } else {
+                            ev.ignored = false;
+                            checkbox.checked = true;
+                        }
+                    };
+                });
+
+                // Handle resolve button
+                const btnResolve = document.getElementById(`btn-resolve-${idx}`);
+                if (btnResolve) {
+                    btnResolve.onclick = () => {
+                        initRescheduleWizard(ev.conflicts[0].uid, refreshUpdateCheck);
+                    };
+                }
+            }
         });
 
         // Removed Bookings
