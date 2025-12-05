@@ -902,7 +902,7 @@ function renderPreviewStep(body, footer) {
     let html = `<div class="p-2 space-y-4 h-full flex flex-col">
     <div class="flex items-center justify-between flex-shrink-0">
             <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Review Your Schedule</h3>
-            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full">Adding ${newEventsCount} Events</span>
+            <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs font-medium px-2.5 py-0.5 rounded-full">Adding ${newEventsCount} Events</span>
     </div>
     <div class="space-y-4 overflow-y-auto pr-2 flex-grow">`;
 
@@ -988,7 +988,7 @@ function renderPreviewStep(body, footer) {
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${formatTime(ev.startMins)} - ${formatTime(ev.endMins)} <span class="mx-1">•</span> ${ev.location}</div>
                     </div>
                     <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                        ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Already Scheduled</span>' : ''}
+                        ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Planned</span>' : '<span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2 py-0.5 rounded">Adding to Planner</span>'}
                         ${hasConflict ? '<span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium px-2 py-0.5 rounded">Event Overlap</span>' : ''}
                     </div>
                 </div>
