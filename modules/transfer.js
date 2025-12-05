@@ -10,9 +10,12 @@ const DPASTE_API_URL = 'https://dpaste.com/api/';
  */
 export function exportData() {
     const data = {};
+    // Explicitly exclude auth tokens
+    const EXCLUDED_KEYS = ['vv_access_token', 'vv_token_expiry', 'vv_username'];
+
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('virginVoyages')) {
+        if (key.startsWith('virginVoyages') && !EXCLUDED_KEYS.includes(key)) {
             data[key] = localStorage.getItem(key);
         }
     }

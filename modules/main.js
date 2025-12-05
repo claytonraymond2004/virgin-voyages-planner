@@ -1302,7 +1302,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added, pendingReschedules: new Set() };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added, removed, pendingReschedules: new Set() };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
 }
 
@@ -1313,7 +1313,7 @@ export function getPendingUpdateEvents() {
 function applyAgendaUpdate() {
     if (!pendingUpdateEvents) return;
 
-    const { newEvents, migrations, bookedEvents, bookedChanges, added, pendingReschedules } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges, added, removed, pendingReschedules } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
     migrations.forEach(({ oldUid, newUid }) => {
@@ -1423,7 +1423,10 @@ function applyAgendaUpdate() {
                 c.timePeriod === b.timePeriod
             );
 
-            if (addedChange && addedChange.ignored) return false;
+            if (addedChange) {
+                if (addedChange.ignored) return false;
+                if (addedChange.addToSchedule === false) return false;
+            }
             return true;
         });
 
@@ -1436,8 +1439,8 @@ function applyAgendaUpdate() {
     const autoRescheduleEvents = new Set();
 
     // A. Removed Events marked for reschedule
-    if (changes.removed) {
-        changes.removed.forEach(ev => {
+    if (removed) {
+        removed.forEach(ev => {
             if (ev.reschedule) {
                 autoRescheduleEvents.add(ev.name);
                 // Ensure the old instance is removed from attending (already done if removed from data, but good to be sure)
@@ -1485,13 +1488,32 @@ function applyAgendaUpdate() {
         // renderApp is called at the end.
         // We should probably call openSmartScheduler AFTER renderApp.
         setTimeout(() => {
-            openSmartScheduler();
-            showToast(`Smart Scheduler launched for ${autoRescheduleEvents.size} event(s).`);
+            openSmartScheduler(true, () => {
+                showConfirm("Itinerary updated successfully!", null, "Success");
+                // Hide cancel button for this success message
+                setTimeout(() => {
+                    const cancelBtn = document.getElementById('btn-confirm-cancel');
+                    if (cancelBtn) cancelBtn.style.display = 'none';
+                    const okBtn = document.getElementById('btn-confirm-ok');
+                    if (okBtn) {
+                        const oldOnClick = okBtn.onclick;
+                        okBtn.onclick = () => {
+                            if (oldOnClick) oldOnClick();
+                            cancelBtn.style.display = 'inline-block'; // Restore
+                        };
+                    }
+                }, 0);
+            });
         }, 500);
+
+        pendingUpdateEvents = null;
+        renderApp();
+        return true; // Handled async
     }
 
     pendingUpdateEvents = null;
     renderApp();
+    return false; // Handled synchronously
 }
 
 function processLoadedData(jsonObjects) {

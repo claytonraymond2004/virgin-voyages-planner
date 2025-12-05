@@ -608,8 +608,8 @@ export function toggleMenu() {
     menu.classList.toggle('open');
 }
 
-export function openSmartScheduler() {
-    initSmartScheduler();
+export function openSmartScheduler(isAutoMode = false, onClose = null) {
+    initSmartScheduler(isAutoMode, onClose);
     document.getElementById('dropdown-menu').classList.remove('open');
 }
 
@@ -1435,16 +1435,17 @@ export function renderChangeSummary(changes) {
                             </div>
                             <div class="space-y-1">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict-action-${idx}" id="${idOverlap}" value="overlap" class="text-green-600 focus:ring-green-500" ${ev.addToSchedule ? 'checked' : ''}>
+                                    <input type="radio" name="conflict-action-${idx}" id="${idOverlap}" value="overlap" class="text-green-600 focus:ring-green-500" ${ev.addToSchedule && !ev.rescheduleConflict ? 'checked' : ''}>
                                     <span class="text-xs text-gray-700 dark:text-gray-300">Mark Attending with Overlap</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="conflict-action-${idx}" id="${idNoMark}" value="nomark" class="text-green-600 focus:ring-green-500" ${!ev.addToSchedule ? 'checked' : ''}>
                                     <span class="text-xs text-gray-700 dark:text-gray-300">Do not Mark Attending in Planner</span>
                                 </label>
-                                <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-bold ml-6 mt-1" id="${idReschedule}">
-                                    Reschedule Event...
-                                </button>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="conflict-action-${idx}" id="${idReschedule}" value="reschedule" class="text-green-600 focus:ring-green-500" ${ev.rescheduleConflict ? 'checked' : ''}>
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Reschedule Event</span>
+                                </label>
                             </div>
                         </div>
                     `;
@@ -1570,15 +1571,82 @@ export function renderChangeSummary(changes) {
 
             let rescheduleHtml = '';
             if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
-                const idReschedule = `removed-reschedule-${idx}`;
-                rescheduleHtml = `
-                    <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${idReschedule}" class="rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
-                            <span class="text-xs font-bold text-blue-800 dark:text-blue-200">Reschedule (Auto-find new time)</span>
-                        </label>
-                    </div>
-                 `;
+                // Check if any OTHER instance of this event is already attending in the projected schedule
+                const pending = getPendingUpdateEvents();
+                const projectedAttending = new Set();
+
+                // Build projected attending set (similar to conflict logic)
+                state.attendingIds.forEach(uid => projectedAttending.add(uid));
+                pending.migrations.forEach(m => {
+                    if (projectedAttending.has(m.oldUid)) {
+                        projectedAttending.delete(m.oldUid);
+                        projectedAttending.add(m.newUid);
+                    }
+                });
+                changes.removed.forEach(r => projectedAttending.delete(r._uid));
+                changes.added.forEach(a => {
+                    if (a.addToSchedule) projectedAttending.add(a._uid);
+                });
+                if (changes.bookedChanges) {
+                    changes.bookedChanges.added.forEach(a => {
+                        if (!a.ignored) projectedAttending.add(a.uid);
+                    });
+                    changes.bookedChanges.removed.forEach(r => {
+                        if (!r.ignored) projectedAttending.delete(r.uid);
+                    });
+                    changes.bookedChanges.unattended.forEach(u => {
+                        if (!u.ignored) projectedAttending.delete(u.uid);
+                    });
+                }
+                pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
+
+                // Check for other instances of same name
+                let hasOtherInstance = false;
+                for (const uid of projectedAttending) {
+                    let otherEv = state.eventLookup.get(uid);
+                    if (!otherEv) {
+                        otherEv = pending.newEvents.find(e => e._uid === uid);
+                    }
+                    if (otherEv && otherEv.name === ev.name && otherEv._uid !== ev._uid) {
+                        hasOtherInstance = true;
+                        break;
+                    }
+                }
+
+                if (!hasOtherInstance) {
+                    const idReschedule = `removed-reschedule-${idx}`;
+                    rescheduleHtml = `
+                        <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="${idReschedule}" class="rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule !== false ? 'checked' : ''}>
+                                <span class="text-xs font-bold text-blue-800 dark:text-blue-200">Reschedule Event</span>
+                            </label>
+                        </div>
+                     `;
+                } else {
+                    // Refine reason: Is it because of a reschedule conflict mark?
+                    let isRescheduleMarked = false;
+                    if (changes.bookedChanges && changes.bookedChanges.added) {
+                        isRescheduleMarked = changes.bookedChanges.added.some(a =>
+                            a.rescheduleConflict &&
+                            a.conflicts &&
+                            a.conflicts.some(c => c.name === ev.name)
+                        );
+                    }
+
+                    const reasonText = isRescheduleMarked
+                        ? "Event already marked for reschedule"
+                        : "Already attending at least 1 instance of event";
+
+                    rescheduleHtml = `
+                        <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                ${reasonText}
+                            </div>
+                        </div>
+                    `;
+                }
             } else if (ev.rescheduledUid) {
                 const pending = getPendingUpdateEvents();
                 const newEv = pending.newEvents.find(e => e._uid === ev.rescheduledUid);
@@ -1604,6 +1672,9 @@ export function renderChangeSummary(changes) {
             if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
                 const checkbox = document.getElementById(`removed-reschedule-${idx}`);
                 if (checkbox) {
+                    // Initialize default state
+                    if (ev.reschedule === undefined) ev.reschedule = true;
+
                     checkbox.onchange = (e) => {
                         ev.reschedule = e.target.checked;
                         // No need to re-render unless we want to update conflict projections, 
@@ -1618,23 +1689,26 @@ export function renderChangeSummary(changes) {
 
 export function confirmUpdateApply() {
     if (window.applyAgendaUpdate) {
-        window.applyAgendaUpdate();
+        const handledAsync = window.applyAgendaUpdate();
         updateStateSnapshot = null; // Commit changes
         closeAllModals();
-        showConfirm("Itinerary updated successfully!", null, "Success");
-        // Hide cancel button for this success message
-        setTimeout(() => {
-            const cancelBtn = document.getElementById('btn-confirm-cancel');
-            if (cancelBtn) cancelBtn.style.display = 'none';
-            const okBtn = document.getElementById('btn-confirm-ok');
-            if (okBtn) {
-                const oldOnClick = okBtn.onclick;
-                okBtn.onclick = () => {
-                    if (oldOnClick) oldOnClick();
-                    cancelBtn.style.display = 'inline-block'; // Restore
-                };
-            }
-        }, 0);
+
+        if (!handledAsync) {
+            showConfirm("Itinerary updated successfully!", null, "Success");
+            // Hide cancel button for this success message
+            setTimeout(() => {
+                const cancelBtn = document.getElementById('btn-confirm-cancel');
+                if (cancelBtn) cancelBtn.style.display = 'none';
+                const okBtn = document.getElementById('btn-confirm-ok');
+                if (okBtn) {
+                    const oldOnClick = okBtn.onclick;
+                    okBtn.onclick = () => {
+                        if (oldOnClick) oldOnClick();
+                        cancelBtn.style.display = 'inline-block'; // Restore
+                    };
+                }
+            }, 0);
+        }
     }
 }
 

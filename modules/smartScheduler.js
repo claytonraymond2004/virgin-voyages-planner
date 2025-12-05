@@ -28,17 +28,31 @@ let tempEventLookup = null;
 let tempAttendingBase = null;
 
 // --- Main Entry Point ---
-export function initSmartScheduler() {
+let schedulerOnCloseCallback = null;
+
+export function initSmartScheduler(isAutoMode = false, onClose = null) {
     window.isRescheduleMode = false;
+    window.isAutoRescheduleMode = isAutoMode;
+    schedulerOnCloseCallback = onClose;
     tempEventLookup = null;
     tempAttendingBase = null;
-    currentWizardStep = WIZARD_STEPS.INTRO;
+
+    if (isAutoMode) {
+        currentWizardStep = WIZARD_STEPS.PROCESS;
+    } else {
+        currentWizardStep = WIZARD_STEPS.INTRO;
+    }
+
     proposedSchedule.clear();
     conflictList = [];
     ignoredConflicts.clear();
     skippedEvents.clear();
     conflictSelectionsBackup = null;
     renderWizard();
+
+    if (isAutoMode) {
+        setTimeout(runAlgorithm, 100);
+    }
 }
 
 export function initRescheduleWizard(eventUid, onComplete = null, customEvents = null, customAttendingIds = null) {
@@ -195,6 +209,10 @@ function renderWizard() {
 function closeWizard() {
     const modal = document.getElementById('smart-scheduler-modal');
     if (modal) modal.remove();
+    if (schedulerOnCloseCallback) {
+        schedulerOnCloseCallback();
+        schedulerOnCloseCallback = null;
+    }
 }
 
 function renderStepContent(bodyContainer, footerContainer) {
@@ -247,8 +265,14 @@ function renderIntroStep(body, footer) {
     `;
 
     document.getElementById('btn-intro-next').onclick = () => {
-        currentWizardStep = WIZARD_STEPS.CHECKLIST;
-        renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+        if (window.isAutoRescheduleMode) {
+            currentWizardStep = WIZARD_STEPS.PROCESS;
+            renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+            setTimeout(runAlgorithm, 100);
+        } else {
+            currentWizardStep = WIZARD_STEPS.CHECKLIST;
+            renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+        }
     };
 }
 
@@ -692,7 +716,7 @@ function renderConflictsStep(body, footer) {
         <button class="btn-primary" id="btn-conflicts-next">Resolve & Continue</button>
     `;
 
-    if (window.isRescheduleMode) {
+    if (window.isRescheduleMode || window.isAutoRescheduleMode) {
         document.getElementById('btn-conflicts-back').style.display = 'none';
     }
 
@@ -1051,7 +1075,8 @@ function renderPreviewStep(body, footer) {
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${formatTime(ev.startMins)} - ${formatTime(ev.endMins)} <span class="mx-1">•</span> ${ev.location}</div>
                     </div>
                     <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                        ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Already Scheduled</span>' : ''}
+                        ${ev.isNew ? '<span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2 py-0.5 rounded">Adding to Planner</span>' : ''}
+                        ${!ev.isNew ? '<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded">Planned</span>' : ''}
                         ${hasConflict ? '<span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium px-2 py-0.5 rounded">Event Overlap</span>' : ''}
                     </div>
                 </div>
@@ -1070,6 +1095,10 @@ function renderPreviewStep(body, footer) {
     <button class="btn-secondary" id="btn-preview-back">Back</button>
     <button class="btn-primary" id="btn-apply">Confirm & Apply</button>
 `;
+
+    if (window.isAutoRescheduleMode) {
+        document.getElementById('btn-preview-back').style.display = 'none';
+    }
 
     document.getElementById('btn-preview-back').onclick = () => {
         // Restore state if available
