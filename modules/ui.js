@@ -1136,75 +1136,6 @@ export function renderChangeSummary(changes) {
     document.getElementById('update-step-summary').classList.remove('hidden');
     document.getElementById('update-step-summary').classList.add('flex');
 
-    // Render Modified
-    if (changes.modified && changes.modified.length > 0) {
-        const modHeader = document.createElement('h5');
-        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        modHeader.textContent = `Modified Events (${changes.modified.length})`;
-        list.appendChild(modHeader);
-
-        changes.modified.forEach(item => {
-            const { oldEv, newEv, changes: changedFields } = item;
-            const el = document.createElement('div');
-            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
-
-            let details = '';
-            if (changedFields.includes('Time')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
-            }
-            if (changedFields.includes('Location')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
-            }
-            if (changedFields.includes('Description')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
-            }
-
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
-                ${details}
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Removed
-    if (changes.removed.length > 0) {
-        const removedHeader = document.createElement('h5');
-        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
-        list.appendChild(removedHeader);
-
-        changes.removed.forEach(ev => {
-            const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Added
-    if (changes.added.length > 0) {
-        const addedHeader = document.createElement('h5');
-        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        addedHeader.textContent = `New Events (${changes.added.length})`;
-        list.appendChild(addedHeader);
-
-        changes.added.forEach(ev => {
-            const el = document.createElement('div');
-            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-            `;
-            list.appendChild(el);
-        });
-    }
-
     // Render Booked Changes
     if (changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0)) {
         const bookedHeader = document.createElement('h5');
@@ -1328,6 +1259,107 @@ export function renderChangeSummary(changes) {
             `;
             list.appendChild(el);
             document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+        });
+    }
+
+    // Render Added
+    if (changes.added.length > 0) {
+        const addedHeader = document.createElement('h5');
+        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        addedHeader.textContent = `New Events (${changes.added.length})`;
+        list.appendChild(addedHeader);
+
+        changes.added.forEach((ev, idx) => {
+            const el = document.createElement('div');
+            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
+
+            let actionHtml = '';
+            if (ev.isBooked) {
+                const id = `added-booked-${idx}`;
+                actionHtml = `
+                    <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="${id}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-green-800 dark:text-green-200">Add to Schedule? (Booked)</span>
+                        </label>
+                    </div>
+                `;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                ${actionHtml}
+            `;
+            list.appendChild(el);
+
+            if (ev.isBooked) {
+                const checkbox = document.getElementById(`added-booked-${idx}`);
+                if (checkbox) {
+                    checkbox.onchange = (e) => { ev.addToSchedule = e.target.checked; };
+                }
+            }
+        });
+    }
+
+    // Render Modified
+    if (changes.modified && changes.modified.length > 0) {
+        const modHeader = document.createElement('h5');
+        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        modHeader.textContent = `Modified Events (${changes.modified.length})`;
+        list.appendChild(modHeader);
+
+        changes.modified.forEach(item => {
+            const { oldEv, newEv, changes: changedFields } = item;
+            const el = document.createElement('div');
+            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
+
+            let details = '';
+            if (changedFields.includes('Time')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
+            }
+            if (changedFields.includes('Location')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
+            }
+            if (changedFields.includes('Description')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
+                ${details}
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Removed
+    if (changes.removed.length > 0) {
+        const removedHeader = document.createElement('h5');
+        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
+        list.appendChild(removedHeader);
+
+        changes.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+
+            let warningHtml = '';
+            if (ev.wasAttending) {
+                warningHtml = `<div class="text-xs text-red-600 dark:text-red-400 font-bold mt-1 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Was in your planned agenda
+                </div>`;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                ${warningHtml}
+            `;
+            list.appendChild(el);
         });
     }
 }

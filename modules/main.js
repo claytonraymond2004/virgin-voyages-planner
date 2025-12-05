@@ -994,6 +994,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
             } else {
                 // No match in new list -> Removed
+                if (state.attendingIds.has(oldEv._uid)) oldEv.wasAttending = true;
                 removed.push(oldEv);
             }
         });
@@ -1001,6 +1002,25 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         // Any remaining new events -> Added
         newList.forEach((newEv, newIdx) => {
             if (!newMatched.has(newIdx)) {
+                // Check if this new event matches any booked event
+                if (bookedEvents) {
+                    const newTime = parseTimeRange(newEv.timePeriod);
+                    if (newTime) {
+                        const newStart = newTime.start + SHIFT_START_ADD;
+                        const match = bookedEvents.find(b => {
+                            if (b.date !== newEv.date) return false;
+                            if (b.name !== newEv.name) return false;
+                            const bTime = parseTimeRange(b.timePeriod);
+                            if (!bTime) return false;
+                            const bStart = bTime.start + SHIFT_START_ADD;
+                            return Math.abs(bStart - newStart) < 15;
+                        });
+                        if (match) {
+                            newEv.isBooked = true;
+                            newEv.addToSchedule = true;
+                        }
+                    }
+                }
                 added.push(newEv);
             }
         });
@@ -1028,6 +1048,9 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
 
             if (match) {
                 // Official Event Match
+                // If it's an "Added" event (isBooked=true), we handle it in the Added section, not here.
+                if (match.isBooked) return;
+
                 // If not currently attending, it's "Added"
                 const uid = getUid(match);
                 if (uid && !state.attendingIds.has(uid)) {
@@ -1130,20 +1153,24 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 }
 
                 if (!isInformative) {
-                    bookedChanges.unattended.push(ev);
+                    // Check if this event was removed from the agenda entirely
+                    const isRemoved = removed.some(remEv => remEv._uid === ev.uid);
+                    if (!isRemoved) {
+                        bookedChanges.unattended.push(ev);
+                    }
                 }
             }
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
 }
 
 function applyAgendaUpdate() {
     if (!pendingUpdateEvents) return;
 
-    const { newEvents, migrations, bookedEvents, bookedChanges } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges, added } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
     migrations.forEach(({ oldUid, newUid }) => {
@@ -1177,6 +1204,21 @@ function applyAgendaUpdate() {
 
     // 3. Update Data
     updateAppData(newEvents);
+
+    // 3.5 Process Added Events marked for scheduling
+    if (added && added.length > 0) {
+        added.forEach(ev => {
+            if (ev.addToSchedule) {
+                const timeData = parseTimeRange(ev.timePeriod);
+                if (timeData) {
+                    const s = timeData.start + SHIFT_START_ADD;
+                    const uid = `${ev.date}_${ev.name}_${s}`;
+                    state.attendingIds.add(uid);
+                }
+            }
+        });
+        saveAttendance();
+    }
 
     // 4. Process Booked Events
     if (bookedChanges) {
