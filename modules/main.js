@@ -871,11 +871,19 @@ window.switchUpdateAccount = function () {
     const cachedContainer = document.getElementById('update-vv-cached-session');
 
     if (inputContainer) inputContainer.classList.remove('hidden');
-    if (cachedContainer) cachedContainer.classList.add('hidden');
+    if (cachedContainer) {
+        cachedContainer.classList.add('hidden');
+        cachedContainer.style.display = ''; // Clear inline flex style
+    }
 
     // Also clear the password field to force re-entry if desired, but maybe keep username
     const passwordInput = document.getElementById('update-vv-password');
     if (passwordInput) passwordInput.value = '';
+
+    // Clear the token so we don't try to use it again immediately or if the user cancels
+    if (window.VirginAPI && window.VirginAPI.clearToken) {
+        window.VirginAPI.clearToken();
+    }
 }
 
 window.toggleUpdateOptions = toggleUpdateOptions;

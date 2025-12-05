@@ -1097,6 +1097,26 @@ export function openUpdateAgendaModal() {
 
     usernameInput.onkeydown = handleEnter;
     passwordInput.onkeydown = handleEnter;
+
+    // Check for cached credentials
+    const hasToken = window.VirginAPI && window.VirginAPI.hasValidToken();
+    const cachedUser = localStorage.getItem('vv_username');
+    const inputContainer = document.getElementById('update-vv-login-inputs');
+    const cachedContainer = document.getElementById('update-vv-cached-session');
+    const cachedUserLabel = document.getElementById('update-vv-cached-username');
+
+    if (hasToken && cachedUser) {
+        if (inputContainer) inputContainer.classList.add('hidden');
+        if (cachedContainer) cachedContainer.classList.remove('hidden');
+        if (cachedContainer) cachedContainer.style.display = 'flex'; // Ensure flex
+        if (cachedUserLabel) cachedUserLabel.textContent = cachedUser;
+        // Pre-fill username for logic but hide it
+        if (usernameInput) usernameInput.value = cachedUser;
+    } else {
+        if (inputContainer) inputContainer.classList.remove('hidden');
+        if (cachedContainer) cachedContainer.classList.add('hidden');
+        if (usernameInput) usernameInput.value = cachedUser || '';
+    }
 }
 
 export function resetUpdateModal() {
