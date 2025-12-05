@@ -1167,7 +1167,11 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
 
                 // If not currently attending, it's "Added"
                 const uid = getUid(match);
-                if (uid && !state.attendingIds.has(uid)) {
+
+                // Check if this is just a migrated event (time change) that we are already attending
+                const isMigrated = migrations.some(m => m.newUid === uid && state.attendingIds.has(m.oldUid));
+
+                if (uid && !state.attendingIds.has(uid) && !isMigrated) {
                     // Check for conflicts
                     const conflicts = [];
                     const matchTime = parseTimeRange(match.timePeriod);
@@ -1246,6 +1250,27 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             });
 
             if (!isBooked) {
+                // Check if this event was migrated to a new time, and that new time IS booked
+                const migration = migrations.find(m => m.oldUid === ev.uid);
+                if (migration) {
+                    const newEv = newEvents.find(ne => ne._uid === migration.newUid);
+                    if (newEv) {
+                        const newTime = parseTimeRange(newEv.timePeriod);
+                        if (newTime) {
+                            const newStart = newTime.start + SHIFT_START_ADD;
+                            const isNewBooked = bookedEvents.find(b => {
+                                if (b.date !== newEv.date) return false;
+                                if (b.name !== newEv.name) return false;
+                                const bTime = parseTimeRange(b.timePeriod);
+                                if (!bTime) return false;
+                                const bStart = bTime.start + SHIFT_START_ADD;
+                                return Math.abs(bStart - newStart) < 15;
+                            });
+                            if (isNewBooked) return; // It is booked (at the new time), so don't mark unattended
+                        }
+                    }
+                }
+
                 // Check if type is Informative (don't unmark these as they don't appear in booked list)
                 let isInformative = ev.type === "Informative";
 
@@ -1406,8 +1431,63 @@ function applyAgendaUpdate() {
             processBookedEvents(activeBookedEvents, false);
         }
     }
-    if (bookedEvents && bookedEvents.length > 0) {
-        processBookedEvents(bookedEvents, false);
+
+    // 5. Process Auto-Reschedules (Removed Events & Conflicts)
+    const autoRescheduleEvents = new Set();
+
+    // A. Removed Events marked for reschedule
+    if (changes.removed) {
+        changes.removed.forEach(ev => {
+            if (ev.reschedule) {
+                autoRescheduleEvents.add(ev.name);
+                // Ensure the old instance is removed from attending (already done if removed from data, but good to be sure)
+                if (ev._uid) state.attendingIds.delete(ev._uid);
+            }
+        });
+    }
+
+    // B. Booked Conflicts marked for reschedule
+    if (bookedChanges && bookedChanges.added) {
+        bookedChanges.added.forEach(ev => {
+            if (ev.rescheduleConflict && ev.conflicts) {
+                ev.conflicts.forEach(conflict => {
+                    autoRescheduleEvents.add(conflict.name);
+                    // Unattend the conflicting event
+                    if (conflict.uid) state.attendingIds.delete(conflict.uid);
+                });
+            }
+        });
+    }
+
+    // Apply Reschedule Logic
+    if (autoRescheduleEvents.size > 0) {
+        autoRescheduleEvents.forEach(name => {
+            // 1. Unhide Series
+            if (state.hiddenNames.has(name)) state.hiddenNames.delete(name);
+
+            // 2. Unmark Optional (Make Required)
+            // state.optionalEvents is a Set or Array? It's a Set in state.js usually, but let's check usage.
+            // In saveNewData it's a Set.
+            if (state.optionalEvents.has(name)) state.optionalEvents.delete(name);
+
+            // 3. Clean up hidden instances (optional, but good)
+            // We can't easily find all UIDs for a name without iterating everything, 
+            // but hiddenUids are specific instances. If we want to "reset" the series, we should probably clear hidden instances for it.
+            // But that might be expensive. For now, unhiding the series name is the main thing.
+        });
+
+        saveAttendance();
+        saveHiddenNames();
+        saveOptionalEvents();
+
+        // Launch Smart Scheduler
+        // We need to wait for renderApp to finish updating the DOM with new events?
+        // renderApp is called at the end.
+        // We should probably call openSmartScheduler AFTER renderApp.
+        setTimeout(() => {
+            openSmartScheduler();
+            showToast(`Smart Scheduler launched for ${autoRescheduleEvents.size} event(s).`);
+        }, 500);
     }
 
     pendingUpdateEvents = null;

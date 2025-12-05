@@ -1485,29 +1485,18 @@ export function renderChangeSummary(changes) {
 
                     document.getElementById(idOverlap).onchange = () => {
                         ev.addToSchedule = true;
+                        ev.rescheduleConflict = false;
                         renderChangeSummary(changes); // Re-render to update other conflicts
                     };
                     document.getElementById(idNoMark).onchange = () => {
                         ev.addToSchedule = false;
+                        ev.rescheduleConflict = false;
                         renderChangeSummary(changes);
                     };
-                    document.getElementById(idReschedule).onclick = () => {
-                        initRescheduleWizard(ev._uid, (newScheduleSet) => {
-                            let newUid = null;
-                            newScheduleSet.forEach(uid => {
-                                const e = pending.newEvents.find(ne => ne._uid === uid);
-                                if (e && e.name === ev.name) {
-                                    newUid = uid;
-                                }
-                            });
-
-                            if (newUid) {
-                                pending.pendingReschedules.add(newUid);
-                                ev.rescheduledUid = newUid;
-                                ev.addToSchedule = false; // Don't add the original conflicting one
-                                renderChangeSummary(changes);
-                            }
-                        }, pending.newEvents, projectedAttending);
+                    document.getElementById(idReschedule).onchange = () => {
+                        ev.addToSchedule = true; // We accept the new booking
+                        ev.rescheduleConflict = true; // And mark the old one for reschedule
+                        renderChangeSummary(changes);
                     };
 
                 } else if (!ev.rescheduledUid) {
@@ -1546,8 +1535,16 @@ export function renderChangeSummary(changes) {
                 details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
             }
 
+            let labelHtml = '';
+            if (state.attendingIds.has(oldEv._uid)) {
+                labelHtml = `<span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in Planner & App</span>`;
+            }
+
             el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                    ${labelHtml}
+                </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
                 ${details}
             `;
@@ -1573,11 +1570,14 @@ export function renderChangeSummary(changes) {
 
             let rescheduleHtml = '';
             if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
+                const idReschedule = `removed-reschedule-${idx}`;
                 rescheduleHtml = `
-                    <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 flex items-center gap-1 font-bold" id="btn-reschedule-${idx}">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        Reschedule...
-                    </button>
+                    <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="${idReschedule}" class="rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
+                            <span class="text-xs font-bold text-blue-800 dark:text-blue-200">Reschedule (Auto-find new time)</span>
+                        </label>
+                    </div>
                  `;
             } else if (ev.rescheduledUid) {
                 const pending = getPendingUpdateEvents();
@@ -1601,60 +1601,16 @@ export function renderChangeSummary(changes) {
             `;
             list.appendChild(el);
 
-            const btnReschedule = document.getElementById(`btn-reschedule-${idx}`);
-            if (btnReschedule) {
-                btnReschedule.onclick = () => {
-                    const pending = getPendingUpdateEvents();
-                    const projectedAttending = new Set(state.attendingIds);
-
-                    // Apply migrations
-                    pending.migrations.forEach(m => {
-                        if (projectedAttending.has(m.oldUid)) {
-                            projectedAttending.delete(m.oldUid);
-                            projectedAttending.add(m.newUid);
-                        }
-                    });
-
-                    // Remove removed events
-                    changes.removed.forEach(r => projectedAttending.delete(r._uid));
-
-                    // Add added events
-                    changes.added.forEach(a => {
-                        if (a.addToSchedule) projectedAttending.add(a._uid);
-                    });
-
-                    // Add booked changes
-                    if (changes.bookedChanges) {
-                        changes.bookedChanges.added.forEach(a => {
-                            if (!a.ignored) projectedAttending.add(a.uid);
-                        });
-                        changes.bookedChanges.removed.forEach(r => {
-                            if (!r.ignored) projectedAttending.delete(r.uid);
-                        });
-                        changes.bookedChanges.unattended.forEach(u => {
-                            if (!u.ignored) projectedAttending.delete(u.uid);
-                        });
-                    }
-
-                    // Add pending reschedules
-                    pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
-
-                    initRescheduleWizard(ev._uid, (newScheduleSet) => {
-                        let newUid = null;
-                        newScheduleSet.forEach(uid => {
-                            const e = pending.newEvents.find(ne => ne._uid === uid);
-                            if (e && e.name === ev.name) {
-                                newUid = uid;
-                            }
-                        });
-
-                        if (newUid) {
-                            pending.pendingReschedules.add(newUid);
-                            ev.rescheduledUid = newUid;
-                            renderChangeSummary(changes);
-                        }
-                    }, pending.newEvents, projectedAttending);
-                };
+            if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
+                const checkbox = document.getElementById(`removed-reschedule-${idx}`);
+                if (checkbox) {
+                    checkbox.onchange = (e) => {
+                        ev.reschedule = e.target.checked;
+                        // No need to re-render unless we want to update conflict projections, 
+                        // but removed events don't cause conflicts, they free up space.
+                        // renderChangeSummary(changes); 
+                    };
+                }
             }
         });
     }
