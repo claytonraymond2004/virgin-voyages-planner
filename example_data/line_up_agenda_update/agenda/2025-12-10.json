@@ -1,0 +1,47 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "e912b5ab-4d8a-4493-97c5-75212a700d32",
+            "bookableType": "Treatment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:696faed0-9f0f-495b-b09a-763463a1e0ab/IMG-Atonement-Deep-Tissue-Massage-Stocksy-Large-33811-1200x800.jpg",
+            "timePeriod": "10am-12pm",
+            "date": "2025-12-10",
+            "name": "Atonement Deep Tissue Massage",
+            "location": "Redemption Spa, Deck 5 Mid",
+            "inventoryState": "PaidInventoried"
+        },
+        {
+            "id": "a4e58433-e94b-4197-bcf2-44b71925dcc4",
+            "bookableType": "Eatery",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:3bcb8b82-fb3b-4807-a9ad-0276605ff7dd/IMG-FNB-test-kitchen-gallery-thumbnail-208x117.jpg",
+            "timePeriod": "5:45pm",
+            "date": "2025-12-10",
+            "name": "The Test Kitchen",
+            "location": "The Test Kitchen, Deck 6 Mid",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "1b227660-04cb-4997-8b23-fd039a78fa74",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:e72cfae8-d8b7-45a1-a13a-7dba60ded61d/120x120-4.jpg",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-10",
+            "name": "Festival Stage: Tom Crosbie",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "f9525baf-5153-4519-af6c-1f67199ef009",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ab61b024-8695-4871-98ce-2358f725e34b/Duets%20120x120.jpg",
+            "timePeriod": "9pm-10pm",
+            "date": "2025-12-10",
+            "name": "Duets",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

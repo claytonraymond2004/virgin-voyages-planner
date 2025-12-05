@@ -1,0 +1,57 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "5f00a0a5-2c41-41ad-a9bc-78c2104da724",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:e2253926-26a0-426b-8fc9-cf7811257797/VV83-40-12-02SSEvent1_FirstNight120x120.jpg",
+            "timePeriod": "4:15pm-4:45pm",
+            "date": "2025-12-07",
+            "name": "Let’s Set Sail: Solo Sailor Meetup",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "81accefa-1fee-4764-b98a-e34e8e2dcce2",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:21690ee9-017b-4218-948f-fa3720f4a08b/ILL-ENT-UK-Summer-Series-Entertainment-Lets-Set-Sail-From-The-Pool-120x120.jpg",
+            "timePeriod": "4:30pm-6:30pm",
+            "date": "2025-12-07",
+            "name": "Let's Set Sail",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "03c10cef-4e09-4570-9353-f4561e231804",
+            "bookableType": "Eatery",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:f571f000-6404-45d2-98e4-5463103a7f78/IMG-FNB-gunbae-gallery-thumbnail-208x117.jpg",
+            "timePeriod": "6pm",
+            "date": "2025-12-07",
+            "name": "Gunbae",
+            "location": "Gunbae, Deck 15 Aft",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "70df9699-ece9-469b-a466-200ef80686bf",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:07928379-9711-4f5d-9ee2-87a8f92f657d/TymonShippComedian_120x120.jpg",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-07",
+            "name": "Festival Stage: Tymon Shipp",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "a459ebad-6646-4e37-bb48-99595ebacdeb",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:16ec1301-2541-4a0f-810d-b6eee92af79d/DivaGoesWest_120x120.jpg",
+            "timePeriod": "9:30pm-10:15pm",
+            "date": "2025-12-07",
+            "name": "The Diva Goes West",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

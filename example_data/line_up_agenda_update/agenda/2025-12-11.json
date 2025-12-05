@@ -1,0 +1,107 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "2a0b8786-2d9f-4648-8f89-eceea06dd80e",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:cd42267c-c895-45f3-86de-02df1301b5aa/IMG-EXC-MIAMI-Tapas-Salsa-Dancing-v1-120x120.jpg",
+            "timePeriod": "9am-10am",
+            "date": "2025-12-11",
+            "name": "REMIX'd Dance Class",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "e8c1856b-908a-4981-88e5-77b8011c3f42",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:649ae052-d171-4788-82ea-f4ec084757a6/VV8346090401MerryMorningMindBenders_120x120.jpg",
+            "timePeriod": "10am-11am",
+            "date": "2025-12-11",
+            "name": "Merry Morning Mind Benders",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "91201f9e-64de-42a8-80cb-319f09d97a7f",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:627d0078-8b69-4ad2-add6-3f69493f5ba0/IMG-ENT-The-Charmers-Lounge-120x120.jpg",
+            "timePeriod": "11am-12pm",
+            "date": "2025-12-11",
+            "name": "Roaming Magic with The Charmer",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "faa7151f-fc44-4ed4-a9ec-f746a98902b2",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a49f2666-97c6-4090-96a6-6a19c095a819/ILL-ENT-8BIT-SaltyTrivia-120x120.png",
+            "timePeriod": "11:30am-12:15pm",
+            "date": "2025-12-11",
+            "name": "Salty Trivia: Planet Please",
+            "location": "On The Rocks, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "6c5dc030-591d-4f0d-bad6-3329f520a0d5",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:ac44c413-4437-4500-a179-f16549d26e6f/TheBigRemix_120x120.jpg",
+            "timePeriod": "1:30pm-2:45pm",
+            "date": "2025-12-11",
+            "name": "The Big Remix",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "a667b5c4-f8d0-4b5c-9f94-21cb63ff276a",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:12af0de7-e226-4efc-9084-cc49570d6d8d/VV644_Horseplay_Game_GO-120x120.jpg",
+            "timePeriod": "4pm-4:45pm",
+            "date": "2025-12-11",
+            "name": "Horseplay Race",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "9477473c-d616-463c-9265-7dcb66f8cb7b",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:0e978c77-e986-4198-a271-5c14be91b5d7/IMG-ENT-Entertainment-Hostess-Generic-120x120.jpg",
+            "timePeriod": "6pm-6:45pm",
+            "date": "2025-12-11",
+            "name": "VV Cabaret: Featuring the Hostess",
+            "location": "On The Rocks, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "011bb1f8-d4bd-4859-9f26-55b4fcd149c8",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:c82aaf31-bc00-4db2-a07d-eb3dc388f30b/IMG-ENT-duel-reality-v1-0424-120x120.jpg",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-11",
+            "name": "Duel Reality",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "5ca21098-b11b-49bf-993b-8ce0849d644a",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:a3e789c2-4193-4ec0-aba6-fbf381c9b3d1/Murder%20In%20The%20Manor%20120x120.jpg",
+            "timePeriod": "8:45pm-9:45pm",
+            "date": "2025-12-11",
+            "name": "Murder in the Manor",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "0870196c-499b-40d0-a4be-7e4da603cd5f",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7d1d9772-281a-4431-acad-f4019df7b81f/Bingo_Blitz_Logo_Dark_120x120.jpg",
+            "timePeriod": "11pm-2am",
+            "date": "2025-12-11",
+            "name": "Bingo Blitz - After Dark ",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

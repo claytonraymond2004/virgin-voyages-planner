@@ -1,0 +1,77 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "1299ad00-fc97-484e-874e-37c2e24705ff",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:9087e758-d82a-47b8-a05d-f810ae9c8f93/IMG-ENT-90s-Boy-Band-Dance-Class-120x120-100.jpg",
+            "timePeriod": "11:30am-12:30pm",
+            "date": "2025-12-09",
+            "name": "Dance the Decades",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "de8b1aa0-5c3f-4b12-b44c-5ec1d145d6f8",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:42e582e5-cc57-4284-a41d-15c1043cca91/RDR-ENT-UK-Summer-Series-Entertainment-Bingo-Card-Sales-120x120.jpg",
+            "timePeriod": "1:30pm-2pm",
+            "date": "2025-12-09",
+            "name": "Bingo Card Sales",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "145f1a89-6765-44e8-a9e9-c8fb2a3625e6",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:4d3dc4e4-9320-42c8-a516-1d09ec26a2e6/RDR-ENT-UK-Summer-Series-Entertainment-Bingo-With-The-Influencers-120x120.jpg",
+            "timePeriod": "2:30pm-3:30pm",
+            "date": "2025-12-09",
+            "name": "Bingo with the Happenings Cast",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "a540bec2-38ce-4257-b653-1f112dc44713",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:6618de01-d9fb-48d5-ab8d-69685f1c03b6/IMG-ENT-Pop-Quiz-Music-Trivia-120x120.jpg",
+            "timePeriod": "6:15pm-7:15pm",
+            "date": "2025-12-09",
+            "name": "Pop Quiz: 90s Music Trivia",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "b5ca5b12-41b7-4c87-900a-9dbfebafee81",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:00680f15-bedd-4147-8ff0-ce8502b019db/out%20of%20time%20show_120x120.jpg",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-09",
+            "name": "Out of Time",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "fa09d618-7d19-494a-91ee-082aa30f1d70",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:7e3cad7d-a154-427a-a7d3-4103e36762b7/CTRL_ALT_DEL_Logo_120x120.jpg",
+            "timePeriod": "9pm-10pm",
+            "date": "2025-12-09",
+            "name": "CTRL+ALT+DELUSION",
+            "location": "The Social Club, Deck 7",
+            "inventoryState": "NonInventoried"
+        },
+        {
+            "id": "124482f7-b1c0-4ab0-92b1-23edd016c7d6",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:fce23a1e-4e59-4f14-8993-d95122732784/Electric_120x120.jpg",
+            "timePeriod": "11:15pm-2am",
+            "date": "2025-12-09",
+            "name": "Electric",
+            "location": "The Manor, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}

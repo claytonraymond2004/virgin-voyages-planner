@@ -1,0 +1,37 @@
+{
+    "title": "Keep track of everything you’ve booked right here.",
+    "appointments": [
+        {
+            "id": "c54fe8cc-2bb7-42fe-9ddd-392966a0e613",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:6618de01-d9fb-48d5-ab8d-69685f1c03b6/IMG-ENT-Pop-Quiz-Music-Trivia-120x120.jpg",
+            "timePeriod": "4:30pm-5:30pm",
+            "date": "2025-12-15",
+            "name": "Pop Quiz: Billboard Charts Music Trivia",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "852c9b6b-b374-4795-91e4-2f8bbdcda1f9",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:72a75374-9281-44f1-adf5-d40fc31d6369/IMG-DEST-MYKONOS-GREECE-Tastes-of-Mykonos-Baked-Goods-Brews-Cheeses-211754100-120x120.jpg",
+            "timePeriod": "7:15pm-8:15pm",
+            "date": "2025-12-15",
+            "name": "\"Great Minds\" Game Show",
+            "location": "",
+            "inventoryState": "NonPaidInventoried"
+        },
+        {
+            "id": "ab233d73-fa2c-48a1-afe9-f4434fb45d9a",
+            "bookableType": "Entertainment",
+            "imageUrl": "https://virginvoyages.imgix.net/dam/jcr:c82aaf31-bc00-4db2-a07d-eb3dc388f30b/IMG-ENT-duel-reality-v1-0424-120x120.jpg",
+            "timePeriod": "7:30pm-8:30pm",
+            "date": "2025-12-15",
+            "name": "Duel Reality",
+            "location": "The Red Room, Deck 6",
+            "inventoryState": "NonInventoried"
+        }
+    ],
+    "emptyStateText": "Peruse, plan, or book your onboard experiences — and if you need a little inspiration, we can help with that, too.",
+    "emptyStatePictogramUrl": "https://virginvoyages.imgix.net/dam/jcr:7691d154-8668-4043-a123-99b76b4e03bf/emptylist_myagenda_128x128.png"
+}
