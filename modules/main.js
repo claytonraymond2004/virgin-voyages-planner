@@ -114,7 +114,6 @@ window.handleTransferReceive = handleTransferReceive;
 window.copyTransferUrl = copyTransferUrl;
 window.startTransferScanner = startTransferScanner;
 window.stopTransferScanner = stopTransferScanner;
-window.toggleUpdateOptions = toggleUpdateOptions;
 
 // --- Initialization ---
 
@@ -420,54 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Pre-fill username and check token status
-    const cachedUser = localStorage.getItem('vv_username');
-    const usernameInput = document.getElementById('vv-username');
-
-    if (cachedUser && usernameInput) {
-        usernameInput.value = cachedUser;
-
-        if (window.VirginAPI && window.VirginAPI.hasValidToken()) {
-            // Valid token exists - Show cached session UI
-            const loginInputs = document.getElementById('vv-login-inputs');
-            const cachedSession = document.getElementById('vv-cached-session');
-            const cachedUsernameDisplay = document.getElementById('vv-cached-username');
-            const btn = document.getElementById('btn-vv-login');
-
-            if (loginInputs) loginInputs.classList.add('hidden');
-            if (cachedSession) cachedSession.classList.remove('hidden');
-            if (cachedUsernameDisplay) cachedUsernameDisplay.textContent = cachedUser;
-
-            if (btn) {
-                const span = btn.querySelector('span');
-                if (span) span.textContent = "Sync";
-            }
-        }
-    }
-
-    // Expose switchAccount to global scope
-    window.switchAccount = function () {
-        if (window.VirginAPI) window.VirginAPI.clearToken();
-
-        const loginInputs = document.getElementById('vv-login-inputs');
-        const cachedSession = document.getElementById('vv-cached-session');
-        const btn = document.getElementById('btn-vv-login');
-        const passwordInput = document.getElementById('vv-password');
-
-        if (loginInputs) loginInputs.classList.remove('hidden');
-        if (cachedSession) cachedSession.classList.add('hidden');
-
-        if (btn) {
-            const span = btn.querySelector('span');
-            if (span) span.textContent = "Sign In & Import";
-        }
-
-        if (passwordInput) {
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
-    };
-
     // Confirmation Modal Listeners
     const btnConfirmOk = document.getElementById('btn-confirm-ok');
     const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
@@ -751,24 +702,11 @@ async function handleVVLogin() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
 
-    // Check if we can use cached session
-    const hasToken = window.VirginAPI && window.VirginAPI.hasValidToken();
-    const cachedUser = localStorage.getItem('vv_username');
-    const canUseCached = hasToken && (!username || (cachedUser && username === cachedUser));
-
-    if (!username) {
-        statusDiv.textContent = "Please enter your email.";
+    if (!username || !password) {
+        statusDiv.textContent = "Please enter both email and password.";
         statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
         return;
     }
-
-    if (!password && !canUseCached) {
-        statusDiv.textContent = "Please enter your password.";
-        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
-        return;
-    }
-
-    const importBookedCheckbox = document.getElementById('vv-import-booked');
 
     statusDiv.textContent = "";
     statusDiv.className = "text-center text-sm text-gray-600 min-h-[20px]";
@@ -776,9 +714,8 @@ async function handleVVLogin() {
     spinner.classList.remove('hidden');
     usernameInput.disabled = true;
     passwordInput.disabled = true;
-    importBookedCheckbox.disabled = true;
 
-    const importBooked = importBookedCheckbox.checked;
+    const importBooked = document.getElementById('vv-import-booked').checked;
 
     try {
         if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
@@ -797,24 +734,16 @@ async function handleVVLogin() {
 
     } catch (err) {
         console.error(err);
-
-        // Handle Session Expiration
-        if (err.message && (err.message.includes('Session expired') || err.message.includes('401'))) {
-            if (window.switchAccount) window.switchAccount();
-            statusDiv.textContent = "Session expired. Please log in again.";
-        } else {
-            statusDiv.textContent = "Error: " + err.message;
-            // Show CORS help on error
-            document.getElementById('cors-help-link').style.display = 'block';
-        }
-
+        statusDiv.textContent = "Error: " + err.message;
         statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
+
+        // Show CORS help on error
+        document.getElementById('cors-help-link').style.display = 'block';
 
         btn.disabled = false;
         spinner.classList.add('hidden');
         usernameInput.disabled = false;
         passwordInput.disabled = false;
-        importBookedCheckbox.disabled = false;
     }
 }
 
@@ -866,7 +795,7 @@ async function handleUpdateVVLogin() {
     usernameInput.disabled = true;
     passwordInput.disabled = true;
     importBookedCheckbox.disabled = true;
-    modeRadios.forEach(r => r.disabled = true);
+    if (modeRadios) modeRadios.forEach(r => r.disabled = true);
 
     const importBooked = importBookedCheckbox.checked;
 
@@ -889,7 +818,7 @@ async function handleUpdateVVLogin() {
         importBookedCheckbox.disabled = false;
 
         // Restore radio state
-        toggleUpdateOptions();
+        if (window.toggleUpdateOptions) window.toggleUpdateOptions();
 
     } catch (err) {
         console.error(err);
@@ -911,7 +840,7 @@ async function handleUpdateVVLogin() {
         importBookedCheckbox.disabled = false;
 
         // Restore radio state
-        toggleUpdateOptions();
+        if (window.toggleUpdateOptions) window.toggleUpdateOptions();
     }
 }
 
@@ -936,6 +865,20 @@ function toggleUpdateOptions() {
         }
     }
 }
+
+window.switchUpdateAccount = function () {
+    const inputContainer = document.getElementById('update-vv-login-inputs');
+    const cachedContainer = document.getElementById('update-vv-cached-session');
+
+    if (inputContainer) inputContainer.classList.remove('hidden');
+    if (cachedContainer) cachedContainer.classList.add('hidden');
+
+    // Also clear the password field to force re-entry if desired, but maybe keep username
+    const passwordInput = document.getElementById('update-vv-password');
+    if (passwordInput) passwordInput.value = '';
+}
+
+window.toggleUpdateOptions = toggleUpdateOptions;
 
 function handleUpdateFiles(fileList) {
     const files = Array.from(fileList);
@@ -1102,13 +1045,6 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
             } else {
                 // No match in new list -> Removed
-                if (state.attendingIds.has(oldEv._uid)) {
-                    oldEv.wasAttending = true;
-                    // Check if there are other instances of this event in the new agenda
-                    if (newEvents.some(ne => ne.name === oldEv.name)) {
-                        oldEv.hasAlternative = true;
-                    }
-                }
                 removed.push(oldEv);
             }
         });
@@ -1116,25 +1052,6 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         // Any remaining new events -> Added
         newList.forEach((newEv, newIdx) => {
             if (!newMatched.has(newIdx)) {
-                // Check if this new event matches any booked event
-                if (bookedEvents) {
-                    const newTime = parseTimeRange(newEv.timePeriod);
-                    if (newTime) {
-                        const newStart = newTime.start + SHIFT_START_ADD;
-                        const match = bookedEvents.find(b => {
-                            if (b.date !== newEv.date) return false;
-                            if (b.name !== newEv.name) return false;
-                            const bTime = parseTimeRange(b.timePeriod);
-                            if (!bTime) return false;
-                            const bStart = bTime.start + SHIFT_START_ADD;
-                            return Math.abs(bStart - newStart) < 15;
-                        });
-                        if (match) {
-                            newEv.isBooked = true;
-                            newEv.addToSchedule = true;
-                        }
-                    }
-                }
                 added.push(newEv);
             }
         });
@@ -1162,16 +1079,9 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
 
             if (match) {
                 // Official Event Match
-                // If it's an "Added" event (isBooked=true), we handle it in the Added section, not here.
-                if (match.isBooked) return;
-
                 // If not currently attending, it's "Added"
                 const uid = getUid(match);
-
-                // Check if this is just a migrated event (time change) that we are already attending
-                const isMigrated = migrations.some(m => m.newUid === uid && state.attendingIds.has(m.oldUid));
-
-                if (uid && !state.attendingIds.has(uid) && !isMigrated) {
+                if (uid && !state.attendingIds.has(uid)) {
                     // Check for conflicts
                     const conflicts = [];
                     const matchTime = parseTimeRange(match.timePeriod);
@@ -1250,27 +1160,6 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             });
 
             if (!isBooked) {
-                // Check if this event was migrated to a new time, and that new time IS booked
-                const migration = migrations.find(m => m.oldUid === ev.uid);
-                if (migration) {
-                    const newEv = newEvents.find(ne => ne._uid === migration.newUid);
-                    if (newEv) {
-                        const newTime = parseTimeRange(newEv.timePeriod);
-                        if (newTime) {
-                            const newStart = newTime.start + SHIFT_START_ADD;
-                            const isNewBooked = bookedEvents.find(b => {
-                                if (b.date !== newEv.date) return false;
-                                if (b.name !== newEv.name) return false;
-                                const bTime = parseTimeRange(b.timePeriod);
-                                if (!bTime) return false;
-                                const bStart = bTime.start + SHIFT_START_ADD;
-                                return Math.abs(bStart - newStart) < 15;
-                            });
-                            if (isNewBooked) return; // It is booked (at the new time), so don't mark unattended
-                        }
-                    }
-                }
-
                 // Check if type is Informative (don't unmark these as they don't appear in booked list)
                 let isInformative = ev.type === "Informative";
 
@@ -1292,28 +1181,20 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 }
 
                 if (!isInformative) {
-                    // Check if this event was removed from the agenda entirely
-                    const isRemoved = removed.some(remEv => remEv._uid === ev.uid);
-                    if (!isRemoved) {
-                        bookedChanges.unattended.push(ev);
-                    }
+                    bookedChanges.unattended.push(ev);
                 }
             }
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added, removed, pendingReschedules: new Set() };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
-}
-
-export function getPendingUpdateEvents() {
-    return pendingUpdateEvents;
 }
 
 function applyAgendaUpdate() {
     if (!pendingUpdateEvents) return;
 
-    const { newEvents, migrations, bookedEvents, bookedChanges, added, removed, pendingReschedules } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
     migrations.forEach(({ oldUid, newUid }) => {
@@ -1347,27 +1228,6 @@ function applyAgendaUpdate() {
 
     // 3. Update Data
     updateAppData(newEvents);
-
-    // 3.5 Process Added Events marked for scheduling
-    if (added && added.length > 0) {
-        added.forEach(ev => {
-            if (ev.addToSchedule) {
-                const timeData = parseTimeRange(ev.timePeriod);
-                if (timeData) {
-                    const s = timeData.start + SHIFT_START_ADD;
-                    const uid = `${ev.date}_${ev.name}_${s}`;
-                    state.attendingIds.add(uid);
-                }
-            }
-        });
-        saveAttendance();
-    }
-
-    // 3.6 Process Pending Reschedules
-    if (pendingReschedules && pendingReschedules.size > 0) {
-        pendingReschedules.forEach(uid => state.attendingIds.add(uid));
-        saveAttendance();
-    }
 
     // 4. Process Booked Events
     if (bookedChanges) {
@@ -1423,10 +1283,7 @@ function applyAgendaUpdate() {
                 c.timePeriod === b.timePeriod
             );
 
-            if (addedChange) {
-                if (addedChange.ignored) return false;
-                if (addedChange.addToSchedule === false) return false;
-            }
+            if (addedChange && addedChange.ignored) return false;
             return true;
         });
 
@@ -1434,86 +1291,12 @@ function applyAgendaUpdate() {
             processBookedEvents(activeBookedEvents, false);
         }
     }
-
-    // 5. Process Auto-Reschedules (Removed Events & Conflicts)
-    const autoRescheduleEvents = new Set();
-
-    // A. Removed Events marked for reschedule
-    if (removed) {
-        removed.forEach(ev => {
-            if (ev.reschedule) {
-                autoRescheduleEvents.add(ev.name);
-                // Ensure the old instance is removed from attending (already done if removed from data, but good to be sure)
-                if (ev._uid) state.attendingIds.delete(ev._uid);
-            }
-        });
-    }
-
-    // B. Booked Conflicts marked for reschedule
-    if (bookedChanges && bookedChanges.added) {
-        bookedChanges.added.forEach(ev => {
-            if (ev.rescheduleConflict && ev.conflicts) {
-                ev.conflicts.forEach(conflict => {
-                    autoRescheduleEvents.add(conflict.name);
-                    // Unattend the conflicting event
-                    if (conflict.uid) state.attendingIds.delete(conflict.uid);
-                });
-            }
-        });
-    }
-
-    // Apply Reschedule Logic
-    if (autoRescheduleEvents.size > 0) {
-        autoRescheduleEvents.forEach(name => {
-            // 1. Unhide Series
-            if (state.hiddenNames.has(name)) state.hiddenNames.delete(name);
-
-            // 2. Unmark Optional (Make Required)
-            // state.optionalEvents is a Set or Array? It's a Set in state.js usually, but let's check usage.
-            // In saveNewData it's a Set.
-            if (state.optionalEvents.has(name)) state.optionalEvents.delete(name);
-
-            // 3. Clean up hidden instances (optional, but good)
-            // We can't easily find all UIDs for a name without iterating everything, 
-            // but hiddenUids are specific instances. If we want to "reset" the series, we should probably clear hidden instances for it.
-            // But that might be expensive. For now, unhiding the series name is the main thing.
-        });
-
-        saveAttendance();
-        saveHiddenNames();
-        saveOptionalEvents();
-
-        // Launch Smart Scheduler
-        // We need to wait for renderApp to finish updating the DOM with new events?
-        // renderApp is called at the end.
-        // We should probably call openSmartScheduler AFTER renderApp.
-        setTimeout(() => {
-            openSmartScheduler(true, () => {
-                showConfirm("Itinerary updated successfully!", null, "Success");
-                // Hide cancel button for this success message
-                setTimeout(() => {
-                    const cancelBtn = document.getElementById('btn-confirm-cancel');
-                    if (cancelBtn) cancelBtn.style.display = 'none';
-                    const okBtn = document.getElementById('btn-confirm-ok');
-                    if (okBtn) {
-                        const oldOnClick = okBtn.onclick;
-                        okBtn.onclick = () => {
-                            if (oldOnClick) oldOnClick();
-                            cancelBtn.style.display = 'inline-block'; // Restore
-                        };
-                    }
-                }, 0);
-            });
-        }, 500);
-
-        pendingUpdateEvents = null;
-        renderApp();
-        return true; // Handled async
+    if (bookedEvents && bookedEvents.length > 0) {
+        processBookedEvents(bookedEvents, false);
     }
 
     pendingUpdateEvents = null;
     renderApp();
-    return false; // Handled synchronously
 }
 
 function processLoadedData(jsonObjects) {

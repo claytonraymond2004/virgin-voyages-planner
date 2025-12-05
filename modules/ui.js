@@ -6,13 +6,8 @@ import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
     showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
 } from './interactions.js';
-import { initSmartScheduler, initRescheduleWizard, checkOverlap } from './smartScheduler.js';
-import { refreshUpdateCheck, getPendingUpdateEvents } from './main.js';
-
-// ... (existing code) ...
-
-// Removed Bookings
-// ...
+import { initSmartScheduler, initRescheduleWizard } from './smartScheduler.js';
+import { refreshUpdateCheck } from './main.js';
 
 // --- Modals ---
 
@@ -608,8 +603,8 @@ export function toggleMenu() {
     menu.classList.toggle('open');
 }
 
-export function openSmartScheduler(isAutoMode = false, onClose = null) {
-    initSmartScheduler(isAutoMode, onClose);
+export function openSmartScheduler() {
+    initSmartScheduler();
     document.getElementById('dropdown-menu').classList.remove('open');
 }
 
@@ -1067,9 +1062,6 @@ export function openUpdateAgendaModal() {
     document.getElementById('update-agenda-modal').style.display = 'flex';
     document.getElementById('dropdown-menu').classList.remove('open');
 
-    // Ensure options are correctly toggled
-    if (window.toggleUpdateOptions) window.toggleUpdateOptions();
-
     // Initialize file input listener for update
     const fileInput = document.getElementById('update-file-input');
     const dropZone = document.getElementById('update-drop-zone');
@@ -1105,52 +1097,7 @@ export function openUpdateAgendaModal() {
 
     usernameInput.onkeydown = handleEnter;
     passwordInput.onkeydown = handleEnter;
-
-    // Pre-fill username for update modal
-    const cachedUser = localStorage.getItem('vv_username');
-    if (cachedUser) {
-        usernameInput.value = cachedUser;
-        if (window.VirginAPI && window.VirginAPI.hasValidToken()) {
-            // Valid token exists - Show cached session UI
-            const loginInputs = document.getElementById('update-vv-login-inputs');
-            const cachedSession = document.getElementById('update-vv-cached-session');
-            const cachedUsernameDisplay = document.getElementById('update-vv-cached-username');
-            const btn = document.getElementById('btn-update-vv-login');
-
-            if (loginInputs) loginInputs.classList.add('hidden');
-            if (cachedSession) cachedSession.classList.remove('hidden');
-            if (cachedUsernameDisplay) cachedUsernameDisplay.textContent = cachedUser;
-
-            if (btn) {
-                const span = btn.querySelector('span');
-                if (span) span.textContent = "Sync";
-            }
-        }
-    }
 }
-
-// Expose switchUpdateAccount to global scope
-window.switchUpdateAccount = function () {
-    if (window.VirginAPI) window.VirginAPI.clearToken();
-
-    const loginInputs = document.getElementById('update-vv-login-inputs');
-    const cachedSession = document.getElementById('update-vv-cached-session');
-    const btn = document.getElementById('btn-update-vv-login');
-    const passwordInput = document.getElementById('update-vv-password');
-
-    if (loginInputs) loginInputs.classList.remove('hidden');
-    if (cachedSession) cachedSession.classList.add('hidden');
-
-    if (btn) {
-        const span = btn.querySelector('span');
-        if (span) span.textContent = "Sign In";
-    }
-
-    if (passwordInput) {
-        passwordInput.value = '';
-        passwordInput.focus();
-    }
-};
 
 export function resetUpdateModal() {
     document.getElementById('update-step-source').classList.remove('hidden');
@@ -1186,6 +1133,75 @@ export function renderChangeSummary(changes) {
     document.getElementById('update-step-summary').classList.remove('hidden');
     document.getElementById('update-step-summary').classList.add('flex');
 
+    // Render Modified
+    if (changes.modified && changes.modified.length > 0) {
+        const modHeader = document.createElement('h5');
+        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        modHeader.textContent = `Modified Events (${changes.modified.length})`;
+        list.appendChild(modHeader);
+
+        changes.modified.forEach(item => {
+            const { oldEv, newEv, changes: changedFields } = item;
+            const el = document.createElement('div');
+            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
+
+            let details = '';
+            if (changedFields.includes('Time')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
+            }
+            if (changedFields.includes('Location')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
+            }
+            if (changedFields.includes('Description')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
+            }
+
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
+                ${details}
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Removed
+    if (changes.removed.length > 0) {
+        const removedHeader = document.createElement('h5');
+        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
+        list.appendChild(removedHeader);
+
+        changes.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // Render Added
+    if (changes.added.length > 0) {
+        const addedHeader = document.createElement('h5');
+        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        addedHeader.textContent = `New Events (${changes.added.length})`;
+        list.appendChild(addedHeader);
+
+        changes.added.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
     // Render Booked Changes
     if (changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0)) {
         const bookedHeader = document.createElement('h5');
@@ -1194,11 +1210,12 @@ export function renderChangeSummary(changes) {
         list.appendChild(bookedHeader);
 
         // Added Bookings
+        // Added Bookings
         changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
             el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex flex-col gap-2";
+            const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
             const id = `booked-add-${idx}`;
-            const actionText = ev.type === 'attendance' ? 'Mark as Attending?' : 'Add Custom Event?';
 
             let conflictHtml = '';
             if (ev.conflicts && ev.conflicts.length > 0) {
@@ -1227,19 +1244,16 @@ export function renderChangeSummary(changes) {
             }
 
             el.innerHTML = `
-                <div class="flex-1">
-                    <div class="flex justify-between items-start">
-                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in App</span>
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-                    ${conflictHtml}
-                    <div class="mt-2 pt-2 border-t border-purple-200 dark:border-purple-800 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                            <span class="text-xs font-bold text-purple-800 dark:text-purple-200">${actionText}</span>
-                        </label>
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                        ${conflictHtml}
                     </div>
                 </div>
             `;
@@ -1273,442 +1287,67 @@ export function renderChangeSummary(changes) {
             }
         });
 
-
-
-        // Removed Bookings (Custom Events)
+        // Removed Bookings
         changes.bookedChanges.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex flex-col gap-2";
-            const id = `booked-removed-${idx}`;
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            const id = `booked-rem-${idx}`;
 
             el.innerHTML = `
+                <input type="checkbox" id="${id}" class="mt-1 rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
                 <div class="flex-1">
-                    <div class="flex justify-between items-start">
+                    <div class="flex justify-between">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Cancelled in App</span>
+                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                    <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${!ev.ignored ? 'checked' : ''}>
-                            <span class="text-xs font-bold text-red-800 dark:text-red-200">Remove Custom Event</span>
-                        </label>
-                    </div>
                 </div>
             `;
             list.appendChild(el);
-            document.getElementById(id).onchange = (e) => {
-                ev.ignored = !e.target.checked;
-                renderChangeSummary(changes);
-            };
+            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
         });
 
         // Unattended Bookings
         changes.bookedChanges.unattended.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex flex-col gap-2";
+            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
             const id = `booked-unatt-${idx}`;
 
             el.innerHTML = `
+                <input type="checkbox" id="${id}" class="mt-1 rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
                 <div class="flex-1">
-                    <div class="flex justify-between items-start">
+                    <div class="flex justify-between">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded ml-2 whitespace-nowrap">Not Attended in App</span>
+                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                    <div class="mt-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" ${!ev.ignored ? 'checked' : ''}>
-                            <span class="text-xs font-bold text-yellow-800 dark:text-yellow-200">Remove Attendance in Planner</span>
-                        </label>
-                    </div>
                 </div>
             `;
             list.appendChild(el);
-            document.getElementById(id).onchange = (e) => {
-                ev.ignored = !e.target.checked;
-                renderChangeSummary(changes);
-            };
-        });
-    }
-
-    // ... (inside renderChangeSummary)
-
-    // Calculate Projected Attending for Conflict Detection
-    const pending = getPendingUpdateEvents();
-    const projectedAttending = new Set();
-
-    // 1. Start with current attending
-    state.attendingIds.forEach(uid => projectedAttending.add(uid));
-
-    // 2. Apply Migrations
-    pending.migrations.forEach(m => {
-        if (projectedAttending.has(m.oldUid)) {
-            projectedAttending.delete(m.oldUid);
-            projectedAttending.add(m.newUid);
-        }
-    });
-
-    // 3. Remove Removed Events
-    changes.removed.forEach(r => projectedAttending.delete(r._uid));
-
-    // 4. Add Added Events (if marked for schedule)
-    changes.added.forEach(a => {
-        if (a.addToSchedule) projectedAttending.add(a._uid);
-    });
-
-    // 5. Apply Booked Changes
-    if (changes.bookedChanges) {
-        changes.bookedChanges.added.forEach(a => {
-            if (!a.ignored) projectedAttending.add(a.uid);
-        });
-        changes.bookedChanges.removed.forEach(r => {
-            if (!r.ignored) projectedAttending.delete(r.uid);
-        });
-        changes.bookedChanges.unattended.forEach(u => {
-            if (!u.ignored) projectedAttending.delete(u.uid);
-        });
-    }
-
-    // 6. Add Pending Reschedules
-    pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
-
-
-    // Render Added
-    if (changes.added.length > 0) {
-        const addedHeader = document.createElement('h5');
-        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        addedHeader.textContent = `New Events (${changes.added.length})`;
-        list.appendChild(addedHeader);
-
-        changes.added.forEach((ev, idx) => {
-            const el = document.createElement('div');
-            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
-
-            let actionHtml = '';
-            let conflictName = null;
-
-            if (ev.isBooked) {
-                // Check for conflicts
-                // We need to check against projectedAttending, excluding THIS event
-                const tempProjected = new Set(projectedAttending);
-                tempProjected.delete(ev._uid);
-
-                // Find conflict
-                // We need to lookup event objects for UIDs in tempProjected
-                // UIDs can be in state.eventLookup (old/existing) OR pending.newEvents (new)
-                // We need a unified lookup or check both.
-
-                for (const uid of tempProjected) {
-                    let otherEv = state.eventLookup.get(uid);
-                    if (!otherEv) {
-                        otherEv = pending.newEvents.find(e => e._uid === uid);
-                    }
-
-                    if (otherEv && otherEv._uid !== ev._uid) {
-                        if (checkOverlap(ev, otherEv)) {
-                            conflictName = `${otherEv.name} (${otherEv.date} @ ${formatTimeRange(otherEv.startMins, otherEv.endMins)})`;
-                            break;
-                        }
-                    }
-                }
-
-                if (ev.rescheduledUid) {
-                    const newEv = pending.newEvents.find(e => e._uid === ev.rescheduledUid);
-                    const timeStr = newEv ? `${newEv.date} @ ${newEv.timePeriod}` : 'New Time';
-                    actionHtml = `
-                        <div class="text-xs text-green-600 dark:text-green-400 font-bold mt-2 flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Rescheduled to ${timeStr}
-                        </div>
-                     `;
-                } else if (conflictName) {
-                    const idOverlap = `conflict-overlap-${idx}`;
-                    const idNoMark = `conflict-nomark-${idx}`;
-                    const idReschedule = `conflict-reschedule-${idx}`;
-
-                    actionHtml = `
-                        <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
-                            <div class="text-xs text-red-600 dark:text-red-400 font-bold mb-2 flex items-start gap-1">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                <span>Will conflict with ${escapeHtml(conflictName)}</span>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict-action-${idx}" id="${idOverlap}" value="overlap" class="text-green-600 focus:ring-green-500" ${ev.addToSchedule && !ev.rescheduleConflict ? 'checked' : ''}>
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Mark Attending with Overlap</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict-action-${idx}" id="${idNoMark}" value="nomark" class="text-green-600 focus:ring-green-500" ${!ev.addToSchedule ? 'checked' : ''}>
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Do not Mark Attending in Planner</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict-action-${idx}" id="${idReschedule}" value="reschedule" class="text-green-600 focus:ring-green-500" ${ev.rescheduleConflict ? 'checked' : ''}>
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Reschedule Event</span>
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    const id = `added-booked-${idx}`;
-                    actionHtml = `
-                        <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="${id}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${ev.addToSchedule ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-green-800 dark:text-green-200">Mark Attending in Planner</span>
-                            </label>
-                        </div>
-                    `;
-                }
-            }
-
-            let labelHtml = '';
-            if (ev.isBooked) {
-                labelHtml = `<span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in App</span>`;
-            }
-
-            el.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    ${labelHtml}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-                ${actionHtml}
-            `;
-            list.appendChild(el);
-
-            if (ev.isBooked) {
-                if (conflictName && !ev.rescheduledUid) {
-                    const idOverlap = `conflict-overlap-${idx}`;
-                    const idNoMark = `conflict-nomark-${idx}`;
-                    const idReschedule = `conflict-reschedule-${idx}`;
-
-                    document.getElementById(idOverlap).onchange = () => {
-                        ev.addToSchedule = true;
-                        ev.rescheduleConflict = false;
-                        renderChangeSummary(changes); // Re-render to update other conflicts
-                    };
-                    document.getElementById(idNoMark).onchange = () => {
-                        ev.addToSchedule = false;
-                        ev.rescheduleConflict = false;
-                        renderChangeSummary(changes);
-                    };
-                    document.getElementById(idReschedule).onchange = () => {
-                        ev.addToSchedule = true; // We accept the new booking
-                        ev.rescheduleConflict = true; // And mark the old one for reschedule
-                        renderChangeSummary(changes);
-                    };
-
-                } else if (!ev.rescheduledUid) {
-                    const checkbox = document.getElementById(`added-booked-${idx}`);
-                    if (checkbox) {
-                        checkbox.onchange = (e) => {
-                            ev.addToSchedule = e.target.checked;
-                            renderChangeSummary(changes); // Re-render to check for new conflicts
-                        };
-                    }
-                }
-            }
-        });
-    }
-
-    // Render Modified
-    if (changes.modified && changes.modified.length > 0) {
-        const modHeader = document.createElement('h5');
-        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        modHeader.textContent = `Modified Events (${changes.modified.length})`;
-        list.appendChild(modHeader);
-
-        changes.modified.forEach(item => {
-            const { oldEv, newEv, changes: changedFields } = item;
-            const el = document.createElement('div');
-            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
-
-            let details = '';
-            if (changedFields.includes('Time')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
-            }
-            if (changedFields.includes('Location')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
-            }
-            if (changedFields.includes('Description')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
-            }
-
-            let labelHtml = '';
-            if (state.attendingIds.has(oldEv._uid)) {
-                labelHtml = `<span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in Planner & App</span>`;
-            }
-
-            el.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
-                    ${labelHtml}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
-                ${details}
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Removed
-    if (changes.removed.length > 0) {
-        const removedHeader = document.createElement('h5');
-        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
-        list.appendChild(removedHeader);
-
-        changes.removed.forEach((ev, idx) => {
-            const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
-
-            let labelHtml = '';
-            if (ev.wasAttending) {
-                labelHtml = `<span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attended in Planner</span>`;
-            }
-
-            let rescheduleHtml = '';
-            if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
-                // Check if any OTHER instance of this event is already attending in the projected schedule
-                const pending = getPendingUpdateEvents();
-                const projectedAttending = new Set();
-
-                // Build projected attending set (similar to conflict logic)
-                state.attendingIds.forEach(uid => projectedAttending.add(uid));
-                pending.migrations.forEach(m => {
-                    if (projectedAttending.has(m.oldUid)) {
-                        projectedAttending.delete(m.oldUid);
-                        projectedAttending.add(m.newUid);
-                    }
-                });
-                changes.removed.forEach(r => projectedAttending.delete(r._uid));
-                changes.added.forEach(a => {
-                    if (a.addToSchedule) projectedAttending.add(a._uid);
-                });
-                if (changes.bookedChanges) {
-                    changes.bookedChanges.added.forEach(a => {
-                        if (!a.ignored) projectedAttending.add(a.uid);
-                    });
-                    changes.bookedChanges.removed.forEach(r => {
-                        if (!r.ignored) projectedAttending.delete(r.uid);
-                    });
-                    changes.bookedChanges.unattended.forEach(u => {
-                        if (!u.ignored) projectedAttending.delete(u.uid);
-                    });
-                }
-                pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
-
-                // Check for other instances of same name
-                let hasOtherInstance = false;
-                for (const uid of projectedAttending) {
-                    let otherEv = state.eventLookup.get(uid);
-                    if (!otherEv) {
-                        otherEv = pending.newEvents.find(e => e._uid === uid);
-                    }
-                    if (otherEv && otherEv.name === ev.name && otherEv._uid !== ev._uid) {
-                        hasOtherInstance = true;
-                        break;
-                    }
-                }
-
-                if (!hasOtherInstance) {
-                    const idReschedule = `removed-reschedule-${idx}`;
-                    rescheduleHtml = `
-                        <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="${idReschedule}" class="rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule !== false ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-blue-800 dark:text-blue-200">Reschedule Event</span>
-                            </label>
-                        </div>
-                     `;
-                } else {
-                    // Refine reason: Is it because of a reschedule conflict mark?
-                    let isRescheduleMarked = false;
-                    if (changes.bookedChanges && changes.bookedChanges.added) {
-                        isRescheduleMarked = changes.bookedChanges.added.some(a =>
-                            a.rescheduleConflict &&
-                            a.conflicts &&
-                            a.conflicts.some(c => c.name === ev.name)
-                        );
-                    }
-
-                    const reasonText = isRescheduleMarked
-                        ? "Event already marked for reschedule"
-                        : "Already attending at least 1 instance of event";
-
-                    rescheduleHtml = `
-                        <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                ${reasonText}
-                            </div>
-                        </div>
-                    `;
-                }
-            } else if (ev.rescheduledUid) {
-                const pending = getPendingUpdateEvents();
-                const newEv = pending.newEvents.find(e => e._uid === ev.rescheduledUid);
-                const timeStr = newEv ? `${newEv.date} @ ${newEv.timePeriod}` : 'New Time';
-                rescheduleHtml = `
-                    <div class="text-xs text-green-600 dark:text-green-400 font-bold mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Rescheduled to ${timeStr}
-                    </div>
-                 `;
-            }
-
-            el.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    ${labelHtml}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                ${rescheduleHtml}
-            `;
-            list.appendChild(el);
-
-            if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
-                const checkbox = document.getElementById(`removed-reschedule-${idx}`);
-                if (checkbox) {
-                    // Initialize default state
-                    if (ev.reschedule === undefined) ev.reschedule = true;
-
-                    checkbox.onchange = (e) => {
-                        ev.reschedule = e.target.checked;
-                        // No need to re-render unless we want to update conflict projections, 
-                        // but removed events don't cause conflicts, they free up space.
-                        // renderChangeSummary(changes); 
-                    };
-                }
-            }
+            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
         });
     }
 }
 
 export function confirmUpdateApply() {
     if (window.applyAgendaUpdate) {
-        const handledAsync = window.applyAgendaUpdate();
+        window.applyAgendaUpdate();
         updateStateSnapshot = null; // Commit changes
         closeAllModals();
-
-        if (!handledAsync) {
-            showConfirm("Itinerary updated successfully!", null, "Success");
-            // Hide cancel button for this success message
-            setTimeout(() => {
-                const cancelBtn = document.getElementById('btn-confirm-cancel');
-                if (cancelBtn) cancelBtn.style.display = 'none';
-                const okBtn = document.getElementById('btn-confirm-ok');
-                if (okBtn) {
-                    const oldOnClick = okBtn.onclick;
-                    okBtn.onclick = () => {
-                        if (oldOnClick) oldOnClick();
-                        cancelBtn.style.display = 'inline-block'; // Restore
-                    };
-                }
-            }, 0);
-        }
+        showConfirm("Itinerary updated successfully!", null, "Success");
+        // Hide cancel button for this success message
+        setTimeout(() => {
+            const cancelBtn = document.getElementById('btn-confirm-cancel');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const okBtn = document.getElementById('btn-confirm-ok');
+            if (okBtn) {
+                const oldOnClick = okBtn.onclick;
+                okBtn.onclick = () => {
+                    if (oldOnClick) oldOnClick();
+                    cancelBtn.style.display = 'inline-block'; // Restore
+                };
+            }
+        }, 0);
     }
 }
 
