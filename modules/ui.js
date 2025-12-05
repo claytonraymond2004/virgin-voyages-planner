@@ -1185,7 +1185,7 @@ export function renderChangeSummary(changes) {
         // Added Bookings
         changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex flex-col gap-2";
+            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded mb-2 text-sm mx-4 flex flex-col";
             const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
             const id = `booked-add-${idx}`;
 
@@ -1193,7 +1193,7 @@ export function renderChangeSummary(changes) {
             if (ev.conflicts && ev.conflicts.length > 0) {
                 const conflictNames = ev.conflicts.map(c => c.name).join(', ');
                 conflictHtml = `
-                    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-1">
+                    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
                         <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                             Conflict with: ${escapeHtml(conflictNames)}
@@ -1215,18 +1215,23 @@ export function renderChangeSummary(changes) {
                 `;
             }
 
+            // Main Content
             el.innerHTML = `
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}>
-                    <div class="flex-1">
-                        <div class="flex justify-between">
-                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-                        ${conflictHtml}
+                <div class="p-2">
+                    <div class="flex justify-between">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded h-5 flex items-center">${typeLabel}</span>
                     </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                    ${conflictHtml}
+                </div>
+                
+                <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner?</span>
+                    </label>
                 </div>
             `;
             list.appendChild(el);
@@ -1241,10 +1246,10 @@ export function renderChangeSummary(changes) {
                     radio.onchange = (e) => {
                         if (e.target.value === 'skip') {
                             ev.ignored = true;
-                            checkbox.checked = false;
+                            // Visual feedback if needed, basically 'skip' means not adding
                         } else {
                             ev.ignored = false;
-                            checkbox.checked = true;
+                            // Overlap chosen
                         }
                     };
                 });
@@ -1262,17 +1267,23 @@ export function renderChangeSummary(changes) {
         // Removed Bookings
         changes.bookedChanges.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
             const id = `booked-rem-${idx}`;
 
             el.innerHTML = `
-                <input type="checkbox" id="${id}" class="mt-1 rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                <div class="flex-1">
+                <div class="p-2">
                     <div class="flex justify-between">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
+                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded h-5 flex items-center">Booking Cancelled</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                </div>
+
+                <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <span class="text-xs font-bold text-red-800 dark:text-red-300">Unmark Attending in Planner?</span>
+                    </label>
                 </div>
             `;
             list.appendChild(el);
@@ -1282,17 +1293,23 @@ export function renderChangeSummary(changes) {
         // Unattended Bookings
         changes.bookedChanges.unattended.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
             const id = `booked-unatt-${idx}`;
 
             el.innerHTML = `
-                <input type="checkbox" id="${id}" class="mt-1 rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                <div class="flex-1">
+                <div class="p-2">
                     <div class="flex justify-between">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
+                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Unmarking Attendance</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                </div>
+
+                <div class="border-t border-yellow-200 dark:border-yellow-800 p-2 bg-yellow-100/30 dark:bg-yellow-900/10">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                        <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300">Unmark Attending in Planner?</span>
+                    </label>
                 </div>
             `;
             list.appendChild(el);

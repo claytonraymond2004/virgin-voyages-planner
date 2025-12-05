@@ -1112,6 +1112,33 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 // But getUid recalculates it.
                 const uid = getUid(match);
                 if (uid && !state.attendingIds.has(uid)) {
+                    // Check if this event (new UID) is part of a Modification (Time Change)
+                    // If so, and we are attending the OLD version, then this is just the "Moved" version
+                    // already covered by the Modified section. We don't want to show it as "New Booking".
+                    // However, if we were NOT attending the old version, arguably it's a new booking.
+                    // But here we are iterating *bookedEvents* (what is currently in the app).
+                    // If it matches a `modified` event's `newEv` UID, it means the app says we are booked for the new time.
+
+                    // Check if this match is the 'newEv' of a modification
+                    const isModifiedMove = modified.some(m => getUid(m.newEv) === uid);
+
+                    if (isModifiedMove) {
+                        // It is a moved event. Now check if we were attending the OLD version.
+                        // We need to find the old version's UID.
+                        // The 'modified' object has oldEv.
+                        const modEntry = modified.find(m => getUid(m.newEv) === uid);
+                        if (modEntry) {
+                            const oldUid = getUid(modEntry.oldEv);
+                            if (state.attendingIds.has(oldUid)) {
+                                // case: Event moved, and we were booked for old time.
+                                // The new time is now in our booked list.
+                                // This is handled by the "Modified" section showing "Scheduled in Planner".
+                                // So we SKIP adding it to "Booked Changes" to avoid dup.
+                                return;
+                            }
+                        }
+                    }
+
                     // Check for conflicts
                     const conflicts = [];
                     const matchTime = parseTimeRange(match.timePeriod);
@@ -1231,7 +1258,18 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 }
 
                 if (!isInformative) {
-                    bookedChanges.unattended.push(ev);
+                    // Check if this is just the OLD version of a Modified Event
+                    // If so, we don't want to show "Unmarking Attendance", because the system will automatically migrate attendance
+                    const isOldVersionOfModified = modified.some(m => getUid(m.oldEv) === uid);
+
+                    // Check if this event is REMOVED entirely from the schedule
+                    // If so, it's covered by the "Removed Events" section (with the red "Scheduled in Planner" label)
+                    // We don't need to show it as "Unmarking Attendance" separately.
+                    const isRemovedEvent = removed.some(r => getUid(r) === uid);
+
+                    if (!isOldVersionOfModified && !isRemovedEvent) {
+                        bookedChanges.unattended.push(ev);
+                    }
                 }
             }
         });
