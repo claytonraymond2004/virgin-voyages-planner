@@ -158,6 +158,12 @@ function closeWizard() {
     const modal = document.getElementById('smart-scheduler-modal');
     if (modal) modal.remove();
 
+    // Execute callback if valid (e.g. calling from Update Itinerary)
+    if (window.isRescheduleMode && rescheduleCallback && !restoreStateOnClose) {
+        rescheduleCallback();
+        rescheduleCallback = null;
+    }
+
     if (restoreStateOnClose) {
         const state = restoreStateOnClose;
         restoreStateOnClose = null; // Clear it so we don't loop
@@ -560,7 +566,7 @@ function renderConflictsStep(body, footer) {
         <div class="p-2 space-y-4">
             <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Schedule Conflicts</h3>
             <p class="text-sm text-gray-600 dark:text-gray-300">We found some event conflicts we couldn't resolve automatically. For each event, please select when you would like to schedule it. Check "Allow Overlap" if you would like to allow the conflicting event(s) to be scheduled at the same time.</p>
-            <p class="text-xs text-gray-500 italic dark:text-gray-400">* Event cannot be rescheduled - Single occurrence or custom event</p>
+            <p class="text-xs text-gray-500 italic dark:text-gray-400">* Event cannot be rescheduled - Single occurrence, custom event, or past event</p>
             <div id="conflicts-list" class="space-y-4"></div>
         </div>
     `;
