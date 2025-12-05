@@ -1134,10 +1134,11 @@ export function openUpdateAgendaModal() {
         // Pre-fill username for logic but hide it
         if (usernameInput) usernameInput.value = cachedUser;
     } else {
-        if (inputContainer) inputContainer.classList.remove('hidden');
-        if (cachedContainer) cachedContainer.classList.add('hidden');
         if (usernameInput) usernameInput.value = cachedUser || '';
     }
+
+    // Ensure options state matches checkboxes
+    if (window.toggleUpdateOptions) window.toggleUpdateOptions();
 }
 
 export function resetUpdateModal() {
@@ -1174,83 +1175,13 @@ export function renderChangeSummary(changes) {
     document.getElementById('update-step-summary').classList.remove('hidden');
     document.getElementById('update-step-summary').classList.add('flex');
 
-    // Render Modified
-    if (changes.modified && changes.modified.length > 0) {
-        const modHeader = document.createElement('h5');
-        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        modHeader.textContent = `Modified Events (${changes.modified.length})`;
-        list.appendChild(modHeader);
-
-        changes.modified.forEach(item => {
-            const { oldEv, newEv, changes: changedFields } = item;
-            const el = document.createElement('div');
-            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
-
-            let details = '';
-            if (changedFields.includes('Time')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
-            }
-            if (changedFields.includes('Location')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
-            }
-            if (changedFields.includes('Description')) {
-                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
-            }
-
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
-                ${details}
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Removed
-    if (changes.removed.length > 0) {
-        const removedHeader = document.createElement('h5');
-        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
-        list.appendChild(removedHeader);
-
-        changes.removed.forEach(ev => {
-            const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Added
-    if (changes.added.length > 0) {
-        const addedHeader = document.createElement('h5');
-        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        addedHeader.textContent = `New Events (${changes.added.length})`;
-        list.appendChild(addedHeader);
-
-        changes.added.forEach(ev => {
-            const el = document.createElement('div');
-            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
-            el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-            `;
-            list.appendChild(el);
-        });
-    }
-
-    // Render Booked Changes
+    // 1. Render Booked Event Changes
     if (changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0)) {
         const bookedHeader = document.createElement('h5');
         bookedHeader.className = "font-bold text-purple-700 dark:text-purple-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
         bookedHeader.textContent = `Booked Event Changes`;
         list.appendChild(bookedHeader);
 
-        // Added Bookings
         // Added Bookings
         changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
@@ -1366,6 +1297,114 @@ export function renderChangeSummary(changes) {
             `;
             list.appendChild(el);
             document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+        });
+    }
+
+    // 2. Render Added (New Events)
+    if (changes.added.length > 0) {
+        const addedHeader = document.createElement('h5');
+        addedHeader.className = "font-bold text-green-700 dark:text-green-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        addedHeader.textContent = `New Events (${changes.added.length})`;
+        list.appendChild(addedHeader);
+
+        changes.added.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
+            el.innerHTML = `
+                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // 3. Render Modified
+    if (changes.modified && changes.modified.length > 0) {
+        const modHeader = document.createElement('h5');
+        modHeader.className = "font-bold text-orange-700 dark:text-orange-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        modHeader.textContent = `Modified Events (${changes.modified.length})`;
+        list.appendChild(modHeader);
+
+        changes.modified.forEach(item => {
+            const { oldEv, newEv, changes: changedFields } = item;
+            const el = document.createElement('div');
+            el.className = "bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded p-2 mb-2 text-sm mx-4";
+
+            // Check if user is attending this modified event
+            let isScheduled = false;
+            const timeData = parseTimeRange(oldEv.timePeriod);
+            if (timeData) {
+                const s = timeData.start + SHIFT_START_ADD;
+                const uid = `${oldEv.date}_${oldEv.name}_${s}`;
+                if (state.attendingIds.has(uid)) isScheduled = true;
+            }
+
+            let details = '';
+            if (changedFields.includes('Time')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
+            }
+            if (changedFields.includes('Location')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Location:</span> ${escapeHtml(oldEv.location || 'None')} &rarr; ${escapeHtml(newEv.location || 'None')}</div>`;
+            }
+            if (changedFields.includes('Description')) {
+                details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Description Updated</span></div>`;
+            }
+
+            let warningHtml = '';
+            if (isScheduled) {
+                warningHtml = `
+                    <span class="text-[10px] uppercase font-bold text-orange-800 dark:text-orange-200 bg-orange-100 dark:bg-orange-900 px-1 rounded ml-2 whitespace-nowrap">Scheduled in Planner</span>
+                `;
+            }
+
+            el.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</div>
+                    ${warningHtml}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
+                ${details}
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // 4. Render Removed
+    if (changes.removed.length > 0) {
+        const removedHeader = document.createElement('h5');
+        removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+        removedHeader.textContent = `Removed Events (${changes.removed.length})`;
+        list.appendChild(removedHeader);
+
+        changes.removed.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+
+            // Check if user is attending this removed event
+            let isScheduled = false;
+            const timeData = parseTimeRange(ev.timePeriod);
+            if (timeData) {
+                const s = timeData.start + SHIFT_START_ADD;
+                const uid = `${ev.date}_${ev.name}_${s}`;
+                if (state.attendingIds.has(uid)) isScheduled = true;
+            }
+
+            let warningHtml = '';
+            if (isScheduled) {
+                warningHtml = `
+                    <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Scheduled in Planner</span>
+                `;
+            }
+
+            el.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    ${warningHtml}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+            `;
+            list.appendChild(el);
         });
     }
 }

@@ -1128,7 +1128,20 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                                     const attEnd = attTime.end + SHIFT_END_ADD;
 
                                     if (matchStart < attEnd && matchEnd > attStart) {
-                                        conflicts.push(attEv);
+                                        // Only count as conflict if the attending event is ALSO still in the booked list
+                                        // (i.e. it's not being removed/moved itself)
+                                        const isAttEvStillBooked = bookedEvents.some(b => {
+                                            if (b.date !== attEv.date) return false;
+                                            if (b.name !== attEv.name) return false;
+                                            const bTime = parseTimeRange(b.timePeriod);
+                                            if (!bTime) return false;
+                                            const bStart = bTime.start + SHIFT_START_ADD;
+                                            return Math.abs(bStart - attStart) < 15;
+                                        });
+
+                                        if (isAttEvStillBooked) {
+                                            conflicts.push(attEv);
+                                        }
                                     }
                                 }
                             }
