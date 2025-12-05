@@ -1062,6 +1062,9 @@ export function openUpdateAgendaModal() {
     document.getElementById('update-agenda-modal').style.display = 'flex';
     document.getElementById('dropdown-menu').classList.remove('open');
 
+    // Ensure options are correctly toggled
+    if (window.toggleUpdateOptions) window.toggleUpdateOptions();
+
     // Initialize file input listener for update
     const fileInput = document.getElementById('update-file-input');
     const dropZone = document.getElementById('update-drop-zone');

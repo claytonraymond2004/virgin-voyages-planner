@@ -114,6 +114,7 @@ window.handleTransferReceive = handleTransferReceive;
 window.copyTransferUrl = copyTransferUrl;
 window.startTransferScanner = startTransferScanner;
 window.stopTransferScanner = stopTransferScanner;
+window.toggleUpdateOptions = toggleUpdateOptions;
 
 // --- Initialization ---
 
@@ -803,6 +804,28 @@ async function handleUpdateVVLogin() {
         spinner.classList.add('hidden');
         usernameInput.disabled = false;
         passwordInput.disabled = false;
+    }
+}
+
+function toggleUpdateOptions() {
+    const importBooked = document.getElementById('update-vv-import-booked').checked;
+    const pullRadio = document.querySelector('input[name="update-mode"][value="pull"]');
+
+    if (pullRadio) {
+        const pullLabel = pullRadio.closest('label');
+        if (importBooked) {
+            pullRadio.disabled = false;
+            if (pullLabel) {
+                pullLabel.classList.remove('cursor-not-allowed', 'opacity-50');
+                pullLabel.classList.add('cursor-pointer');
+            }
+        } else {
+            pullRadio.disabled = true;
+            if (pullLabel) {
+                pullLabel.classList.add('cursor-not-allowed', 'opacity-50');
+                pullLabel.classList.remove('cursor-pointer');
+            }
+        }
     }
 }
 
