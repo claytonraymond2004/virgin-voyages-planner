@@ -1192,6 +1192,60 @@ export function renderChangeSummary(changes) {
     const addedList = changes.added || [];
     const bookedMatchesInAdded = new Set(); // Set of bookedChange objects to skip in the Booked section
 
+    // --- Future Conflict Detection Setup ---
+    // 1. Build a "Future Base Schedule" from currently scheduled events that are NOT being removed/changed.
+    let futureAttending = new Set(state.attendingIds);
+
+    // Remove UIDs for events that are being removed
+    if (changes.removed) changes.removed.forEach(e => futureAttending.delete(e._uid));
+
+    // Remove UIDs for events that are being modified (we will check the *new* state of them later)
+    if (changes.modified) changes.modified.forEach(m => futureAttending.delete(m.oldEv._uid));
+
+    // Remove UIDs for booked events that are being cancelled/unattended
+    if (changes.bookedChanges) {
+        if (changes.bookedChanges.removed) changes.bookedChanges.removed.forEach(e => futureAttending.delete(e._uid));
+        if (changes.bookedChanges.unattended) changes.bookedChanges.unattended.forEach(e => futureAttending.delete(e._uid));
+    }
+
+    // Helper to check for conflicts against the Future Base Schedule
+    const checkFutureConflict = (candidate) => {
+        let conflicts = [];
+
+        let cS, cE;
+        // Determine candidate times
+        if (typeof candidate.startMins === 'number') {
+            cS = candidate.startMins;
+            cE = candidate.endMins;
+        } else {
+            const t = parseTimeRange(candidate.timePeriod);
+            if (!t) return []; // Cannot check without time
+            cS = t.start + SHIFT_START_ADD;
+            cE = t.end + SHIFT_END_ADD;
+        }
+
+        // Iterate over the "stable" events
+        futureAttending.forEach(uid => {
+            let existing = state.eventLookup.get(uid);
+            // Fallback for custom events if not in lookup (though they should be)
+            if (!existing) return;
+
+            // Simple date check first
+            if (existing.date === candidate.date) {
+                const eS = existing.startMins;
+                const eE = existing.endMins;
+
+                // Check overlap (exclusive end time usually, but inclusive logic is fine for warnings)
+                // Overlap if Max(StartA, StartB) < Min(EndA, EndB)
+                if (Math.max(cS, eS) < Math.min(cE, eE)) {
+                    conflicts.push(existing);
+                }
+            }
+        });
+        return conflicts;
+    };
+
+
     bookedAddedList.forEach(booked => {
         const bookedTime = parseTimeRange(booked.timePeriod);
         if (!bookedTime) return;
@@ -1230,27 +1284,20 @@ export function renderChangeSummary(changes) {
                 const id = `booked-add-${idx}`;
 
                 let conflictHtml = '';
-                if (ev.conflicts && ev.conflicts.length > 0) {
-                    const conflictNames = ev.conflicts.map(c => c.name).join(', ');
+                // Check conflicts against future state
+                const futureConflicts = checkFutureConflict(ev);
+
+                if (futureConflicts.length > 0) {
+                    const conflictList = futureConflicts.map(c => `<li>${escapeHtml(c.name)} (${formatTimeRange(c.startMins, c.endMins)})</li>`).join('');
                     conflictHtml = `
                         <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
                             <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                Conflict with: ${escapeHtml(conflictNames)}
+                                Conflict with:
                             </div>
-                            <div class="flex flex-col gap-1 ml-6">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict_action_${idx}" value="overlap" checked class="text-purple-600 focus:ring-purple-500">
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Add anyway (Allow Overlap)</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="conflict_action_${idx}" value="skip" class="text-purple-600 focus:ring-purple-500">
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Skip (Don't Add)</span>
-                                </label>
-                                <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline text-left mt-1" id="btn-resolve-${idx}">
-                                    Find Alternative for ${escapeHtml(ev.conflicts[0].name)}...
-                                </button>
-                            </div>
+                            <ul class="list-disc list-inside text-xs text-red-600 dark:text-red-400 ml-2">
+                                ${conflictList}
+                            </ul>
                         </div>
                     `;
                 }
@@ -1267,7 +1314,7 @@ export function renderChangeSummary(changes) {
                         ${conflictHtml}
                     </div>
                     
-                    <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
+                    <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10">
                         <label class="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
                             <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner?</span>
@@ -1387,17 +1434,19 @@ export function renderChangeSummary(changes) {
                 `;
 
                 // If it's a booked event, we show conflict UI if any
-                if (bookedRef.conflicts && bookedRef.conflicts.length > 0) {
-                    const conflictNames = bookedRef.conflicts.map(c => c.name).join(', ');
+                // If it's a booked event, we show conflict UI if any
+                const futureConflicts = checkFutureConflict(ev);
+                if (futureConflicts.length > 0) {
+                    const conflictList = futureConflicts.map(c => `<li>${escapeHtml(c.name)} (${formatTimeRange(c.startMins, c.endMins)})</li>`).join('');
                     conflictHtml = `
                         <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
                              <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
-                                 Conflict with: ${escapeHtml(conflictNames)}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                Conflict with:
                              </div>
-                             <!-- Simplified conflict UI for this context -->
-                             <div class="text-xs text-red-600 dark:text-red-400">
-                                This new event conflicts with your schedule.
-                             </div>
+                             <ul class="list-disc list-inside text-xs text-red-600 dark:text-red-400 ml-2">
+                                ${conflictList}
+                             </ul>
                         </div>
                      `;
                 }
@@ -1455,6 +1504,26 @@ export function renderChangeSummary(changes) {
                 if (state.attendingIds.has(uid)) isScheduled = true;
             }
 
+            let conflictHtml = '';
+            // Only check conflicts if it's scheduled and moving/changing
+            if (isScheduled) {
+                const futureConflicts = checkFutureConflict(newEv);
+                if (futureConflicts.length > 0) {
+                    const conflictList = futureConflicts.map(c => `<li>${escapeHtml(c.name)} (${formatTimeRange(c.startMins, c.endMins)})</li>`).join('');
+                    conflictHtml = `
+                        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
+                             <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
+                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                 Conflict with:
+                             </div>
+                             <ul class="list-disc list-inside text-xs text-red-600 dark:text-red-400 ml-2">
+                                ${conflictList}
+                             </ul>
+                        </div>
+                     `;
+                }
+            }
+
             let details = '';
             if (changedFields.includes('Time')) {
                 details += `<div class="text-xs text-orange-800 dark:text-orange-200 mt-1"><span class="font-bold">Time:</span> ${formatTimeRange(oldEv.startMins, oldEv.endMins)} &rarr; ${formatTimeRange(newEv.startMins, newEv.endMins)}</div>`;
@@ -1480,6 +1549,7 @@ export function renderChangeSummary(changes) {
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
                 ${details}
+                ${conflictHtml}
             `;
             list.appendChild(el);
         });
