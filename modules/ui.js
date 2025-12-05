@@ -6,8 +6,13 @@ import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
     showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
 } from './interactions.js';
-import { initSmartScheduler, initRescheduleWizard } from './smartScheduler.js';
-import { refreshUpdateCheck } from './main.js';
+import { initSmartScheduler, initRescheduleWizard, checkOverlap } from './smartScheduler.js';
+import { refreshUpdateCheck, getPendingUpdateEvents } from './main.js';
+
+// ... (existing code) ...
+
+// Removed Bookings
+// ...
 
 // --- Modals ---
 
@@ -1223,29 +1228,34 @@ export function renderChangeSummary(changes) {
             }
         });
 
-        // Removed Bookings
+
+
+        // Removed Bookings (Custom Events)
         changes.bookedChanges.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
             el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex flex-col gap-2";
-            const id = `booked-rem-${idx}`;
+            const id = `booked-removed-${idx}`;
 
             el.innerHTML = `
                 <div class="flex-1">
                     <div class="flex justify-between items-start">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Not Attended in App</span>
+                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Cancelled in App</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                            <span class="text-xs font-bold text-red-800 dark:text-red-200">Remove Custom Event?</span>
+                            <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${!ev.ignored ? 'checked' : ''}>
+                            <span class="text-xs font-bold text-red-800 dark:text-red-200">Remove Custom Event</span>
                         </label>
                     </div>
                 </div>
             `;
             list.appendChild(el);
-            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+            document.getElementById(id).onchange = (e) => {
+                ev.ignored = !e.target.checked;
+                renderChangeSummary(changes);
+            };
         });
 
         // Unattended Bookings
@@ -1263,16 +1273,61 @@ export function renderChangeSummary(changes) {
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     <div class="mt-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" ${!ev.ignored ? 'checked' : ''}>
                             <span class="text-xs font-bold text-yellow-800 dark:text-yellow-200">Remove Attendance in Planner</span>
                         </label>
                     </div>
                 </div>
             `;
             list.appendChild(el);
-            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+            document.getElementById(id).onchange = (e) => {
+                ev.ignored = !e.target.checked;
+                renderChangeSummary(changes);
+            };
         });
     }
+
+    // ... (inside renderChangeSummary)
+
+    // Calculate Projected Attending for Conflict Detection
+    const pending = getPendingUpdateEvents();
+    const projectedAttending = new Set();
+
+    // 1. Start with current attending
+    state.attendingIds.forEach(uid => projectedAttending.add(uid));
+
+    // 2. Apply Migrations
+    pending.migrations.forEach(m => {
+        if (projectedAttending.has(m.oldUid)) {
+            projectedAttending.delete(m.oldUid);
+            projectedAttending.add(m.newUid);
+        }
+    });
+
+    // 3. Remove Removed Events
+    changes.removed.forEach(r => projectedAttending.delete(r._uid));
+
+    // 4. Add Added Events (if marked for schedule)
+    changes.added.forEach(a => {
+        if (a.addToSchedule) projectedAttending.add(a._uid);
+    });
+
+    // 5. Apply Booked Changes
+    if (changes.bookedChanges) {
+        changes.bookedChanges.added.forEach(a => {
+            if (!a.ignored) projectedAttending.add(a.uid);
+        });
+        changes.bookedChanges.removed.forEach(r => {
+            if (!r.ignored) projectedAttending.delete(r.uid);
+        });
+        changes.bookedChanges.unattended.forEach(u => {
+            if (!u.ignored) projectedAttending.delete(u.uid);
+        });
+    }
+
+    // 6. Add Pending Reschedules
+    pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
+
 
     // Render Added
     if (changes.added.length > 0) {
@@ -1286,16 +1341,79 @@ export function renderChangeSummary(changes) {
             el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
 
             let actionHtml = '';
+            let conflictName = null;
+
             if (ev.isBooked) {
-                const id = `added-booked-${idx}`;
-                actionHtml = `
-                    <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="${id}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                            <span class="text-xs font-bold text-green-800 dark:text-green-200">Mark Attending Planner</span>
-                        </label>
-                    </div>
-                `;
+                // Check for conflicts
+                // We need to check against projectedAttending, excluding THIS event
+                const tempProjected = new Set(projectedAttending);
+                tempProjected.delete(ev._uid);
+
+                // Find conflict
+                // We need to lookup event objects for UIDs in tempProjected
+                // UIDs can be in state.eventLookup (old/existing) OR pending.newEvents (new)
+                // We need a unified lookup or check both.
+
+                for (const uid of tempProjected) {
+                    let otherEv = state.eventLookup.get(uid);
+                    if (!otherEv) {
+                        otherEv = pending.newEvents.find(e => e._uid === uid);
+                    }
+
+                    if (otherEv && otherEv._uid !== ev._uid) {
+                        if (checkOverlap(ev, otherEv)) {
+                            conflictName = `${otherEv.name} (${otherEv.date} @ ${formatTimeRange(otherEv.startMins, otherEv.endMins)})`;
+                            break;
+                        }
+                    }
+                }
+
+                if (ev.rescheduledUid) {
+                    const newEv = pending.newEvents.find(e => e._uid === ev.rescheduledUid);
+                    const timeStr = newEv ? `${newEv.date} @ ${newEv.timePeriod}` : 'New Time';
+                    actionHtml = `
+                        <div class="text-xs text-green-600 dark:text-green-400 font-bold mt-2 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Rescheduled to ${timeStr}
+                        </div>
+                     `;
+                } else if (conflictName) {
+                    const idOverlap = `conflict-overlap-${idx}`;
+                    const idNoMark = `conflict-nomark-${idx}`;
+                    const idReschedule = `conflict-reschedule-${idx}`;
+
+                    actionHtml = `
+                        <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
+                            <div class="text-xs text-red-600 dark:text-red-400 font-bold mb-2 flex items-start gap-1">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span>Will conflict with ${escapeHtml(conflictName)}</span>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="conflict-action-${idx}" id="${idOverlap}" value="overlap" class="text-green-600 focus:ring-green-500" ${ev.addToSchedule ? 'checked' : ''}>
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Mark Attending with Overlap</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="conflict-action-${idx}" id="${idNoMark}" value="nomark" class="text-green-600 focus:ring-green-500" ${!ev.addToSchedule ? 'checked' : ''}>
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Do not Mark Attending in Planner</span>
+                                </label>
+                                <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-bold ml-6 mt-1" id="${idReschedule}">
+                                    Reschedule Event...
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const id = `added-booked-${idx}`;
+                    actionHtml = `
+                        <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="${id}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${ev.addToSchedule ? 'checked' : ''}>
+                                <span class="text-xs font-bold text-green-800 dark:text-green-200">Mark Attending in Planner</span>
+                            </label>
+                        </div>
+                    `;
+                }
             }
 
             let labelHtml = '';
@@ -1315,9 +1433,46 @@ export function renderChangeSummary(changes) {
             list.appendChild(el);
 
             if (ev.isBooked) {
-                const checkbox = document.getElementById(`added-booked-${idx}`);
-                if (checkbox) {
-                    checkbox.onchange = (e) => { ev.addToSchedule = e.target.checked; };
+                if (conflictName && !ev.rescheduledUid) {
+                    const idOverlap = `conflict-overlap-${idx}`;
+                    const idNoMark = `conflict-nomark-${idx}`;
+                    const idReschedule = `conflict-reschedule-${idx}`;
+
+                    document.getElementById(idOverlap).onchange = () => {
+                        ev.addToSchedule = true;
+                        renderChangeSummary(changes); // Re-render to update other conflicts
+                    };
+                    document.getElementById(idNoMark).onchange = () => {
+                        ev.addToSchedule = false;
+                        renderChangeSummary(changes);
+                    };
+                    document.getElementById(idReschedule).onclick = () => {
+                        initRescheduleWizard(ev._uid, (newScheduleSet) => {
+                            let newUid = null;
+                            newScheduleSet.forEach(uid => {
+                                const e = pending.newEvents.find(ne => ne._uid === uid);
+                                if (e && e.name === ev.name) {
+                                    newUid = uid;
+                                }
+                            });
+
+                            if (newUid) {
+                                pending.pendingReschedules.add(newUid);
+                                ev.rescheduledUid = newUid;
+                                ev.addToSchedule = false; // Don't add the original conflicting one
+                                renderChangeSummary(changes);
+                            }
+                        }, pending.newEvents, projectedAttending);
+                    };
+
+                } else if (!ev.rescheduledUid) {
+                    const checkbox = document.getElementById(`added-booked-${idx}`);
+                    if (checkbox) {
+                        checkbox.onchange = (e) => {
+                            ev.addToSchedule = e.target.checked;
+                            renderChangeSummary(changes); // Re-render to check for new conflicts
+                        };
+                    }
                 }
             }
         });
@@ -1362,7 +1517,7 @@ export function renderChangeSummary(changes) {
         removedHeader.textContent = `Removed Events (${changes.removed.length})`;
         list.appendChild(removedHeader);
 
-        changes.removed.forEach(ev => {
+        changes.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
             el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
 
@@ -1371,14 +1526,91 @@ export function renderChangeSummary(changes) {
                 labelHtml = `<span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attended in Planner</span>`;
             }
 
+            let rescheduleHtml = '';
+            if (ev.wasAttending && ev.hasAlternative && !ev.rescheduledUid) {
+                rescheduleHtml = `
+                    <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 flex items-center gap-1 font-bold" id="btn-reschedule-${idx}">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Reschedule...
+                    </button>
+                 `;
+            } else if (ev.rescheduledUid) {
+                const pending = getPendingUpdateEvents();
+                const newEv = pending.newEvents.find(e => e._uid === ev.rescheduledUid);
+                const timeStr = newEv ? `${newEv.date} @ ${newEv.timePeriod}` : 'New Time';
+                rescheduleHtml = `
+                    <div class="text-xs text-green-600 dark:text-green-400 font-bold mt-1 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Rescheduled to ${timeStr}
+                    </div>
+                 `;
+            }
+
             el.innerHTML = `
                 <div class="flex justify-between items-start">
                     <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
                     ${labelHtml}
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                ${rescheduleHtml}
             `;
             list.appendChild(el);
+
+            const btnReschedule = document.getElementById(`btn-reschedule-${idx}`);
+            if (btnReschedule) {
+                btnReschedule.onclick = () => {
+                    const pending = getPendingUpdateEvents();
+                    const projectedAttending = new Set(state.attendingIds);
+
+                    // Apply migrations
+                    pending.migrations.forEach(m => {
+                        if (projectedAttending.has(m.oldUid)) {
+                            projectedAttending.delete(m.oldUid);
+                            projectedAttending.add(m.newUid);
+                        }
+                    });
+
+                    // Remove removed events
+                    changes.removed.forEach(r => projectedAttending.delete(r._uid));
+
+                    // Add added events
+                    changes.added.forEach(a => {
+                        if (a.addToSchedule) projectedAttending.add(a._uid);
+                    });
+
+                    // Add booked changes
+                    if (changes.bookedChanges) {
+                        changes.bookedChanges.added.forEach(a => {
+                            if (!a.ignored) projectedAttending.add(a.uid);
+                        });
+                        changes.bookedChanges.removed.forEach(r => {
+                            if (!r.ignored) projectedAttending.delete(r.uid);
+                        });
+                        changes.bookedChanges.unattended.forEach(u => {
+                            if (!u.ignored) projectedAttending.delete(u.uid);
+                        });
+                    }
+
+                    // Add pending reschedules
+                    pending.pendingReschedules.forEach(uid => projectedAttending.add(uid));
+
+                    initRescheduleWizard(ev._uid, (newScheduleSet) => {
+                        let newUid = null;
+                        newScheduleSet.forEach(uid => {
+                            const e = pending.newEvents.find(ne => ne._uid === uid);
+                            if (e && e.name === ev.name) {
+                                newUid = uid;
+                            }
+                        });
+
+                        if (newUid) {
+                            pending.pendingReschedules.add(newUid);
+                            ev.rescheduledUid = newUid;
+                            renderChangeSummary(changes);
+                        }
+                    }, pending.newEvents, projectedAttending);
+                };
+            }
         });
     }
 }

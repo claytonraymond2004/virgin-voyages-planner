@@ -709,14 +709,17 @@ async function handleVVLogin() {
         return;
     }
 
+    const importBookedCheckbox = document.getElementById('vv-import-booked');
+
     statusDiv.textContent = "";
     statusDiv.className = "text-center text-sm text-gray-600 min-h-[20px]";
     btn.disabled = true;
     spinner.classList.remove('hidden');
     usernameInput.disabled = true;
     passwordInput.disabled = true;
+    importBookedCheckbox.disabled = true;
 
-    const importBooked = document.getElementById('vv-import-booked').checked;
+    const importBooked = importBookedCheckbox.checked;
 
     try {
         if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
@@ -745,6 +748,7 @@ async function handleVVLogin() {
         spinner.classList.add('hidden');
         usernameInput.disabled = false;
         passwordInput.disabled = false;
+        importBookedCheckbox.disabled = false;
     }
 }
 
@@ -775,14 +779,19 @@ async function handleUpdateVVLogin() {
         return;
     }
 
+    const importBookedCheckbox = document.getElementById('update-vv-import-booked');
+    const modeRadios = document.querySelectorAll('input[name="update-mode"]');
+
     statusDiv.textContent = "";
     statusDiv.className = "text-center text-xs text-gray-500 min-h-[16px]";
     btn.disabled = true;
     spinner.classList.remove('hidden');
     usernameInput.disabled = true;
     passwordInput.disabled = true;
+    importBookedCheckbox.disabled = true;
+    modeRadios.forEach(r => r.disabled = true);
 
-    const importBooked = document.getElementById('update-vv-import-booked').checked;
+    const importBooked = importBookedCheckbox.checked;
 
     try {
         if (!window.VirginAPI) throw new Error("VirginAPI not loaded");
@@ -795,6 +804,16 @@ async function handleUpdateVVLogin() {
 
         checkForUpdates(events, importBooked ? bookedEvents : null);
 
+        // Re-enable on success (though view changes, good practice)
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+        importBookedCheckbox.disabled = false;
+
+        // Restore radio state
+        toggleUpdateOptions();
+
     } catch (err) {
         console.error(err);
         statusDiv.textContent = "Error: " + err.message;
@@ -804,6 +823,10 @@ async function handleUpdateVVLogin() {
         spinner.classList.add('hidden');
         usernameInput.disabled = false;
         passwordInput.disabled = false;
+        importBookedCheckbox.disabled = false;
+
+        // Restore radio state
+        toggleUpdateOptions();
     }
 }
 
@@ -994,7 +1017,13 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
             } else {
                 // No match in new list -> Removed
-                if (state.attendingIds.has(oldEv._uid)) oldEv.wasAttending = true;
+                if (state.attendingIds.has(oldEv._uid)) {
+                    oldEv.wasAttending = true;
+                    // Check if there are other instances of this event in the new agenda
+                    if (newEvents.some(ne => ne.name === oldEv.name)) {
+                        oldEv.hasAlternative = true;
+                    }
+                }
                 removed.push(oldEv);
             }
         });
@@ -1163,14 +1192,18 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, added, pendingReschedules: new Set() };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
+}
+
+export function getPendingUpdateEvents() {
+    return pendingUpdateEvents;
 }
 
 function applyAgendaUpdate() {
     if (!pendingUpdateEvents) return;
 
-    const { newEvents, migrations, bookedEvents, bookedChanges, added } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges, added, pendingReschedules } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
     migrations.forEach(({ oldUid, newUid }) => {
@@ -1217,6 +1250,12 @@ function applyAgendaUpdate() {
                 }
             }
         });
+        saveAttendance();
+    }
+
+    // 3.6 Process Pending Reschedules
+    if (pendingReschedules && pendingReschedules.size > 0) {
+        pendingReschedules.forEach(uid => state.attendingIds.add(uid));
         saveAttendance();
     }
 

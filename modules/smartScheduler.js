@@ -24,9 +24,14 @@ let skippedEventsBackup = null;
 let conflictSelectionsBackup = null;
 let rescheduleCallback = null;
 
+let tempEventLookup = null;
+let tempAttendingBase = null;
+
 // --- Main Entry Point ---
 export function initSmartScheduler() {
     window.isRescheduleMode = false;
+    tempEventLookup = null;
+    tempAttendingBase = null;
     currentWizardStep = WIZARD_STEPS.INTRO;
     proposedSchedule.clear();
     conflictList = [];
@@ -36,11 +41,51 @@ export function initSmartScheduler() {
     renderWizard();
 }
 
-export function initRescheduleWizard(eventUid, onComplete = null) {
+export function initRescheduleWizard(eventUid, onComplete = null, customEvents = null, customAttendingIds = null) {
     window.isRescheduleMode = true;
     rescheduleCallback = onComplete;
-    const ev = state.eventLookup.get(eventUid);
-    if (!ev) {
+
+    // Handle Custom Data (for Update Itinerary)
+    if (customEvents) {
+        tempEventLookup = new Map();
+        customEvents.forEach(ev => {
+            // Ensure UID exists (it should for new events from checkForUpdates)
+            // If not, we might need to generate it, but let's assume it's there or we can't schedule it.
+            if (ev._uid || ev.uid) {
+                const uid = ev._uid || ev.uid;
+                // Ensure startMins/endMins are present if only timePeriod is there
+                if (ev.startMins === undefined && ev.timePeriod) {
+                    const timeData = parseTimeRange(ev.timePeriod);
+                    if (timeData) {
+                        ev.startMins = timeData.start + SHIFT_START_ADD;
+                        ev.endMins = timeData.end + SHIFT_END_ADD;
+                    }
+                }
+                tempEventLookup.set(uid, ev);
+            }
+        });
+    } else {
+        tempEventLookup = null;
+    }
+
+    if (customAttendingIds) {
+        tempAttendingBase = customAttendingIds;
+    } else {
+        tempAttendingBase = null;
+    }
+
+    const lookup = tempEventLookup || state.eventLookup;
+    const attending = tempAttendingBase || state.attendingIds;
+
+    const ev = lookup.get(eventUid);
+
+    // If event not found in the NEW data, it might be the "Removed" event we are trying to reschedule.
+    // In that case, we need to find the series name from the OLD data (state.appData) if possible,
+    // or pass it in. But initRescheduleWizard signature is fixed.
+    // Let's try to find it in state.eventLookup if not in temp.
+    const targetEvent = ev || state.eventLookup.get(eventUid);
+
+    if (!targetEvent) {
         alert("Event not found.");
         return;
     }
@@ -53,19 +98,22 @@ export function initRescheduleWizard(eventUid, onComplete = null) {
     conflictSelectionsBackup = null;
 
     // 2. Populate Proposed Schedule (All attending EXCEPT target)
-    state.attendingIds.forEach(uid => {
+    attending.forEach(uid => {
         if (uid !== eventUid) {
-            proposedSchedule.add(uid);
+            // Only add if it exists in the current lookup (new data)
+            if (lookup.has(uid)) {
+                proposedSchedule.add(uid);
+            }
         }
     });
 
     // 3. Identify Candidates (Future instances of the same series)
     const now = new Date();
-    const allInstances = Array.from(state.eventLookup.values()).filter(e => e.name === ev.name);
+    const allInstances = Array.from(lookup.values()).filter(e => e.name === targetEvent.name);
 
     // Filter for future instances
     const candidates = allInstances.filter(instance => {
-        // Must not be the exact same instance we are moving from (unless we want to allow keeping it? No, "Unable to Attend")
+        // Must not be the exact same instance we are moving from
         if (instance.uid === eventUid) return false;
 
         const instanceDate = new Date(instance.date + 'T00:00:00');
@@ -74,7 +122,7 @@ export function initRescheduleWizard(eventUid, onComplete = null) {
     });
 
     if (candidates.length === 0) {
-        alert("No future occurrences found for this event.");
+        alert("No future occurrences found for this event in the new itinerary.");
         return;
     }
 
@@ -87,7 +135,7 @@ export function initRescheduleWizard(eventUid, onComplete = null) {
     // 4. Create Conflict Entry
     // We treat this as a "conflict" so the user is forced to choose one.
     conflictList.push({
-        name: ev.name,
+        name: targetEvent.name,
         instances: candidates
     });
 
@@ -435,44 +483,54 @@ function findBingoSales(bingoGameEvent) {
     // We must search ALL events, even hidden ones, so we cannot rely on state.eventLookup.
     const candidates = [];
 
-    // 1. Official Events
-    if (state.appData) {
-        state.appData.forEach(ev => {
+    if (tempEventLookup) {
+        // Use the temporary lookup (which contains all new events)
+        tempEventLookup.forEach(ev => {
             if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
-                const timeData = parseTimeRange(ev.timePeriod);
-                if (timeData) {
-                    const s = timeData.start + SHIFT_START_ADD;
-                    const e = timeData.end + SHIFT_END_ADD;
-                    const uid = `${ev.date}_${ev.name}_${s}`;
-                    candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
-                }
+                // Ensure startMins/endMins are present (should be if populated correctly in initRescheduleWizard)
+                candidates.push(ev);
             }
         });
-    }
-
-    // 2. Custom Events
-    if (state.customEvents) {
-        state.customEvents.forEach(ev => {
-            if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
-                let s, e;
-                if (ev.startMinutes !== undefined) {
-                    s = ev.startMinutes;
-                    e = ev.endMinutes;
-                } else {
+    } else {
+        // 1. Official Events
+        if (state.appData) {
+            state.appData.forEach(ev => {
+                if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
                     const timeData = parseTimeRange(ev.timePeriod);
                     if (timeData) {
-                        s = timeData.start + SHIFT_START_ADD;
-                        e = timeData.end + SHIFT_END_ADD;
+                        const s = timeData.start + SHIFT_START_ADD;
+                        const e = timeData.end + SHIFT_END_ADD;
+                        const uid = `${ev.date}_${ev.name}_${s}`;
+                        candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
                     }
                 }
+            });
+        }
 
-                if (s !== undefined) {
-                    // Custom events should have a UID
-                    const uid = ev.uid || `${ev.date}_${ev.name}_${s}`;
-                    candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
+        // 2. Custom Events
+        if (state.customEvents) {
+            state.customEvents.forEach(ev => {
+                if (ev.name === "Bingo Card Sales" && ev.date === bingoGameEvent.date) {
+                    let s, e;
+                    if (ev.startMinutes !== undefined) {
+                        s = ev.startMinutes;
+                        e = ev.endMinutes;
+                    } else {
+                        const timeData = parseTimeRange(ev.timePeriod);
+                        if (timeData) {
+                            s = timeData.start + SHIFT_START_ADD;
+                            e = timeData.end + SHIFT_END_ADD;
+                        }
+                    }
+
+                    if (s !== undefined) {
+                        // Custom events should have a UID
+                        const uid = ev.uid || `${ev.date}_${ev.name}_${s}`;
+                        candidates.push({ ...ev, startMins: s, endMins: e, uid: uid });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     const sales = candidates.find(ev => {
@@ -696,7 +754,8 @@ function applyDeadlockSelection() {
         }
 
         const selectedUid = sel.value;
-        const selectedEvent = state.eventLookup.get(selectedUid);
+        const lookup = tempEventLookup || state.eventLookup;
+        const selectedEvent = lookup.get(selectedUid);
         if (!selectedEvent) return;
 
         // 1. Find what it conflicts with in proposedSchedule
@@ -843,10 +902,13 @@ function applyDeadlockSelection() {
 
 function getConflictingEvents(event) {
     const conflicts = [];
-    const tempAttending = new Set([...state.attendingIds, ...proposedSchedule]);
+    const lookup = tempEventLookup || state.eventLookup;
+    const attending = tempAttendingBase || state.attendingIds;
+
+    const tempAttending = new Set([...attending, ...proposedSchedule]);
 
     for (const uid of tempAttending) {
-        const attendingEvent = state.eventLookup.get(uid);
+        const attendingEvent = lookup.get(uid);
         if (!attendingEvent) continue;
 
         // Don't conflict with self or other instances of the same series (we are rescheduling the series)
@@ -871,17 +933,18 @@ function formatTime(minutes) {
 // --- Step 5: Preview ---
 function renderPreviewStep(body, footer) {
     const events = [];
+    const lookup = tempEventLookup || state.eventLookup;
 
     // 1. Add Proposed (New)
     proposedSchedule.forEach(uid => {
-        const ev = state.eventLookup.get(uid);
+        const ev = lookup.get(uid);
         if (ev) events.push({ ...ev, isNew: true });
     });
 
     // 2. Add Existing Attending
     state.attendingIds.forEach(uid => {
         if (!proposedSchedule.has(uid)) {
-            const ev = state.eventLookup.get(uid);
+            const ev = lookup.get(uid);
             if (ev) events.push({ ...ev, isNew: false });
         }
     });
@@ -945,7 +1008,7 @@ function renderPreviewStep(body, footer) {
 
             // 1. Check against Existing Attending
             state.attendingIds.forEach(uid => {
-                const other = state.eventLookup.get(uid);
+                const other = lookup.get(uid);
                 if (other && other.date === ev.date && other.uid !== ev.uid) {
                     if (ev.startMins < other.endMins && ev.endMins > other.startMins) {
                         conflicts.push(other.name);
@@ -955,7 +1018,7 @@ function renderPreviewStep(body, footer) {
 
             // 2. Check against Other Proposed
             proposedSchedule.forEach(uid => {
-                const other = state.eventLookup.get(uid);
+                const other = lookup.get(uid);
                 if (other && other.date === ev.date && other.uid !== ev.uid) {
                     if (ev.startMins < other.endMins && ev.endMins > other.startMins) {
                         conflicts.push(other.name);
@@ -1040,7 +1103,7 @@ function getTimes(ev) {
     };
 }
 
-function checkOverlap(ev1, ev2) {
+export function checkOverlap(ev1, ev2) {
     if (ev1.date !== ev2.date) return false;
     const t1 = getTimes(ev1);
     const t2 = getTimes(ev2);
@@ -1048,6 +1111,16 @@ function checkOverlap(ev1, ev2) {
 }
 
 function applySchedule() {
+    if (tempEventLookup) {
+        // Hypothetical mode (Update Itinerary)
+        // Do NOT modify global state.
+        if (rescheduleCallback) {
+            rescheduleCallback(new Set(proposedSchedule));
+            rescheduleCallback = null;
+        }
+        return;
+    }
+
     state.attendingIds.clear();
     proposedSchedule.forEach(uid => {
         state.attendingIds.add(uid);
@@ -1096,7 +1169,8 @@ function removeEventFromSchedule(uid) {
     const removedSeries = new Set();
     if (!proposedSchedule.has(uid)) return removedSeries;
 
-    const ev = state.eventLookup.get(uid);
+    const lookup = tempEventLookup || state.eventLookup;
+    const ev = lookup.get(uid);
     if (!ev) return removedSeries;
 
     proposedSchedule.delete(uid);
@@ -1260,7 +1334,8 @@ function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = nu
         return false;
     }
 
-    let instances = Array.from(state.eventLookup.values()).filter(e => e.name === seriesName);
+    const lookup = tempEventLookup || state.eventLookup;
+    let instances = Array.from(lookup.values()).filter(e => e.name === seriesName);
 
     if (filterPredicate) {
         instances = instances.filter(filterPredicate);
