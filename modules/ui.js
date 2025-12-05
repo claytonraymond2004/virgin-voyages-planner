@@ -1175,146 +1175,177 @@ export function renderChangeSummary(changes) {
     document.getElementById('update-step-summary').classList.remove('hidden');
     document.getElementById('update-step-summary').classList.add('flex');
 
+    // Pre-process: Identify Booked Adds that match New Events (Added)
+    // We want to show these in the "New Events" section with the "Mark Attending" footer,
+    // instead of showing them in "Booked Event Changes".
+    const bookedAddedList = (changes.bookedChanges && changes.bookedChanges.added) ? changes.bookedChanges.added : [];
+    const addedList = changes.added || [];
+    const bookedMatchesInAdded = new Set(); // Set of bookedChange objects to skip in the Booked section
+
+    bookedAddedList.forEach(booked => {
+        const bookedTime = parseTimeRange(booked.timePeriod);
+        if (!bookedTime) return;
+        const bookedStart = bookedTime.start + SHIFT_START_ADD;
+
+        const match = addedList.find(newEv =>
+            newEv.date === booked.date &&
+            newEv.name === booked.name &&
+            Math.abs(newEv.startMins - bookedStart) < 15
+        );
+
+        if (match) {
+            bookedMatchesInAdded.add(booked);
+            // Attach reference to the new event so we can render the footer there
+            match._bookedChangeRef = booked;
+        }
+    });
+
     // 1. Render Booked Event Changes
     if (changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0)) {
-        const bookedHeader = document.createElement('h5');
-        bookedHeader.className = "font-bold text-purple-700 dark:text-purple-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
-        bookedHeader.textContent = `Booked Event Changes`;
-        list.appendChild(bookedHeader);
 
-        // Added Bookings
-        changes.bookedChanges.added.forEach((ev, idx) => {
-            const el = document.createElement('div');
-            el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded mb-2 text-sm mx-4 flex flex-col";
-            const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
-            const id = `booked-add-${idx}`;
+        // Filter out the ones moved to "New Events" section
+        const visibleAdded = changes.bookedChanges.added.filter(b => !bookedMatchesInAdded.has(b));
 
-            let conflictHtml = '';
-            if (ev.conflicts && ev.conflicts.length > 0) {
-                const conflictNames = ev.conflicts.map(c => c.name).join(', ');
-                conflictHtml = `
-                    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
-                        <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            Conflict with: ${escapeHtml(conflictNames)}
+        if (visibleAdded.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0) {
+            const bookedHeader = document.createElement('h5');
+            bookedHeader.className = "font-bold text-purple-700 dark:text-purple-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
+            bookedHeader.textContent = `Booked Event Changes`;
+            list.appendChild(bookedHeader);
+
+            // Added Bookings
+            visibleAdded.forEach((ev, idx) => {
+                const el = document.createElement('div');
+                el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded mb-2 text-sm mx-4 flex flex-col";
+                const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
+                const id = `booked-add-${idx}`;
+
+                let conflictHtml = '';
+                if (ev.conflicts && ev.conflicts.length > 0) {
+                    const conflictNames = ev.conflicts.map(c => c.name).join(', ');
+                    conflictHtml = `
+                        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
+                            <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                Conflict with: ${escapeHtml(conflictNames)}
+                            </div>
+                            <div class="flex flex-col gap-1 ml-6">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="conflict_action_${idx}" value="overlap" checked class="text-purple-600 focus:ring-purple-500">
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Add anyway (Allow Overlap)</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="conflict_action_${idx}" value="skip" class="text-purple-600 focus:ring-purple-500">
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Skip (Don't Add)</span>
+                                </label>
+                                <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline text-left mt-1" id="btn-resolve-${idx}">
+                                    Find Alternative for ${escapeHtml(ev.conflicts[0].name)}...
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-1 ml-6">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="conflict_action_${idx}" value="overlap" checked class="text-purple-600 focus:ring-purple-500">
-                                <span class="text-xs text-gray-700 dark:text-gray-300">Add anyway (Allow Overlap)</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="conflict_action_${idx}" value="skip" class="text-purple-600 focus:ring-purple-500">
-                                <span class="text-xs text-gray-700 dark:text-gray-300">Skip (Don't Add)</span>
-                            </label>
-                            <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline text-left mt-1" id="btn-resolve-${idx}">
-                                Find Alternative for ${escapeHtml(ev.conflicts[0].name)}...
-                            </button>
+                    `;
+                }
+
+                // Main Content
+                el.innerHTML = `
+                    <div class="p-2">
+                        <div class="flex justify-between">
+                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded h-5 flex items-center">${typeLabel}</span>
                         </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                        ${conflictHtml}
+                    </div>
+                    
+                    <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner?</span>
+                        </label>
                     </div>
                 `;
-            }
+                list.appendChild(el);
 
-            // Main Content
-            el.innerHTML = `
-                <div class="p-2">
-                    <div class="flex justify-between">
-                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded h-5 flex items-center">${typeLabel}</span>
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-                    ${conflictHtml}
-                </div>
-                
-                <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                        <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner?</span>
-                    </label>
-                </div>
-            `;
-            list.appendChild(el);
+                const checkbox = document.getElementById(id);
+                checkbox.onchange = (e) => { ev.ignored = !e.target.checked; };
 
-            const checkbox = document.getElementById(id);
-            checkbox.onchange = (e) => { ev.ignored = !e.target.checked; };
+                if (ev.conflicts && ev.conflicts.length > 0) {
+                    // Handle radio buttons
+                    const radios = el.querySelectorAll(`input[name="conflict_action_${idx}"]`);
+                    radios.forEach(radio => {
+                        radio.onchange = (e) => {
+                            if (e.target.value === 'skip') {
+                                ev.ignored = true;
+                                // Visual feedback if needed, basically 'skip' means not adding
+                            } else {
+                                ev.ignored = false;
+                                // Overlap chosen
+                            }
+                        };
+                    });
 
-            if (ev.conflicts && ev.conflicts.length > 0) {
-                // Handle radio buttons
-                const radios = el.querySelectorAll(`input[name="conflict_action_${idx}"]`);
-                radios.forEach(radio => {
-                    radio.onchange = (e) => {
-                        if (e.target.value === 'skip') {
-                            ev.ignored = true;
-                            // Visual feedback if needed, basically 'skip' means not adding
-                        } else {
-                            ev.ignored = false;
-                            // Overlap chosen
-                        }
-                    };
-                });
-
-                // Handle resolve button
-                const btnResolve = document.getElementById(`btn-resolve-${idx}`);
-                if (btnResolve) {
-                    btnResolve.onclick = () => {
-                        initRescheduleWizard(ev.conflicts[0].uid, refreshUpdateCheck);
-                    };
+                    // Handle resolve button
+                    const btnResolve = document.getElementById(`btn-resolve-${idx}`);
+                    if (btnResolve) {
+                        btnResolve.onclick = () => {
+                            initRescheduleWizard(ev.conflicts[0].uid, refreshUpdateCheck);
+                        };
+                    }
                 }
-            }
-        });
+            });
 
-        // Removed Bookings
-        changes.bookedChanges.removed.forEach((ev, idx) => {
-            const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
-            const id = `booked-rem-${idx}`;
+            // Removed Bookings
+            changes.bookedChanges.removed.forEach((ev, idx) => {
+                const el = document.createElement('div');
+                el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
+                const id = `booked-rem-${idx}`;
 
-            el.innerHTML = `
-                <div class="p-2">
-                    <div class="flex justify-between">
-                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded h-5 flex items-center">Booking Cancelled</span>
+                el.innerHTML = `
+                    <div class="p-2">
+                        <div class="flex justify-between">
+                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                            <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded h-5 flex items-center">Booking Cancelled</span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                </div>
 
-                <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                        <span class="text-xs font-bold text-red-800 dark:text-red-300">Unmark Attending in Planner?</span>
-                    </label>
-                </div>
-            `;
-            list.appendChild(el);
-            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
-        });
-
-        // Unattended Bookings
-        changes.bookedChanges.unattended.forEach((ev, idx) => {
-            const el = document.createElement('div');
-            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
-            const id = `booked-unatt-${idx}`;
-
-            el.innerHTML = `
-                <div class="p-2">
-                    <div class="flex justify-between">
-                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Unmarking Attendance</span>
+                    <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-red-800 dark:text-red-300">Unmark Attending in Planner?</span>
+                        </label>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                </div>
+                `;
+                list.appendChild(el);
+                document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+            });
 
-                <div class="border-t border-yellow-200 dark:border-yellow-800 p-2 bg-yellow-100/30 dark:bg-yellow-900/10">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                        <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300">Unmark Attending in Planner?</span>
-                    </label>
-                </div>
-            `;
-            list.appendChild(el);
-            document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
-        });
+            // Unattended Bookings
+            changes.bookedChanges.unattended.forEach((ev, idx) => {
+                const el = document.createElement('div');
+                el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded mb-2 text-sm opacity-75 mx-4 flex flex-col";
+                const id = `booked-unatt-${idx}`;
+
+                el.innerHTML = `
+                    <div class="p-2">
+                        <div class="flex justify-between">
+                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Unmarking Attendance</span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                    </div>
+
+                    <div class="border-t border-yellow-200 dark:border-yellow-800 p-2 bg-yellow-100/30 dark:bg-yellow-900/10">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-yellow-800 dark:text-yellow-300">Unmark Attending in Planner?</span>
+                        </label>
+                    </div>
+                `;
+                list.appendChild(el);
+                document.getElementById(id).onchange = (e) => { ev.ignored = !e.target.checked; };
+            });
+        }
     }
 
     // 2. Render Added (New Events)
@@ -1324,15 +1355,72 @@ export function renderChangeSummary(changes) {
         addedHeader.textContent = `New Events (${changes.added.length})`;
         list.appendChild(addedHeader);
 
-        changes.added.forEach(ev => {
+        changes.added.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded p-2 mb-2 text-sm mx-4";
+            // Check if this new event is also a booked event
+            const bookedRef = ev._bookedChangeRef;
+
+            // Adjust styling if it's a booked match - User requested keeping green color
+            const borderClass = "border-green-100 dark:border-green-800";
+            const bgClass = "bg-green-50 dark:bg-green-900/20";
+
+            el.className = `${bgClass} border ${borderClass} rounded mb-2 text-sm mx-4 flex flex-col`;
+
+            let footerHtml = '';
+            let conflictHtml = '';
+            let attendingLabelHtml = '';
+
+            if (bookedRef) {
+                // Label for "Attending In App"
+                attendingLabelHtml = `
+                    <span class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 px-1 rounded h-5 flex items-center whitespace-nowrap ml-2">Attending In App</span>
+                `;
+
+                // If it's a booked event, we show conflict UI if any
+                if (bookedRef.conflicts && bookedRef.conflicts.length > 0) {
+                    const conflictNames = bookedRef.conflicts.map(c => c.name).join(', ');
+                    conflictHtml = `
+                        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mt-2">
+                             <div class="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-xs mb-1">
+                                 Conflict with: ${escapeHtml(conflictNames)}
+                             </div>
+                             <!-- Simplified conflict UI for this context -->
+                             <div class="text-xs text-red-600 dark:text-red-400">
+                                This new event conflicts with your schedule.
+                             </div>
+                        </div>
+                     `;
+                }
+
+                // Add the footer
+                footerHtml = `
+                    <div class="border-t border-green-200 dark:border-green-800 p-2 bg-green-100/30 dark:bg-green-900/10">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="added-booked-${idx}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-green-800 dark:text-green-300">Mark Attending in Planner?</span>
+                        </label>
+                    </div>
+                `;
+            }
+
             el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                <div class="p-2">
+                    <div class="flex justify-between items-start">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        ${attendingLabelHtml}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                    ${conflictHtml}
+                </div>
+                ${footerHtml}
             `;
             list.appendChild(el);
+
+            if (bookedRef) {
+                const cb = document.getElementById(`added-booked-${idx}`);
+                cb.onchange = (e) => { bookedRef.ignored = !e.target.checked; };
+            }
         });
     }
 
