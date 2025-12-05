@@ -15,7 +15,12 @@ let updateStateSnapshot = null;
 
 export function showGenericChoice(title, message, primaryLabel, onPrimary, secondaryLabel, onSecondary) {
     document.getElementById('generic-choice-title').textContent = title;
-    document.getElementById('generic-choice-message').textContent = message;
+
+    // Support HTML content if message starts with specific tag or just always use innerHTML?
+    // Using innerHTML is flexible but risks XSS if user input is not escaped.
+    // The message here comes from internal logic, so it's relatively safe.
+    // Let's assume standard use of innerHTML is fine for this helper.
+    document.getElementById('generic-choice-message').innerHTML = message.replace(/\n/g, '<br>');
 
     const btnPrimary = document.getElementById('btn-generic-primary');
     btnPrimary.textContent = primaryLabel;
@@ -25,11 +30,16 @@ export function showGenericChoice(title, message, primaryLabel, onPrimary, secon
     };
 
     const btnSecondary = document.getElementById('btn-generic-secondary');
-    btnSecondary.textContent = secondaryLabel;
-    btnSecondary.onclick = () => {
-        document.getElementById('generic-choice-modal').style.display = 'none';
-        if (onSecondary) onSecondary();
-    };
+    if (secondaryLabel) {
+        btnSecondary.style.display = 'inline-flex'; // Restore display
+        btnSecondary.textContent = secondaryLabel;
+        btnSecondary.onclick = () => {
+            document.getElementById('generic-choice-modal').style.display = 'none';
+            if (onSecondary) onSecondary();
+        };
+    } else {
+        btnSecondary.style.display = 'none';
+    }
 
     const btnCancel = document.getElementById('btn-generic-cancel-x');
     btnCancel.onclick = () => {
@@ -623,7 +633,13 @@ export function closeAllModals() {
 
     // Also close wizard if open
     const wizard = document.getElementById('smart-scheduler-modal');
-    if (wizard) wizard.remove();
+    if (wizard) {
+        if (window.closeSmartSchedulerWizard) {
+            window.closeSmartSchedulerWizard();
+        } else {
+            wizard.remove();
+        }
+    }
 
     state.currentCtxEvent = null;
     state.initialFormState = null;

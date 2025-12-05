@@ -243,24 +243,10 @@ export function toggleAttendance(uid) {
         }
     } else {
         // Case: Removing (Un-attending)
+
         if (state.hiddenNames.has(ev.name)) {
-            // Check if this is the last attended instance
-            if (attendedSiblingCount === 1) {
-                showGenericChoice(
-                    "Unhide Series?",
-                    `You are no longer attending "${ev.name}". Would you like to unhide the other occurrences?`,
-                    "Yes, Unhide Series",
-                    () => {
-                        performToggleAttendance(uid);
-                        unhideSeries(ev.name);
-                    },
-                    "No, Keep Hidden",
-                    () => {
-                        performToggleAttendance(uid);
-                    }
-                );
-                return;
-            }
+            state.hiddenNames.delete(ev.name);
+            saveHiddenNames();
         }
     }
 
@@ -314,11 +300,38 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
 
     const siblings = state.eventNameMap.get(ev.name) || [];
     const myIndex = siblings.indexOf(ev.uid);
-    let hasPrev = (myIndex > 0);
-    let hasNext = (myIndex < siblings.length - 1);
+
+    // Check next/prev visibility
+    const hasPrev = (myIndex > 0);
+    let isPrevHidden = false;
+    if (hasPrev) {
+        const prevUid = siblings[myIndex - 1];
+        const isSeriesHidden = state.hiddenNames.has(ev.name);
+        const isInstanceHidden = state.hiddenUids.has(prevUid);
+        const isExplicitlyShown = state.shownUids.has(prevUid);
+        const isAttending = state.attendingIds.has(prevUid);
+        if ((isSeriesHidden || isInstanceHidden) && !isAttending && !isExplicitlyShown && !state.showHiddenTemp) {
+            isPrevHidden = true;
+        }
+    }
+
+    const hasNext = (myIndex < siblings.length - 1);
+    let isNextHidden = false;
+    if (hasNext) {
+        const nextUid = siblings[myIndex + 1];
+        const isSeriesHidden = state.hiddenNames.has(ev.name);
+        const isInstanceHidden = state.hiddenUids.has(nextUid);
+        const isExplicitlyShown = state.shownUids.has(nextUid);
+        const isAttending = state.attendingIds.has(nextUid);
+        if ((isSeriesHidden || isInstanceHidden) && !isAttending && !isExplicitlyShown && !state.showHiddenTemp) {
+            isNextHidden = true;
+        }
+    }
 
     const btnPrev = document.getElementById('ctx-prev');
     const btnNext = document.getElementById('ctx-next');
+
+    // ... (rest of element selection is fine) ...
 
     const btnHide = document.getElementById('ctx-hide');
     const btnDelete = document.getElementById('ctx-delete');
@@ -555,23 +568,46 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     };
 
     // Nav
-    btnPrev.style.display = hasPrev ? 'flex' : 'none';
-    btnNext.style.display = hasNext ? 'flex' : 'none';
-    if (hasPrev) btnPrev.onclick = () => {
-        document.getElementById('mobile-event-modal').style.display = 'none';
-        closeMenu();
-        jumpToEvent(siblings[myIndex - 1]);
-    };
-    if (hasNext) btnNext.onclick = () => {
-        document.getElementById('mobile-event-modal').style.display = 'none';
-        closeMenu();
-        jumpToEvent(siblings[myIndex + 1]);
-    };
+    const isSeries = siblings.length > 1;
+
+    btnPrev.style.display = isSeries ? 'flex' : 'none';
+    if (isSeries) {
+        // Disabled if no previous item OR previous is hidden
+        if (!hasPrev || isPrevHidden) {
+            btnPrev.style.opacity = '0.5';
+            btnPrev.style.pointerEvents = 'none';
+        } else {
+            btnPrev.style.opacity = '1';
+            btnPrev.style.pointerEvents = 'auto';
+            btnPrev.onclick = () => {
+                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeMenu();
+                jumpToEvent(siblings[myIndex - 1]);
+            };
+        }
+    }
+
+    btnNext.style.display = isSeries ? 'flex' : 'none';
+    if (isSeries) {
+        // Disabled if no next item OR next is hidden
+        if (!hasNext || isNextHidden) {
+            btnNext.style.opacity = '0.5';
+            btnNext.style.pointerEvents = 'none';
+        } else {
+            btnNext.style.opacity = '1';
+            btnNext.style.pointerEvents = 'auto';
+            btnNext.onclick = () => {
+                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeMenu();
+                jumpToEvent(siblings[myIndex + 1]);
+            };
+        }
+    }
 
     dividerNav.style.display = 'none';
 
     // VV Divider Logic
-    dividerVV.style.display = (!ev.isCustom && (hasPrev || hasNext)) ? 'block' : 'none';
+    dividerVV.style.display = (!ev.isCustom && isSeries) ? 'block' : 'none';
 }
 
 function handleUnableToAttend(ev) {

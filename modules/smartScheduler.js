@@ -17,12 +17,15 @@ let proposedSchedule = new Set(); // Set of UIDs
 let conflictList = []; // Array of conflict objects
 let ignoredConflicts = new Set(); // Set of UIDs to ignore conflicts for
 let skippedEvents = new Set(); // Set of Names
+let removedEvents = new Set(); // Set of UIDs to remove from existing schedule
 
 // State Backups for "Back" button functionality
 let proposedScheduleBackup = null;
 let skippedEventsBackup = null;
 let conflictSelectionsBackup = null;
 let rescheduleCallback = null;
+let currentRescheduleTargetUid = null;
+let restoreStateOnClose = null;
 
 // --- Main Entry Point ---
 export function initSmartScheduler() {
@@ -31,14 +34,17 @@ export function initSmartScheduler() {
     proposedSchedule.clear();
     conflictList = [];
     ignoredConflicts.clear();
+    removedEvents.clear();
     skippedEvents.clear();
     conflictSelectionsBackup = null;
+    restoreStateOnClose = null;
     renderWizard();
 }
 
 export function initRescheduleWizard(eventUid, onComplete = null) {
     window.isRescheduleMode = true;
     rescheduleCallback = onComplete;
+    currentRescheduleTargetUid = eventUid;
     const ev = state.eventLookup.get(eventUid);
     if (!ev) {
         alert("Event not found.");
@@ -49,6 +55,7 @@ export function initRescheduleWizard(eventUid, onComplete = null) {
     proposedSchedule.clear();
     conflictList = [];
     ignoredConflicts.clear();
+    removedEvents.clear();
     skippedEvents.clear();
     conflictSelectionsBackup = null;
 
@@ -144,9 +151,44 @@ function renderWizard() {
     renderStepContent(body, footer);
 }
 
+// Make global for UI closing logic
+window.closeSmartSchedulerWizard = closeWizard;
+
 function closeWizard() {
     const modal = document.getElementById('smart-scheduler-modal');
     if (modal) modal.remove();
+
+    if (restoreStateOnClose) {
+        const state = restoreStateOnClose;
+        restoreStateOnClose = null; // Clear it so we don't loop
+
+        // Restore functionality
+        if (state.wasRescheduleMode) {
+            initRescheduleWizard(state.targetUid, state.callback);
+            // Restore selections if present
+            if (state.selections) {
+                conflictSelectionsBackup = state.selections;
+            }
+        } else {
+            initSmartScheduler();
+            // Restore selections if present
+            if (state.selections) {
+                conflictSelectionsBackup = state.selections;
+            }
+
+            // Skip to process
+            setTimeout(() => {
+                currentWizardStep = WIZARD_STEPS.PROCESS;
+                // Re-finding elements because we just re-initialized (which re-renders wizard structure)
+                const body = document.getElementById('wizard-body');
+                const footer = document.getElementById('wizard-footer');
+                if (body && footer) {
+                    renderStepContent(body, footer);
+                    setTimeout(runAlgorithm, 100);
+                }
+            }, 0);
+        }
+    }
 }
 
 function renderStepContent(bodyContainer, footerContainer) {
@@ -518,6 +560,7 @@ function renderConflictsStep(body, footer) {
         <div class="p-2 space-y-4">
             <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Schedule Conflicts</h3>
             <p class="text-sm text-gray-600 dark:text-gray-300">We found some event conflicts we couldn't resolve automatically. For each event, please select when you would like to schedule it. Check "Allow Overlap" if you would like to allow the conflicting event(s) to be scheduled at the same time.</p>
+            <p class="text-xs text-gray-500 italic dark:text-gray-400">* Event cannot be rescheduled - Single occurrence or custom event</p>
             <div id="conflicts-list" class="space-y-4"></div>
         </div>
     `;
@@ -605,7 +648,29 @@ function renderConflictsStep(body, footer) {
                 }
             });
 
-            const conflictNames = uniqueConflicts.map(e => `${e.name} (${formatTime(e.startMins ?? e.startMinutes)} - ${formatTime(e.endMins ?? e.endMinutes)})`).join(', ');
+            const conflictListItems = uniqueConflicts.map(c => {
+                const totalInstances = Array.from(state.eventLookup.values()).filter(ev => ev.name === c.name).length;
+                const mark = totalInstances === 1 ? '*' : '';
+                const timeStr = `${formatTime(c.startMins ?? c.startMinutes)} - ${formatTime(c.endMins ?? c.endMinutes)}`;
+                let itemHtml = `<span class="font-medium">${mark}${c.name}</span> <span class="text-xs opacity-75">(${timeStr})</span>`;
+
+                // Add "Find Alternative" text button inline if applicable
+                if (totalInstances > 1 && !c.isCustom) {
+                    const lockedForCheck = new Set([...state.attendingIds, ...proposedSchedule]);
+                    lockedForCheck.add(instance.uid);
+                    lockedForCheck.delete(c.uid);
+
+                    if (canMoveSeries(c.name, lockedForCheck, 0)) {
+                        const safeName = c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const safeUid = c.uid.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const safeInstanceUid = instance.uid.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                        itemHtml += ` - <button class="underline hover:no-underline font-medium focus:outline-none text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" onclick="event.preventDefault(); window.smartSchedulerRescheduleConflict('${safeName}', '${safeUid}', '${safeInstanceUid}')">Find Alternative</button>`;
+                    }
+                }
+
+                return `<li>${itemHtml}</li>`;
+            }).join('');
 
             html += `
                 <label class="flex items-start gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
@@ -613,7 +678,14 @@ function renderConflictsStep(body, footer) {
                     <div class="text-sm w-full flex justify-between items-center">
                         <div class="flex-grow pr-2">
                             <span class="font-semibold text-gray-800 dark:text-gray-200 block">${instance.date} @ ${timeStr}</span>
-                            ${conflictNames ? `<p class="text-xs text-red-600 dark:text-red-400 mt-1">⚠️ Conflicts with: ${conflictNames}</p>` : ''}
+                            ${conflictListItems ? `
+                                <div class="mt-1">
+                                    <p class="text-xs text-red-600 dark:text-red-400 font-semibold mb-0.5">⚠️ Conflicts with:</p>
+                                    <ul class="list-disc pl-5 text-xs text-red-600 dark:text-red-400 space-y-0.5">
+                                        ${conflictListItems}
+                                    </ul>
+                                </div>
+                            ` : ''}
                         </div>
                         <label class="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer p-2 -m-2 flex-shrink-0" onclick="event.stopPropagation()">
                             <input type="checkbox" name="allow_overlap_${index}_${instance.uid}" ${selectedValue === instance.uid && isOverlapAllowed ? 'checked' : ''} class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-500">
@@ -634,22 +706,50 @@ function renderConflictsStep(body, footer) {
         <button class="btn-primary" id="btn-conflicts-next">Resolve & Continue</button>
     `;
 
+    const cancelBtn = document.getElementById('btn-conflicts-back');
+    const nextBtn = document.getElementById('btn-conflicts-next');
+
+    // Logic: 
+    // If in Global Mode: Show "Back" (to Checklist)
+    // If in Reschedule Mode (Single Event): Hide "Back" usually...
+    // UNLESS it's a nested Reschedule (launched via Find Alternative), in which case "Back" becomes "Cancel" (to return to parent).
+
+    // How to detect Nested Reschedule?
+    // We can check if 'restoreStateOnClose' is populated? 
+    // Wait, restoreStateOnClose is populated BEFORE calling initRescheduleWizard.
+    // So if restoreStateOnClose is NOT null, we are nested.
+
     if (window.isRescheduleMode) {
-        document.getElementById('btn-conflicts-back').style.display = 'none';
+        if (restoreStateOnClose) {
+            // Nested mode -> Show Cancel
+            cancelBtn.style.display = 'inline-block';
+            cancelBtn.innerText = 'Cancel';
+            cancelBtn.onclick = () => {
+                closeWizard(); // This triggers the restore logic in closeWizard()
+            };
+        } else {
+            // Top-level Reschedule Mode (e.g. from "Reschedule" context menu) -> Hide Back (Can only Close or Resolve)
+            // Or maybe "Cancel" is just closing the wizard?
+            // User requested "Cancel" button specifically if launched from smart scheduler (which implies nested).
+            cancelBtn.style.display = 'none';
+        }
+    } else {
+        // Global Smart Scheduler Mode -> Standard Back
+        cancelBtn.style.display = 'inline-block';
+        cancelBtn.innerText = 'Back';
+        cancelBtn.onclick = () => {
+            // Clear backups if going back further
+            conflictSelectionsBackup = null;
+            proposedScheduleBackup = null;
+            skippedEventsBackup = null;
+
+            currentWizardStep = WIZARD_STEPS.CHECKLIST; // Go back to checklist? Or re-run?
+            // Maybe just re-run algo?
+            renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+        };
     }
 
-    document.getElementById('btn-conflicts-back').onclick = () => {
-        // Clear backups if going back further
-        conflictSelectionsBackup = null;
-        proposedScheduleBackup = null;
-        skippedEventsBackup = null;
-
-        currentWizardStep = WIZARD_STEPS.CHECKLIST; // Go back to checklist? Or re-run?
-        // Maybe just re-run algo?
-        renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
-    };
-
-    document.getElementById('btn-conflicts-next').onclick = () => {
+    nextBtn.onclick = () => {
         // Snapshot state before applying changes
         proposedScheduleBackup = new Set(proposedSchedule);
         skippedEventsBackup = new Set(skippedEvents);
@@ -678,8 +778,58 @@ function applyDeadlockSelection() {
         });
     });
 
-    // Save selections for Back button
-    conflictSelectionsBackup = selections;
+    // Validation: Check for unresolved conflicts
+    const blockingConflicts = [];
+    selections.forEach(sel => {
+        if (sel.value === 'skip') return;
+        if (sel.allowOverlap) return; // Overlap allowed, no blocker
+
+        const selectedEvent = state.eventLookup.get(sel.value);
+        if (!selectedEvent) return;
+
+        // Check conflicts against currently scheduled items
+        // Note: getConflictingEvents checks against state.attendingIds AND proposedSchedule
+        // We need to ensure we don't count conflicts with ITSELF (though it shouldn't be in proposed yet?)
+        // Actually, proposedSchedule might contain items we are about to add? No, we haven't added them yet.
+        const conflicts = getConflictingEvents(selectedEvent);
+
+        // We only care about conflicts that are NOT correctly handled.
+        // If the conflict is in the 'conflictList' (i.e., we are actively resolving it), it shouldn't trigger this?
+        // Wait, 'conflictList' contains the events we are resolving. The 'conflicts' array returned here contains the BLOCKING events.
+        // If we select a slot, and it conflicts with 'Event B', and we didn't check 'Allow Overlap',
+        // previously we would displace 'Event B'. Now we want to block.
+
+        if (conflicts.length > 0) {
+            conflicts.forEach(c => {
+                // We need to be careful: is 'c' one of the other events being resolved right now?
+                // If so, and we haven't processed its selection yet, is it a real conflict?
+                // The 'proposedSchedule' contains confirmed events. 'state.attendingIds' contains confirmed events.
+                // Events in the current resolving batch are NOT in proposedSchedule yet.
+                // So 'c' must be an already-scheduled event.
+                blockingConflicts.push({ source: sel.name, blocker: c.name });
+            });
+        }
+    });
+
+    if (blockingConflicts.length > 0) {
+        // Construct error message
+        const uniqueBlockers = [...new Set(blockingConflicts.map(x => `<div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2 mb-2 text-sm text-red-800 dark:text-red-200"><span class="font-bold">${x.source}</span> conflicts with <span class="font-bold">${x.blocker}</span></div>`))];
+        const msg = `<div class="mb-4 text-gray-700 dark:text-gray-300">The following conflicts prevent you from proceeding:</div>` +
+            `<div class="mb-4">${uniqueBlockers.join('')}</div>` +
+            `<div class="text-sm text-gray-600 dark:text-gray-400"><p class="mb-2 font-medium">Please resolve these conflicts by:</p><ul class="list-disc pl-5 space-y-1"><li>Skipping the event</li><li>Checking 'Allow Overlap'</li><li>Finding an alternative time for the conflicting event</li><li>Removing the conflicting event</li></ul></div>`;
+
+        import('./ui.js').then(ui => {
+            ui.showGenericChoice(
+                "Unresolved Conflicts",
+                msg,
+                "OK",
+                () => { }, // Close modal
+                null,
+                null
+            );
+        });
+        return; // Stop processing
+    }
 
     // Process selections
     // For each selection that is NOT 'skip', we force it.
@@ -846,6 +996,8 @@ function getConflictingEvents(event) {
     const tempAttending = new Set([...state.attendingIds, ...proposedSchedule]);
 
     for (const uid of tempAttending) {
+        if (removedEvents.has(uid)) continue;
+
         const attendingEvent = state.eventLookup.get(uid);
         if (!attendingEvent) continue;
 
@@ -880,7 +1032,7 @@ function renderPreviewStep(body, footer) {
 
     // 2. Add Existing Attending
     state.attendingIds.forEach(uid => {
-        if (!proposedSchedule.has(uid)) {
+        if (!proposedSchedule.has(uid) && !removedEvents.has(uid)) {
             const ev = state.eventLookup.get(uid);
             if (ev) events.push({ ...ev, isNew: false });
         }
@@ -924,6 +1076,28 @@ function renderPreviewStep(body, footer) {
                     <div class="font-medium text-gray-700 dark:text-gray-300 text-sm">${name}</div>
             </div>
         `;
+        });
+        html += `</div></div>`;
+    }
+
+    if (removedEvents.size > 0) {
+        html += `
+        <div class="border border-red-200 dark:border-red-900/50 rounded-lg overflow-hidden shadow-sm mt-4">
+            <div class="bg-red-50 dark:bg-red-900/20 px-4 py-2 font-semibold text-red-800 dark:text-red-200 border-b border-red-200 dark:border-red-900/50 text-sm flex items-center gap-2">
+                <span>🗑️</span> Removed Events
+            </div>
+            <div class="divide-y divide-red-100 dark:divide-red-900/30 bg-white dark:bg-gray-900">
+    `;
+        removedEvents.forEach(uid => {
+            const ev = state.eventLookup.get(uid);
+            if (ev) {
+                html += `
+            <div class="p-3 flex items-center gap-2">
+                    <div class="font-medium text-gray-700 dark:text-gray-300 text-sm">${ev.name}</div>
+                    <div class="text-xs text-gray-500">${ev.date} @ ${formatTime(ev.startMins)}</div>
+            </div>
+        `;
+            }
         });
         html += `</div></div>`;
     }
@@ -1029,6 +1203,17 @@ function renderPreviewStep(body, footer) {
 
     document.getElementById('btn-apply').onclick = () => {
         applySchedule();
+
+        // If we have a reschedule callback, call it!
+        // This is crucial for the Nested Reschedule flow.
+        if (rescheduleCallback) {
+            rescheduleCallback();
+            rescheduleCallback = null;
+        }
+
+        // Logic split:
+        // If we are in nested mode (restoreStateOnClose exists), closeWizard() will trigger the restore.
+        // If we are in normal mode, closeWizard() just closes.
         closeWizard();
     };
 }
@@ -1048,17 +1233,28 @@ function checkOverlap(ev1, ev2) {
 }
 
 function applySchedule() {
-    state.attendingIds.clear();
-    proposedSchedule.forEach(uid => {
-        state.attendingIds.add(uid);
-        // Hide other occurrences (as if user selected "Yes, Hide Others")
+    // Determine if we are replacing (Reschedule Mode) or adding (Smart Scheduler)
+    if (window.isRescheduleMode) {
+        state.attendingIds.clear();
+        proposedSchedule.forEach(uid => state.attendingIds.add(uid));
+    } else {
+        // Additive Mode
+        // 1. Remove events marked for removal (e.g. to resolve conflicts)
+        removedEvents.forEach(uid => state.attendingIds.delete(uid));
+
+        // 2. Add proposed events
+        proposedSchedule.forEach(uid => state.attendingIds.add(uid));
+    }
+
+    // Update Hidden Names: Ensure all attended series are marked as hidden (to hide other instances)
+    state.attendingIds.forEach(uid => {
         const ev = state.eventLookup.get(uid);
         if (ev) {
             state.hiddenNames.add(ev.name);
         }
     });
+
     saveAttendance();
-    saveHiddenNames();
     saveHiddenNames();
     renderApp();
     if (rescheduleCallback) {
@@ -1094,39 +1290,65 @@ function canMoveSeries(seriesName, lockedUids, depth) {
 // Returns Set of series names that were removed (for rescheduling)
 function removeEventFromSchedule(uid) {
     const removedSeries = new Set();
-    if (!proposedSchedule.has(uid)) return removedSeries;
 
-    const ev = state.eventLookup.get(uid);
-    if (!ev) return removedSeries;
+    // Check if it's in proposedSchedule (New/Tentative)
+    if (proposedSchedule.has(uid)) {
+        proposedSchedule.delete(uid);
+        const ev = state.eventLookup.get(uid);
+        if (ev) {
+            removedSeries.add(ev.name);
 
-    proposedSchedule.delete(uid);
-    removedSeries.add(ev.name);
+            if (ev.name.startsWith("Bingo with")) {
+                // Remove Sales from Proposed
+                const toRemove = [];
+                for (const pUid of proposedSchedule) {
+                    const pEv = state.eventLookup.get(pUid);
+                    if (pEv && pEv.name === "Bingo Card Sales" && pEv.date === ev.date) {
+                        toRemove.push(pUid);
+                    }
+                }
+                toRemove.forEach(id => proposedSchedule.delete(id));
 
-    if (ev.name.startsWith("Bingo with")) {
-        // Remove Sales - Aggressively remove ANY sales on this day from proposedSchedule
-        // This avoids issues where findBingoSales might pick a different instance than the one scheduled
-        const toRemove = [];
-        for (const pUid of proposedSchedule) {
-            const pEv = state.eventLookup.get(pUid);
-            if (pEv && pEv.name === "Bingo Card Sales" && pEv.date === ev.date) {
-                toRemove.push(pUid);
+            } else if (ev.name === "Bingo Card Sales") {
+                // Remove Game from Proposed
+                const toRemove = [];
+                for (const pUid of proposedSchedule) {
+                    const pEv = state.eventLookup.get(pUid);
+                    if (pEv && pEv.name.startsWith("Bingo with") && pEv.date === ev.date) {
+                        toRemove.push(pUid);
+                        removedSeries.add(pEv.name);
+                    }
+                }
+                toRemove.forEach(id => proposedSchedule.delete(id));
             }
         }
-        toRemove.forEach(id => proposedSchedule.delete(id));
+    }
+    // Check if it's in attendingIds (Existing) and not already marked for removal
+    else if (state.attendingIds.has(uid) && !removedEvents.has(uid)) {
+        removedEvents.add(uid);
+        const ev = state.eventLookup.get(uid);
+        if (ev) {
+            removedSeries.add(ev.name);
 
-    } else if (ev.name === "Bingo Card Sales") {
-        // Remove Game - Aggressively remove ANY game on this day
-        const toRemove = [];
-        for (const pUid of proposedSchedule) {
-            const pEv = state.eventLookup.get(pUid);
-            if (pEv && pEv.name.startsWith("Bingo with") && pEv.date === ev.date) {
-                toRemove.push(pUid);
-                removedSeries.add(pEv.name);
+            if (ev.name.startsWith("Bingo with")) {
+                // Remove Sales from Existing
+                state.attendingIds.forEach(attUid => {
+                    const attEv = state.eventLookup.get(attUid);
+                    if (attEv && attEv.name === "Bingo Card Sales" && attEv.date === ev.date) {
+                        removedEvents.add(attUid);
+                    }
+                });
+            } else if (ev.name === "Bingo Card Sales") {
+                // Remove Game from Existing
+                state.attendingIds.forEach(attUid => {
+                    const attEv = state.eventLookup.get(attUid);
+                    if (attEv && attEv.name.startsWith("Bingo with") && attEv.date === ev.date) {
+                        removedEvents.add(attUid);
+                        removedSeries.add(attEv.name);
+                    }
+                });
             }
         }
-        toRemove.forEach(id => proposedSchedule.delete(id));
-    } else {
-        removedSeries.add(ev.name);
     }
 
     return removedSeries;
@@ -1406,3 +1628,60 @@ function smartReschedule(seriesName, lockedUids, depth = 0, filterPredicate = nu
     }
     return false;
 }
+
+// Global handler for Conflict Resolution Buttons
+window.smartSchedulerRescheduleConflict = (blockingSeriesName, blockingUid, desiredUid) => {
+    // 1. Capture Current State
+    const wasRescheduleMode = window.isRescheduleMode;
+    const capturedTargetUid = currentRescheduleTargetUid;
+    const capturedCallback = rescheduleCallback;
+
+    // We should save skipped/removed/conflictSelections if we want to restore exact state?
+    // But since the environment changes (blocker moves), exact restore of conflicts is invalid.
+    // We will re-run the algorithm/init logic.
+    // However, for "Smart Scheduler" (Global), preserving "skippedEvents" (user said Check A, Check B -> Skip A) is nice but maybe complex.
+    // Let's stick to restarting the process to ensure validity.
+
+    // 2. Capture Current Conflict Selections (if any)
+    const list = document.getElementById('conflicts-list');
+    let currentSelections = null;
+    if (list) {
+        currentSelections = [];
+        const inputs = list.querySelectorAll('input[type="radio"]:checked');
+        inputs.forEach(input => {
+            const conflictIndex = parseInt(input.name.split('_')[1]);
+            const value = input.value;
+            // We need the conflict NAME to map it back, because indices will change if list changes
+            // conflictList is global
+            if (conflictList[conflictIndex]) {
+                const conflictName = conflictList[conflictIndex].name;
+                const allowOverlapInput = list.querySelector(`input[name="allow_overlap_${conflictIndex}_${value}"]`);
+                const allowOverlap = allowOverlapInput ? allowOverlapInput.checked : false;
+
+                currentSelections.push({
+                    name: conflictName,
+                    value: value,
+                    allowOverlap: allowOverlap
+                });
+            }
+        });
+    }
+
+    // 3. Close Current Wizard
+    closeWizard();
+
+    // 4. Launch Reschedule Wizard for Blocker
+    // Save restore state before launching logic
+    restoreStateOnClose = {
+        wasRescheduleMode: wasRescheduleMode,
+        targetUid: capturedTargetUid,
+        callback: capturedCallback,
+        selections: currentSelections
+    };
+
+    // We pass an empty callback because the actual restoration happens in closeWizard via restoreStateOnClose.
+    initRescheduleWizard(blockingUid, () => {
+        // Optional: any specific strict-success cleanup?
+        // Nothing needed here, closeWizard handles the flow.
+    });
+};
