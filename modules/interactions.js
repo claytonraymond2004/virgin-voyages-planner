@@ -8,7 +8,7 @@ import {
     toggleComplete
 } from './ui.js';
 import { populateCustomModal, deleteCustomEvent, initiateEdit } from './customEvents.js';
-import { findAlternativeForEvent, initRescheduleWizard } from './smartScheduler.js';
+import { initRescheduleWizard } from './smartScheduler.js';
 
 // --- Drag Interaction ---
 
@@ -610,67 +610,9 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     dividerVV.style.display = (!ev.isCustom && isSeries) ? 'block' : 'none';
 }
 
-function handleUnableToAttend(ev) {
-    const result = findAlternativeForEvent(ev.uid);
-    if (!result.success) {
-        showGenericChoice(
-            "No Simple Alternative Found",
-            result.message + " Would you like to view all options and resolve conflicts manually?",
-            "View Options",
-            () => { initRescheduleWizard(ev.uid); },
-            "Cancel",
-            () => { }
-        );
-        return;
-    }
-
-    // Construct confirmation message
-    const newEv = state.eventLookup.get(result.newTargetUid);
-    const eventDate = new Date(newEv.date + 'T00:00:00');
-    const today = new Date();
-    const isToday = eventDate.toDateString() === today.toDateString();
-    const isSameDay = newEv.date === ev.date;
-
-    const timeStr = formatTime(newEv.startMins);
-    let msg;
-
-    if (isToday) {
-        msg = `Found an alternative today at ${timeStr}.`;
-    } else if (isSameDay) {
-        msg = `Found an alternative on the same day at ${timeStr}.`;
-    } else {
-        const dateDisplay = eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        msg = `Found an alternative ${dateDisplay} at ${timeStr}.`;
-    }
-
-    if (result.changes.removed.length > 0) {
-        const movedNames = result.changes.removed.map(e => e.name).join(", ");
-        msg += `\n\nWarning: This will displace the following events: ${movedNames}.`;
-    }
-
-    showGenericChoice(
-        "Reschedule Event?",
-        msg,
-        "Confirm Change",
-        () => {
-            // Apply changes
-            // Remove old target
-            state.attendingIds.delete(ev.uid);
-            // Add new target
-            state.attendingIds.add(result.newTargetUid);
-
-            // Apply other changes
-            result.changes.added.forEach(e => state.attendingIds.add(e.uid));
-            result.changes.removed.forEach(e => state.attendingIds.delete(e.uid));
-
-            saveAttendance();
-            renderApp();
-            closeMobileEventModal();
-            jumpToEvent(result.newTargetUid);
-        },
-        "View Options",
-        () => { initRescheduleWizard(ev.uid); }
-    );
+export function handleUnableToAttend(ev) {
+    // Directly launch the reschedule wizard to allow the user to choose manually
+    initRescheduleWizard(ev.uid);
 }
 
 

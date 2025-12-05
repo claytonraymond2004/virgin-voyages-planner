@@ -720,19 +720,12 @@ function renderConflictsStep(body, footer) {
     // So if restoreStateOnClose is NOT null, we are nested.
 
     if (window.isRescheduleMode) {
-        if (restoreStateOnClose) {
-            // Nested mode -> Show Cancel
-            cancelBtn.style.display = 'inline-block';
-            cancelBtn.innerText = 'Cancel';
-            cancelBtn.onclick = () => {
-                closeWizard(); // This triggers the restore logic in closeWizard()
-            };
-        } else {
-            // Top-level Reschedule Mode (e.g. from "Reschedule" context menu) -> Hide Back (Can only Close or Resolve)
-            // Or maybe "Cancel" is just closing the wizard?
-            // User requested "Cancel" button specifically if launched from smart scheduler (which implies nested).
-            cancelBtn.style.display = 'none';
-        }
+        // Reschedule Mode -> Show Cancel
+        cancelBtn.style.display = 'inline-block';
+        cancelBtn.innerText = 'Cancel';
+        cancelBtn.onclick = () => {
+            closeWizard();
+        };
     } else {
         // Global Smart Scheduler Mode -> Standard Back
         cancelBtn.style.display = 'inline-block';
