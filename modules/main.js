@@ -37,7 +37,7 @@ import {
     initiateHide, confirmHideInstance, confirmHideSeries,
     hideInstance, hideSeries, unhideSeries, unhideInstance
 } from './interactions.js';
-import { parseTimeRange } from './utils.js';
+import { parseTimeRange, scanFiles } from './utils.js';
 import { initTooltips } from './tooltips.js';
 import {
     exportData as getTransferData, uploadData, downloadData, importData,
@@ -157,10 +157,15 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', (e) => {
+        dropZone.addEventListener('drop', async (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+            if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+                const files = await scanFiles(e.dataTransfer.items);
+                if (files.length > 0) handleFiles(files);
+            } else if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
         });
     }
 
@@ -921,27 +926,35 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
     lastUpdateInputs = { jsonObjects, bookedEvents };
     // Flatten and clean new data
     const newEvents = [];
+    if (!bookedEvents) bookedEvents = [];
 
-    // Handle if passed a single array of events (from API)
-    if (Array.isArray(jsonObjects) && jsonObjects.length > 0 && jsonObjects[0].date && jsonObjects[0].name) {
-        // It's already a flat list of events (likely from API)
-        newEvents.push(...jsonObjects);
-    } else {
-        // It's likely from file upload (array of daily objects)
-        jsonObjects.forEach(json => {
-            if (json.events && Array.isArray(json.events)) {
-                const clean = parseRawData(json);
-                newEvents.push(...clean);
-            } else if (Array.isArray(json)) {
-                // Might be a raw array of events
-                json.forEach(ev => {
-                    if (ev.date && ev.name) newEvents.push(ev);
-                });
-            }
-        });
-    }
+    // Ensure we handle single object input wrapped in array
+    const objects = Array.isArray(jsonObjects) ? jsonObjects : [jsonObjects];
 
-    if (newEvents.length === 0) {
+    objects.forEach(json => {
+        // Handle if passed a single array of events (from API)
+        if (Array.isArray(json) && json.length > 0 && json[0].date && json[0].name) {
+            newEvents.push(...json);
+            return; // It's a flat list
+        }
+
+        if (json.events && Array.isArray(json.events)) {
+            const clean = parseRawData(json);
+            newEvents.push(...clean);
+        } else if (Array.isArray(json)) {
+            // Might be a raw array of events
+            json.forEach(ev => {
+                if (ev.date && ev.name) newEvents.push(ev);
+            });
+        }
+
+        // Grab Booked Events (Agenda)
+        if (json.appointments && Array.isArray(json.appointments)) {
+            bookedEvents.push(...json.appointments);
+        }
+    });
+
+    if (newEvents.length === 0 && bookedEvents.length === 0) {
         alert("No valid agenda data found.");
         resetUpdateModal();
         return;
@@ -1000,75 +1013,78 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
     const migrations = []; // { oldUid, newUid }
 
     // 3. Compare by Key
-    const allKeys = new Set([...oldEventsByKey.keys(), ...newEventsByKey.keys()]);
+    if (newEvents.length > 0) {
+        const allKeys = new Set([...oldEventsByKey.keys(), ...newEventsByKey.keys()]);
 
-    allKeys.forEach(key => {
-        const oldList = oldEventsByKey.get(key) || [];
-        const newList = newEventsByKey.get(key) || [];
+        allKeys.forEach(key => {
+            const oldList = oldEventsByKey.get(key) || [];
+            const newList = newEventsByKey.get(key) || [];
 
-        // Track matched indices
-        const oldMatched = new Set();
-        const newMatched = new Set();
+            // Track matched indices
+            const oldMatched = new Set();
+            const newMatched = new Set();
 
-        // Pass 1: Exact UID Matches (Same time)
-        oldList.forEach((oldEv, oldIdx) => {
-            const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i) && newEv._uid === oldEv._uid);
-            if (newIdx !== -1) {
-                oldMatched.add(oldIdx);
-                newMatched.add(newIdx);
+            // Pass 1: Exact UID Matches (Same time)
+            oldList.forEach((oldEv, oldIdx) => {
+                const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i) && newEv._uid === oldEv._uid);
+                if (newIdx !== -1) {
+                    oldMatched.add(oldIdx);
+                    newMatched.add(newIdx);
 
-                const newEv = newList[newIdx];
+                    const newEv = newList[newIdx];
 
-                // Check for Content Changes (Location, Description)
-                const changes = [];
-                if (oldEv.location !== newEv.location) changes.push('Location');
-                // Simple description check (ignoring minor HTML diffs if possible, but strict for now)
-                if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
+                    // Check for Content Changes (Location, Description)
+                    const changes = [];
+                    if (oldEv.location !== newEv.location) changes.push('Location');
+                    // Simple description check (ignoring minor HTML diffs if possible, but strict for now)
+                    if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
 
-                if (changes.length > 0) {
-                    modified.push({ type: 'content', oldEv, newEv, changes });
-                } else {
-                    unchanged.push(newEv);
+                    if (changes.length > 0) {
+                        modified.push({ type: 'content', oldEv, newEv, changes });
+                    } else {
+                        unchanged.push(newEv);
+                    }
                 }
-            }
+            });
+
+            // Pass 2: Remaining are potential Time Changes (Same Date/Name, Diff Time)
+            oldList.forEach((oldEv, oldIdx) => {
+                if (oldMatched.has(oldIdx)) return;
+
+                // Find an unpaired new event
+                const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i));
+                if (newIdx !== -1) {
+                    // Match found! It's a time change (and possibly content change)
+                    oldMatched.add(oldIdx);
+                    newMatched.add(newIdx);
+                    const newEv = newList[newIdx];
+
+                    const changes = ['Time'];
+                    if (oldEv.location !== newEv.location) changes.push('Location');
+                    if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
+
+                    modified.push({ type: 'time', oldEv, newEv, changes });
+                    migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
+                } else {
+                    // No match in new list -> Removed
+                    removed.push(oldEv);
+                }
+            });
+
+            // Any remaining new events -> Added
+            newList.forEach((newEv, newIdx) => {
+                if (!newMatched.has(newIdx)) {
+                    added.push(newEv);
+                }
+            });
         });
-
-        // Pass 2: Remaining are potential Time Changes (Same Date/Name, Diff Time)
-        oldList.forEach((oldEv, oldIdx) => {
-            if (oldMatched.has(oldIdx)) return;
-
-            // Find an unpaired new event
-            const newIdx = newList.findIndex((newEv, i) => !newMatched.has(i));
-            if (newIdx !== -1) {
-                // Match found! It's a time change (and possibly content change)
-                oldMatched.add(oldIdx);
-                newMatched.add(newIdx);
-                const newEv = newList[newIdx];
-
-                const changes = ['Time'];
-                if (oldEv.location !== newEv.location) changes.push('Location');
-                if (oldEv.longDescription !== newEv.longDescription) changes.push('Description');
-
-                modified.push({ type: 'time', oldEv, newEv, changes });
-                migrations.push({ oldUid: oldEv._uid, newUid: newEv._uid });
-            } else {
-                // No match in new list -> Removed
-                removed.push(oldEv);
-            }
-        });
-
-        // Any remaining new events -> Added
-        newList.forEach((newEv, newIdx) => {
-            if (!newMatched.has(newIdx)) {
-                added.push(newEv);
-            }
-        });
-    });
+    }
+    // Else: newEvents is empty, assume we are keeping old schedule (Bookings Update Only)
 
     // 4. Check for Booked Event Changes
     const bookedChanges = { added: [], removed: [], unattended: [] };
 
-    if (bookedEvents) { // Only if sync is enabled (bookedEvents is not null)
+    if (bookedEvents.length > 0) { // Only if sync is enabled (bookedEvents is not null)
         // A. Check for ADDED bookings (New Custom or New Attendance)
         bookedEvents.forEach(booked => {
             const bookedTime = parseTimeRange(booked.timePeriod);
@@ -1076,7 +1092,10 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             const bookedStart = bookedTime.start + SHIFT_START_ADD;
 
             // Check if matches official
-            const match = newEvents.find(ev => {
+            // Use newEvents if available, otherwise fallback to appData (if doing bookings-only update)
+            const sourceEvents = newEvents.length > 0 ? newEvents : state.appData;
+
+            const match = sourceEvents.find(ev => {
                 if (ev.date !== booked.date) return false;
                 if (ev.name !== booked.name) return false;
                 const evTime = parseTimeRange(ev.timePeriod);
@@ -1088,6 +1107,9 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             if (match) {
                 // Official Event Match
                 // If not currently attending, it's "Added"
+                // If using appData (bookings-only), uid is already in match._uid if we pre-processed it?
+                // Wait, processChecForUpdates added _uid to appData items.
+                // But getUid recalculates it.
                 const uid = getUid(match);
                 if (uid && !state.attendingIds.has(uid)) {
                     // Check for conflicts
@@ -1174,17 +1196,24 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
                 // Fallback: Check new data if old data doesn't have type field yet
                 if (!isInformative) {
                     const key = `${ev.date}_${ev.name}`;
-                    const newEvs = newEventsByKey.get(key);
-                    if (newEvs) {
-                        const evTime = parseTimeRange(ev.timePeriod);
-                        const evStart = evTime ? evTime.start + SHIFT_START_ADD : -1;
-
-                        const match = newEvs.find(ne => {
-                            const neTime = parseTimeRange(ne.timePeriod);
-                            const neStart = neTime ? neTime.start + SHIFT_START_ADD : -1;
-                            return Math.abs(neStart - evStart) < 15;
-                        });
-                        if (match && match.type === "Informative") isInformative = true;
+                    // Use newEventsKeys if available, otherwise check current appData
+                    // Although eventLookup IS current appData.
+                    // If we are updating schedule, we check if new schedule *confirms* it is informative.
+                    if (newEvents.length > 0) {
+                        const newEvs = newEventsByKey.get(key);
+                        if (newEvs) {
+                            const match = newEvs.find(ne => {
+                                // ... time match logic ...
+                                const neTime = parseTimeRange(ne.timePeriod);
+                                const neStart = neTime ? neTime.start + SHIFT_START_ADD : -1;
+                                // Tolerance
+                                return Math.abs(neStart - evStart) < 15;
+                            });
+                            if (match && match.type === "Informative") isInformative = true;
+                        }
+                    } else {
+                        // Schedules are same (Bookings only update). Trust existing type.
+                        // If existing type wasn't informative, then it's not.
                     }
                 }
 
@@ -1205,6 +1234,7 @@ function applyAgendaUpdate() {
     const { newEvents, migrations, bookedEvents, bookedChanges } = pendingUpdateEvents;
 
     // 1. Migrate State (Attendance, Notes)
+    // Only if we have migrations (implies newEvents > 0)
     migrations.forEach(({ oldUid, newUid }) => {
         if (!oldUid || !newUid) return;
 
@@ -1221,8 +1251,6 @@ function applyAgendaUpdate() {
         }
 
         // Hidden UIDs (Instance Hiding)
-        // If user hid the specific old instance, hide the new one
-        // Note: Hidden Names (Series) works by name, so it persists automatically
         if (state.hiddenUids.has(oldUid)) {
             state.hiddenUids.delete(oldUid);
             state.hiddenUids.add(newUid);
@@ -1230,12 +1258,16 @@ function applyAgendaUpdate() {
     });
 
     // 2. Save Migrated State
-    saveAttendance();
-    saveEventNotes();
-    saveHiddenUids();
+    if (migrations.length > 0) {
+        saveAttendance();
+        saveEventNotes();
+        saveHiddenUids();
+    }
 
     // 3. Update Data
-    updateAppData(newEvents);
+    if (newEvents.length > 0) {
+        updateAppData(newEvents);
+    }
 
     // 4. Process Booked Events
     if (bookedChanges) {
@@ -1299,9 +1331,6 @@ function applyAgendaUpdate() {
             processBookedEvents(activeBookedEvents, false);
         }
     }
-    if (bookedEvents && bookedEvents.length > 0) {
-        processBookedEvents(bookedEvents, false);
-    }
 
     pendingUpdateEvents = null;
     renderApp();
@@ -1313,16 +1342,24 @@ function processLoadedData(jsonObjects) {
         if (json.appData) {
             restoreBackup(json);
             return;
-        } else if (Array.isArray(json)) {
-            saveNewData(json);
-            return;
+        } else if (Array.isArray(json) && !json[0].appointments) {
+            // Handle array of events (unless it's an array of agenda objects)
+            // Using check for appointments to check if it's our bulk loaded format
+            // The bulk loaded format is array of objects, each object might have events.
+            // If we drop a single "CleanAgenda.json", it's array of events.
+            // If we drop a single "Lineup.json", it's { events: ... }
+            // If we drop "Agenda.json", it's { appointments: ... }
+            // We should let the loop below handle it for robustness if multiple types dropped
         }
     }
 
     const combinedEvents = [];
     const newPortNotes = {};
+    const extractedBookings = [];
 
-    jsonObjects.forEach(json => {
+    const objects = Array.isArray(jsonObjects) ? jsonObjects : [jsonObjects];
+
+    objects.forEach(json => {
         if (json.date && json.portName) {
             newPortNotes[json.date] = json.portName;
         }
@@ -1330,11 +1367,32 @@ function processLoadedData(jsonObjects) {
         if (json.events && Array.isArray(json.events)) {
             const clean = parseRawData(json);
             combinedEvents.push(...clean);
+        } else if (Array.isArray(json)) {
+            // Check if items are events
+            json.forEach(ev => {
+                if (ev.date && ev.name) combinedEvents.push(ev);
+            });
+        }
+
+        // Handle Appointments
+        if (json.appointments && Array.isArray(json.appointments)) {
+            extractedBookings.push(...json.appointments);
         }
     });
 
     if (combinedEvents.length > 0) {
         saveNewData(combinedEvents, newPortNotes);
+        if (extractedBookings.length > 0) {
+            processBookedEvents(extractedBookings, true);
+        }
+    } else if (extractedBookings.length > 0) {
+        // Only found bookings, maybe assume user wants to mark those on existing data?
+        // OR we can't do anything because we wiped data in saveNewData if we called it.
+        // But we didn't call it securely.
+        // If init with only bookings, we have no schedule.
+        // However, if we drop agenda.json AND line-ups.json, we are good.
+        // If only agenda, we alert "No valid agenda data" (meaning schedule).
+        alert("No schedule data found. Please include line-up files.");
     } else {
         alert("No valid agenda data found in the uploaded file(s).");
     }

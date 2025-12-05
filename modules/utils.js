@@ -166,3 +166,62 @@ export function formatTimeRange(startMins, endMins) {
     };
     return `${fmt(startMins)} - ${fmt(endMins)}`;
 }
+
+/**
+ * Recursively scans files from DataTransferItems, extracting .json and .vvoyage files.
+ * Handles nested directories.
+ * @param {DataTransferItemList} items 
+ * @returns {Promise<File[]>}
+ */
+export async function scanFiles(items) {
+    const files = [];
+
+    // Helper to traverse directories
+    async function traverse(entry) {
+        if (entry.isFile) {
+            const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+            if (file.name.toLowerCase().endsWith('.json') || file.name.endsWith('.vvoyage')) {
+                files.push(file);
+            }
+        } else if (entry.isDirectory) {
+            const dirReader = entry.createReader();
+            // readEntries might not return all entries in one call
+            const entries = await new Promise((resolve, reject) => {
+                const results = [];
+                function read() {
+                    dirReader.readEntries((batch) => {
+                        if (!batch.length) {
+                            resolve(results);
+                        } else {
+                            results.push(...batch);
+                            read();
+                        }
+                    }, reject);
+                }
+                read();
+            });
+            for (const subEntry of entries) {
+                await traverse(subEntry);
+            }
+        }
+    }
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (typeof item.webkitGetAsEntry === 'function') {
+            const entry = item.webkitGetAsEntry();
+            if (entry) await traverse(entry);
+        } else if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file && (file.name.toLowerCase().endsWith('.json') || file.name.endsWith('.vvoyage'))) {
+                files.push(file);
+            }
+        }
+    }
+
+    return files;
+}
+
+export function getAllFileEntries(dataTransferItems) {
+    return scanFiles(dataTransferItems);
+}

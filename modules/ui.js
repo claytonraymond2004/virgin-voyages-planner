@@ -1,7 +1,7 @@
 import { state, saveData, saveAttendance, savePortNote, saveEventNotes, saveBlacklist, saveHiddenNames, saveHiddenUids, saveShownUids, saveOptionalEvents, saveTimeBlocks, saveCompletedIds } from './state.js';
 import { STORAGE_KEY_BLACKLIST, STORAGE_KEY_PORT_NOTES, STORAGE_KEY_EVENT_NOTES, SHIFT_START_ADD, SHIFT_END_ADD, STORAGE_KEY_HIDDEN_UIDS, STORAGE_KEY_HIDDEN_NAMES, STORAGE_KEY_SHOWN_UIDS, STORAGE_KEY_OPTIONAL_EVENTS } from './constants.js';
 import { renderApp } from './render.js';
-import { parseTimeRange, formatTimeRange, escapeHtml } from './utils.js';
+import { parseTimeRange, formatTimeRange, escapeHtml, scanFiles } from './utils.js';
 import {
     jumpToEvent, unhideSeries, unhideInstance, hideInstance, hideSeries,
     showFullTooltip, moveTooltip, hideTooltip, openMobileEventModal
@@ -1095,10 +1095,15 @@ export function openUpdateAgendaModal() {
 
     newDropZone.addEventListener('dragover', (e) => { e.preventDefault(); newDropZone.classList.add('border-red-500', 'bg-red-50'); });
     newDropZone.addEventListener('dragleave', () => newDropZone.classList.remove('border-red-500', 'bg-red-50'));
-    newDropZone.addEventListener('drop', (e) => {
+    newDropZone.addEventListener('drop', async (e) => {
         e.preventDefault();
         newDropZone.classList.remove('border-red-500', 'bg-red-50');
-        if (e.dataTransfer.files.length) window.handleUpdateFiles(e.dataTransfer.files);
+        if (e.dataTransfer.items) {
+            const files = await scanFiles(e.dataTransfer.items);
+            if (files.length > 0) window.handleUpdateFiles(files);
+        } else if (e.dataTransfer.files.length) {
+            window.handleUpdateFiles(e.dataTransfer.files);
+        }
     });
 
     // Add Enter key support for login
