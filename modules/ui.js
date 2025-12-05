@@ -1330,7 +1330,7 @@ export function renderChangeSummary(changes) {
                     <div class="p-2">
                         <div class="flex justify-between">
                             <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Unmarking Attendance</span>
+                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Attending in App</span>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     </div>
@@ -1459,7 +1459,7 @@ export function renderChangeSummary(changes) {
             let warningHtml = '';
             if (isScheduled) {
                 warningHtml = `
-                    <span class="text-[10px] uppercase font-bold text-orange-800 dark:text-orange-200 bg-orange-100 dark:bg-orange-900 px-1 rounded ml-2 whitespace-nowrap">Scheduled in Planner</span>
+                    <span class="text-[10px] uppercase font-bold text-orange-800 dark:text-orange-200 bg-orange-100 dark:bg-orange-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
                 `;
             }
 
@@ -1498,7 +1498,7 @@ export function renderChangeSummary(changes) {
             let warningHtml = '';
             if (isScheduled) {
                 warningHtml = `
-                    <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Scheduled in Planner</span>
+                    <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
                 `;
             }
 
