@@ -1144,12 +1144,11 @@ export function renderChangeSummary(changes) {
         list.appendChild(bookedHeader);
 
         // Added Bookings
-        // Added Bookings
         changes.bookedChanges.added.forEach((ev, idx) => {
             const el = document.createElement('div');
             el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded p-2 mb-2 text-sm mx-4 flex flex-col gap-2";
-            const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
             const id = `booked-add-${idx}`;
+            const actionText = ev.type === 'attendance' ? 'Mark as Attending?' : 'Add Custom Event?';
 
             let conflictHtml = '';
             if (ev.conflicts && ev.conflicts.length > 0) {
@@ -1178,16 +1177,19 @@ export function renderChangeSummary(changes) {
             }
 
             el.innerHTML = `
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" id="${id}" class="mt-1 rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}>
-                    <div class="flex-1">
-                        <div class="flex justify-between">
-                            <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded">${typeLabel}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
-                        ${conflictHtml}
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        <span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in App</span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
+                    ${conflictHtml}
+                    <div class="mt-2 pt-2 border-t border-purple-200 dark:border-purple-800 ${ev.conflicts && ev.conflicts.length > 0 ? 'hidden' : ''}">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="${id}" class="rounded text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-purple-800 dark:text-purple-200">${actionText}</span>
+                        </label>
                     </div>
                 </div>
             `;
@@ -1224,17 +1226,22 @@ export function renderChangeSummary(changes) {
         // Removed Bookings
         changes.bookedChanges.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex flex-col gap-2";
             const id = `booked-rem-${idx}`;
 
             el.innerHTML = `
-                <input type="checkbox" id="${id}" class="mt-1 rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
                 <div class="flex-1">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-start">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded">Booking Cancelled</span>
+                        <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Not Attended in App</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                    <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="${id}" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-red-800 dark:text-red-200">Remove Custom Event?</span>
+                        </label>
+                    </div>
                 </div>
             `;
             list.appendChild(el);
@@ -1244,17 +1251,22 @@ export function renderChangeSummary(changes) {
         // Unattended Bookings
         changes.bookedChanges.unattended.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex items-start gap-2";
+            el.className = "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded p-2 mb-2 text-sm opacity-75 mx-4 flex flex-col gap-2";
             const id = `booked-unatt-${idx}`;
 
             el.innerHTML = `
-                <input type="checkbox" id="${id}" class="mt-1 rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
                 <div class="flex-1">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-start">
                         <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded">Unmarking Attendance</span>
+                        <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded ml-2 whitespace-nowrap">Not Attended in App</span>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                    <div class="mt-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="${id}" class="rounded text-yellow-600 focus:ring-yellow-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-yellow-800 dark:text-yellow-200">Remove Attendance in Planner</span>
+                        </label>
+                    </div>
                 </div>
             `;
             list.appendChild(el);
@@ -1280,14 +1292,22 @@ export function renderChangeSummary(changes) {
                     <div class="mt-2 pt-2 border-t border-green-200 dark:border-green-800">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="${id}" class="rounded text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                            <span class="text-xs font-bold text-green-800 dark:text-green-200">Add to Schedule? (Booked)</span>
+                            <span class="text-xs font-bold text-green-800 dark:text-green-200">Mark Attending Planner</span>
                         </label>
                     </div>
                 `;
             }
 
+            let labelHtml = '';
+            if (ev.isBooked) {
+                labelHtml = `<span class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-1 rounded ml-2 whitespace-nowrap">Attended in App</span>`;
+            }
+
             el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    ${labelHtml}
+                </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
                 ${actionHtml}
@@ -1346,18 +1366,17 @@ export function renderChangeSummary(changes) {
             const el = document.createElement('div');
             el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
 
-            let warningHtml = '';
+            let labelHtml = '';
             if (ev.wasAttending) {
-                warningHtml = `<div class="text-xs text-red-600 dark:text-red-400 font-bold mt-1 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    Was in your planned agenda
-                </div>`;
+                labelHtml = `<span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attended in Planner</span>`;
             }
 
             el.innerHTML = `
-                <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                    ${labelHtml}
+                </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
-                ${warningHtml}
             `;
             list.appendChild(el);
         });
