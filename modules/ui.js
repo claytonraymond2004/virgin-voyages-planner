@@ -689,6 +689,16 @@ export function cancelUpdateAgenda() {
     closeMobileEventModal();
 }
 
+export function openAttendancePanel(tab) {
+    const panel = document.getElementById('attendance-panel');
+    if (!panel.classList.contains('open')) {
+        toggleAttendancePanel();
+    }
+    if (tab) {
+        switchAttendanceTab(tab);
+    }
+}
+
 export function toggleAttendancePanel() {
     const ctxOverlay = document.getElementById('context-menu-overlay');
     if (ctxOverlay) ctxOverlay.classList.remove('active');
@@ -1216,7 +1226,7 @@ export function renderChangeSummary(changes) {
             visibleAdded.forEach((ev, idx) => {
                 const el = document.createElement('div');
                 el.className = "bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded mb-2 text-sm mx-4 flex flex-col";
-                const typeLabel = ev.type === 'attendance' ? 'Marking as Attending' : 'New Custom Event';
+                const typeLabel = ev.type === 'attendance' ? 'Attending in VV App' : 'New Custom Event';
                 const id = `booked-add-${idx}`;
 
                 let conflictHtml = '';
@@ -1330,7 +1340,7 @@ export function renderChangeSummary(changes) {
                     <div class="p-2">
                         <div class="flex justify-between">
                             <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Attending in App</span>
+                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Atttending in Planner</span>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     </div>
@@ -1371,9 +1381,9 @@ export function renderChangeSummary(changes) {
             let attendingLabelHtml = '';
 
             if (bookedRef) {
-                // Label for "Attending In App"
+                // Label for "Attending In VV App"
                 attendingLabelHtml = `
-                    <span class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 px-1 rounded h-5 flex items-center whitespace-nowrap ml-2">Attending In App</span>
+                    <span class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 px-1 rounded h-5 flex items-center whitespace-nowrap ml-2">Attending In VV App</span>
                 `;
 
                 // If it's a booked event, we show conflict UI if any
@@ -1482,9 +1492,9 @@ export function renderChangeSummary(changes) {
         removedHeader.textContent = `Removed Events (${changes.removed.length})`;
         list.appendChild(removedHeader);
 
-        changes.removed.forEach(ev => {
+        changes.removed.forEach((ev, idx) => {
             const el = document.createElement('div');
-            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded p-2 mb-2 text-sm opacity-75 mx-4";
+            el.className = "bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded mb-2 text-sm mx-4 flex flex-col";
 
             // Check if user is attending this removed event
             let isScheduled = false;
@@ -1496,44 +1506,133 @@ export function renderChangeSummary(changes) {
             }
 
             let warningHtml = '';
+            let footerHtml = '';
+
             if (isScheduled) {
+                // Default to reschedule = true for scheduled removed events
+                ev.reschedule = true;
+
                 warningHtml = `
                     <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                `;
+
+                footerHtml = `
+                    <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                            <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
+                        </label>
+                    </div>
                 `;
             }
 
             el.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
-                    ${warningHtml}
+                <div class="p-2">
+                    <div class="flex justify-between items-start">
+                        <div class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</div>
+                        ${warningHtml}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
+                ${footerHtml}
             `;
             list.appendChild(el);
+
+            if (isScheduled) {
+                const cb = document.getElementById(`rem-resched-${idx}-grid`);
+                cb.onchange = (e) => { ev.reschedule = e.target.checked; };
+            }
         });
     }
 }
 
 export function confirmUpdateApply() {
     if (window.applyAgendaUpdate) {
-        window.applyAgendaUpdate();
+        const rescheduled = window.applyAgendaUpdate();
         updateStateSnapshot = null; // Commit changes
         closeAllModals();
-        showConfirm("Itinerary updated successfully!", null, "Success");
-        // Hide cancel button for this success message
-        setTimeout(() => {
-            const cancelBtn = document.getElementById('btn-confirm-cancel');
-            if (cancelBtn) cancelBtn.style.display = 'none';
-            const okBtn = document.getElementById('btn-confirm-ok');
-            if (okBtn) {
-                const oldOnClick = okBtn.onclick;
-                okBtn.onclick = () => {
-                    if (oldOnClick) oldOnClick();
-                    cancelBtn.style.display = 'inline-block'; // Restore
-                };
-            }
-        }, 0);
+
+        if (rescheduled && rescheduled.length > 0) {
+            showRescheduleModal(rescheduled);
+        } else {
+            showConfirm("Itinerary updated successfully!", null, "Success");
+            // Hide cancel button for this success message
+            setTimeout(() => {
+                const cancelBtn = document.getElementById('btn-confirm-cancel');
+                if (cancelBtn) cancelBtn.style.display = 'none';
+                const okBtn = document.getElementById('btn-confirm-ok');
+                if (okBtn) {
+                    const oldOnClick = okBtn.onclick;
+                    okBtn.onclick = () => {
+                        if (oldOnClick) oldOnClick();
+                        cancelBtn.style.display = 'inline-block'; // Restore
+                    };
+                }
+            }, 0);
+        }
     }
+}
+
+function showRescheduleModal(events) {
+    // Create modal if not exists
+    let modal = document.getElementById('reschedule-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'reschedule-modal';
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '9000';
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Reschedule Required</h3>
+                    <button onclick="document.getElementById('reschedule-modal').style.display='none'" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        The following events have been removed from the schedule but were marked for rescheduling. They have been added to your "Missing Events" list as required:
+                    </p>
+                    <ul class="list-disc list-inside text-sm font-bold text-gray-800 dark:text-gray-100 mb-6 max-h-40 overflow-y-auto" id="reschedule-list">
+                    </ul>
+                    <div class="flex flex-col gap-3">
+                        <button id="btn-resched-smart" class="w-full justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#AF231C] text-base font-medium text-white hover:bg-[#8e1c16] focus:outline-none sm:text-sm">
+                            Launch Smart Scheduler
+                        </button>
+                        <button id="btn-resched-missing" class="w-full justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none sm:text-sm">
+                            Show Missing Events
+                        </button>
+                        <button onclick="document.getElementById('reschedule-modal').style.display='none'" class="w-full justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-100 text-base font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-500 focus:outline-none sm:text-sm">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('btn-resched-smart').onclick = () => {
+            document.getElementById('reschedule-modal').style.display = 'none';
+            // Assuming openSmartScheduler takes a 'skipIntro' param or check previous usage
+            // The user requested "skipping the introduction page and pre-voyage checklist"
+            // Start Smart Scheduler
+            if (window.openSmartScheduler) window.openSmartScheduler(true);
+        };
+
+        document.getElementById('btn-resched-missing').onclick = () => {
+            document.getElementById('reschedule-modal').style.display = 'none';
+            openAttendancePanel('required');
+        };
+    }
+
+    // Update list
+    const list = document.getElementById('reschedule-list');
+    list.innerHTML = events.map(name => `<li>${escapeHtml(name)}</li>`).join('');
+
+    // Show
+    document.getElementById('reschedule-modal').style.display = 'flex';
 }
 
 function moveTooltipFromPanel(e) {

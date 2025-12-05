@@ -922,6 +922,13 @@ function handleUpdateFiles(fileList) {
         });
 }
 
+const getUid = (ev) => {
+    const timeData = parseTimeRange(ev.timePeriod);
+    if (!timeData) return null;
+    const s = timeData.start + SHIFT_START_ADD;
+    return `${ev.date}_${ev.name}_${s}`;
+};
+
 function checkForUpdates(jsonObjects, bookedEvents = []) {
     lastUpdateInputs = { jsonObjects, bookedEvents };
     // Flatten and clean new data
@@ -968,13 +975,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
     // Helper to generate key
     const getKey = (ev) => `${ev.date}_${ev.name}`;
 
-    // Helper to get UID
-    const getUid = (ev) => {
-        const timeData = parseTimeRange(ev.timePeriod);
-        if (!timeData) return null;
-        const s = timeData.start + SHIFT_START_ADD;
-        return `${ev.date}_${ev.name}_${s}`;
-    };
+
 
     // 1. Index Old Events
     state.appData.forEach(ev => {
@@ -1275,14 +1276,15 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, removed };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
 }
 
 function applyAgendaUpdate() {
-    if (!pendingUpdateEvents) return;
+    if (!pendingUpdateEvents) return [];
 
-    const { newEvents, migrations, bookedEvents, bookedChanges } = pendingUpdateEvents;
+    const { newEvents, migrations, bookedEvents, bookedChanges, removed } = pendingUpdateEvents;
+    const rescheduledEvents = [];
 
     // 1. Migrate State (Attendance, Notes)
     // Only if we have migrations (implies newEvents > 0)
@@ -1308,45 +1310,101 @@ function applyAgendaUpdate() {
         }
     });
 
-    // 2. Save Migrated State
-    if (migrations.length > 0) {
-        saveAttendance();
-        saveEventNotes();
-        saveHiddenUids();
-    }
-
-    // 3. Update Data
+    // 2. Apply New Events Data
     if (newEvents.length > 0) {
-        updateAppData(newEvents);
-    }
+        state.appData = newEvents;
 
-    // 4. Process Booked Events
-    if (bookedChanges) {
-        // Remove cancelled bookings (Custom Events)
-        if (bookedChanges.removed.length > 0) {
-            const uidsToRemove = new Set(bookedChanges.removed.filter(ev => !ev.ignored).map(ev => ev.uid));
-            if (uidsToRemove.size > 0) {
-                state.customEvents = state.customEvents.filter(ev => !uidsToRemove.has(ev.uid));
-                uidsToRemove.forEach(uid => state.attendingIds.delete(uid));
-                saveCustomEvents();
-            }
+        // Re-calculate UIDs for everything to be safe
+        state.appData.forEach(ev => {
+            ev._uid = getUid(ev); // Ensure _uid property is set
+        });
+
+        // Re-build lookup
+        state.eventLookup = new Map();
+        state.appData.forEach(ev => state.eventLookup.set(ev._uid, ev));
+        state.customEvents.forEach(ev => state.eventLookup.set(ev.uid, ev));
+
+        // Re-validate attending IDs (remove obsolete ones)
+        // We only keep ones that exist in new data or are custom
+        // OR we trust the migration above.
+        // But what about 'removed' events?
+        // If an event was removed, its UID is no longer in appData.
+        // We should remove it from attendingIds unless custom.
+
+        // Handle Removed Events Rescheduling Logic
+        if (removed && removed.length > 0) {
+            removed.forEach(ev => {
+                if (ev.reschedule) {
+                    // User wants to reschedule this removed event.
+                    // 1. Ensure it appears in Missing Events (unhide/unoptional)
+                    if (state.hiddenNames.has(ev.name)) {
+                        state.hiddenNames.delete(ev.name);
+                    }
+                    if (state.optionalEvents.has(ev.name)) {
+                        state.optionalEvents.delete(ev.name);
+                    }
+
+                    // Track for UI confirmation
+                    rescheduledEvents.push(ev.name);
+                }
+
+                // Always remove from attendingIds if it's gone
+                const uid = ev._uid || getUid(ev);
+                if (uid && state.attendingIds.has(uid)) {
+                    state.attendingIds.delete(uid);
+                }
+            });
         }
 
-        // Unmark unattended events (Official Events)
+        // General cleanup of zombie IDs
+        state.attendingIds.forEach(uid => {
+            if (!state.eventLookup.has(uid)) {
+                // Check if it was a migration target (it should be in lookup now)
+                // If not found, it's gone.
+                state.attendingIds.delete(uid);
+            }
+        });
+
+        // Update Migrated UIDs in Hidden UIDs as well (already done in step 1 loop?)
+        // Yes.
+    }
+
+    // 3. Process Booked Changes
+    // First process removals/unmarks
+    if (bookedChanges) {
+        if (bookedChanges.removed.length > 0) {
+            bookedChanges.removed.forEach(ev => {
+                if (ev.ignored) return;
+                // It's a custom event that is removed
+                state.customEvents = state.customEvents.filter(c =>
+                    c.date !== ev.date || c.name !== ev.name || c.timePeriod !== ev.timePeriod
+                );
+            });
+        }
+
         if (bookedChanges.unattended.length > 0) {
             bookedChanges.unattended.forEach(ev => {
-                if (ev.ignored) return; // Skip if ignored
+                if (ev.ignored) return;
+                // Official event to unmark
+                // We need to find its UID. It might be a new UID if migrated?
+                // `ev` here is from state.attendingIds loop in checkForUpdates.
+                // It refers to the *current* state object (old data) if we haven't updated yet?
+                // No, in checkForUpdates we iterate state.attendingIds.
+                // If we updated appData above, `ev` might be stale reference if it was from old appData?
+                // But we act on UIDs.
 
-                // We need to find the UID in the NEW data context if possible, 
-                // but attendingIds stores UIDs based on date/name/time which should be stable 
-                // or migrated by step 1.
-                // However, ev comes from state.eventLookup (OLD data).
-                // Step 1 migrated attendingIds from OldUID -> NewUID.
-                // So we should check if the OldUID was migrated.
+                // If migration happened, we updated attendingIds to newUid.
+                // If this event was migrated, we updated the ID in attendingIds.
+                // But `ev` in bookedChanges has the OLD data/uid?
+                // Use the name/date/time to find the target UID to remove?
+                // Or: assume if it was unattended, it likely WASNT migrated (because it's "unattended" - i.e. not in the booked list).
 
-                let targetUid = ev.uid; // Old UID
-                // Check if this UID was migrated
-                const migration = migrations.find(m => m.oldUid === ev.uid);
+                // However, if we migrated it, we updated attendingIds to newUid.
+                // We should check if we need to remove newUid or oldUid.
+
+                let targetUid = ev._uid;
+                // Check if it was migrated
+                const migration = migrations.find(m => m.oldUid === ev._uid);
                 if (migration) {
                     targetUid = migration.newUid;
                 }
@@ -1385,6 +1443,8 @@ function applyAgendaUpdate() {
 
     pendingUpdateEvents = null;
     renderApp();
+
+    return rescheduledEvents;
 }
 
 function processLoadedData(jsonObjects) {
