@@ -48,7 +48,36 @@ const VirginAPI = {
         }
 
         const data = await response.json();
+        this.saveToken(data.accessToken, data.expiresIn, username);
         return data.accessToken;
+    },
+
+    saveToken(token, expiresIn, username) {
+        localStorage.setItem('vv_access_token', token);
+        // expiresIn is in seconds
+        const expiryMs = (expiresIn || 3600) * 1000;
+        localStorage.setItem('vv_token_expiry', Date.now() + expiryMs);
+        if (username) localStorage.setItem('vv_username', username);
+    },
+
+    getCachedToken() {
+        const token = localStorage.getItem('vv_access_token');
+        const expiry = localStorage.getItem('vv_token_expiry');
+        if (!token || !expiry) return null;
+        if (Date.now() > parseInt(expiry, 10)) {
+            this.clearToken();
+            return null;
+        }
+        return token;
+    },
+
+    clearToken() {
+        localStorage.removeItem('vv_access_token');
+        localStorage.removeItem('vv_token_expiry');
+    },
+
+    hasValidToken() {
+        return !!this.getCachedToken();
     },
 
     /**
@@ -149,10 +178,48 @@ const VirginAPI = {
      * @param {boolean} importBooked Whether to fetch booked events
      */
     async fetchAllData(username, password, onProgress = () => { }, importBooked = false) {
-        try {
-            onProgress('Logging in...');
-            const accessToken = await this.login(username, password);
+        let accessToken = this.getCachedToken();
+        const cachedUsername = localStorage.getItem('vv_username');
+        let usingCached = false;
 
+        // 1. Determine if we can use cached token
+        // We use cached if it exists AND (no username provided OR provided username matches cached)
+        if (accessToken && (!username || (cachedUsername && username === cachedUsername))) {
+            usingCached = true;
+            onProgress('Resuming session...');
+        } else if (username && password) {
+            // 2. Explicit login required (new user or no token)
+            onProgress('Logging in...');
+            accessToken = await this.login(username, password);
+        } else {
+            // 3. No token and insufficient credentials
+            throw new Error('Please enter your password to sign in.');
+        }
+
+        try {
+            return await this._fetchDataInternal(accessToken, onProgress, importBooked);
+        } catch (error) {
+            // 4. Handle Expired Token (401)
+            if (usingCached && error.message && error.message.includes('401')) {
+                this.clearToken();
+
+                if (username && password) {
+                    onProgress('Session expired. Logging in...');
+                    accessToken = await this.login(username, password);
+                    return await this._fetchDataInternal(accessToken, onProgress, importBooked);
+                } else {
+                    throw new Error("Session expired. Please enter your password.");
+                }
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Internal helper to execute the fetch sequence
+     */
+    async _fetchDataInternal(accessToken, onProgress, importBooked) {
+        try {
             onProgress('Fetching profile...');
             const profile = await this.getProfile(accessToken);
 
@@ -180,28 +247,18 @@ const VirginAPI = {
                 try {
                     const dayData = await this.getLineup(accessToken, day.date, reservationGuestId, reservationNumber, voyageNumber);
 
-                    // Attach the port name to the day data so we can use it later
-                    // The API returns 'portName' in the itinerary object
+                    // Attach the port name
                     dayData.portName = day.portName || "";
 
-                    // Ensure date is available on the top level object for script.js to use
+                    // Ensure date is available
                     if (!dayData.date) {
                         dayData.date = day.date;
                     }
 
-                    // The API returns a structure that needs to be parsed
-                    // Based on the user request, we need to mimic what 'parseRawData' expects or do it here.
-                    // Let's assume the response from getLineup is the "Raw API file" content for that day.
-                    // We'll collect them and process them.
-
-                    // NOTE: The curl response for getLineup wasn't fully shown in the prompt, 
-                    // but usually it contains an 'events' array.
-                    // We will pass the whole object to the existing processor.
                     allEvents.push(dayData);
 
                     if (importBooked) {
                         // Fetch agenda
-                        // Use shipCode from reservation, or fallback to first 2 chars of voyageNumber (e.g. BR from BR2025...)
                         const sc = shipCode || (voyageNumber ? voyageNumber.substring(0, 2) : 'BR');
                         try {
                             const agendaData = await this.getAgenda(accessToken, day.date, reservationGuestId, sc);
@@ -209,21 +266,25 @@ const VirginAPI = {
                                 bookedEvents.push(...agendaData.appointments);
                             }
                         } catch (err) {
+                            if (err.message && err.message.includes('401')) throw err;
                             console.warn(`Error fetching agenda for ${day.date}`, err);
                         }
                     }
 
                 } catch (err) {
+                    if (err.message && err.message.includes('401')) throw err;
                     console.error(`Error fetching day ${day.date}`, err);
-                    // Continue to next day? Or fail? Let's continue.
                 }
             }
 
             onProgress('Processing data...');
-            onProgress('Processing data...');
             return { events: allEvents, bookedEvents };
 
         } catch (error) {
+            // Propagate 401s to be handled by the caller
+            if (error.message && error.message.includes('401')) {
+                throw new Error("401 Unauthorized");
+            }
             console.error("API Fetch Error:", error);
             throw error;
         }

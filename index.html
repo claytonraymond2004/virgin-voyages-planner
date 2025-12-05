@@ -71,24 +71,48 @@
                             Voyages</h2>
 
                         <form onsubmit="event.preventDefault(); handleVVLogin();" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email /
-                                    Username</label>
-                                <input type="text" id="vv-username"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="sailor@example.com" autocomplete="username">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                                    <button type="button" onclick="openPasswordHelp()"
-                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Help?</button>
+                            <div id="vv-login-inputs" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email
+                                        /
+                                        Username</label>
+                                    <input type="text" id="vv-username"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                                        placeholder="sailor@example.com" autocomplete="username">
                                 </div>
-                                <input type="password" id="vv-password"
-                                    class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="••••••••" autocomplete="current-password">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                                        <button type="button" onclick="openPasswordHelp()"
+                                            class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Help?</button>
+                                    </div>
+                                    <input type="password" id="vv-password"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                                        placeholder="••••••••" autocomplete="current-password">
+                                </div>
                             </div>
+
+                            <div id="vv-cached-session"
+                                class="hidden bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-3 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="bg-green-100 dark:bg-green-800 p-1.5 rounded-full text-green-600 dark:text-green-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-sm">
+                                        <div class="font-medium text-gray-900 dark:text-white">Cached Session</div>
+                                        <div id="vv-cached-username" class="text-xs text-gray-500 dark:text-gray-400">
+                                            user@example.com</div>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="switchAccount()"
+                                    class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 underline">Switch</button>
+                            </div>
+
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="vv-import-booked"
                                     class="rounded text-red-600 focus:ring-red-500" checked>
@@ -1323,12 +1347,34 @@
                         <div class="border rounded-lg p-4 hover:border-red-300 transition-colors dark:border-gray-700">
                             <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2">From Virgin Voyages</h4>
                             <form onsubmit="event.preventDefault(); handleUpdateVVLogin();" class="space-y-3">
-                                <input type="text" id="update-vv-username"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="Email / Username" autocomplete="username">
-                                <input type="password" id="update-vv-password"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                                    placeholder="Password" autocomplete="current-password">
+                                <div id="update-vv-login-inputs" class="space-y-3">
+                                    <input type="text" id="update-vv-username"
+                                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                                        placeholder="Email / Username" autocomplete="username">
+                                    <input type="password" id="update-vv-password"
+                                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                                        placeholder="Password" autocomplete="current-password">
+                                </div>
+
+                                <div id="update-vv-cached-session"
+                                    class="hidden bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-3 flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="bg-green-100 dark:bg-green-800 p-1.5 rounded-full text-green-600 dark:text-green-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="text-sm">
+                                            <div class="font-medium text-gray-900 dark:text-white">Cached Session</div>
+                                            <div id="update-vv-cached-username"
+                                                class="text-xs text-gray-500 dark:text-gray-400">user@example.com</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="switchUpdateAccount()"
+                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 underline">Switch</button>
+                                </div>
 
                                 <div
                                     class="bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600">

@@ -1105,7 +1105,52 @@ export function openUpdateAgendaModal() {
 
     usernameInput.onkeydown = handleEnter;
     passwordInput.onkeydown = handleEnter;
+
+    // Pre-fill username for update modal
+    const cachedUser = localStorage.getItem('vv_username');
+    if (cachedUser) {
+        usernameInput.value = cachedUser;
+        if (window.VirginAPI && window.VirginAPI.hasValidToken()) {
+            // Valid token exists - Show cached session UI
+            const loginInputs = document.getElementById('update-vv-login-inputs');
+            const cachedSession = document.getElementById('update-vv-cached-session');
+            const cachedUsernameDisplay = document.getElementById('update-vv-cached-username');
+            const btn = document.getElementById('btn-update-vv-login');
+
+            if (loginInputs) loginInputs.classList.add('hidden');
+            if (cachedSession) cachedSession.classList.remove('hidden');
+            if (cachedUsernameDisplay) cachedUsernameDisplay.textContent = cachedUser;
+
+            if (btn) {
+                const span = btn.querySelector('span');
+                if (span) span.textContent = "Sync";
+            }
+        }
+    }
 }
+
+// Expose switchUpdateAccount to global scope
+window.switchUpdateAccount = function () {
+    if (window.VirginAPI) window.VirginAPI.clearToken();
+
+    const loginInputs = document.getElementById('update-vv-login-inputs');
+    const cachedSession = document.getElementById('update-vv-cached-session');
+    const btn = document.getElementById('btn-update-vv-login');
+    const passwordInput = document.getElementById('update-vv-password');
+
+    if (loginInputs) loginInputs.classList.remove('hidden');
+    if (cachedSession) cachedSession.classList.add('hidden');
+
+    if (btn) {
+        const span = btn.querySelector('span');
+        if (span) span.textContent = "Sign In";
+    }
+
+    if (passwordInput) {
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+};
 
 export function resetUpdateModal() {
     document.getElementById('update-step-source').classList.remove('hidden');

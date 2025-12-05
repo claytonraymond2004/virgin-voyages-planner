@@ -420,6 +420,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Pre-fill username and check token status
+    const cachedUser = localStorage.getItem('vv_username');
+    const usernameInput = document.getElementById('vv-username');
+
+    if (cachedUser && usernameInput) {
+        usernameInput.value = cachedUser;
+
+        if (window.VirginAPI && window.VirginAPI.hasValidToken()) {
+            // Valid token exists - Show cached session UI
+            const loginInputs = document.getElementById('vv-login-inputs');
+            const cachedSession = document.getElementById('vv-cached-session');
+            const cachedUsernameDisplay = document.getElementById('vv-cached-username');
+            const btn = document.getElementById('btn-vv-login');
+
+            if (loginInputs) loginInputs.classList.add('hidden');
+            if (cachedSession) cachedSession.classList.remove('hidden');
+            if (cachedUsernameDisplay) cachedUsernameDisplay.textContent = cachedUser;
+
+            if (btn) {
+                const span = btn.querySelector('span');
+                if (span) span.textContent = "Sync";
+            }
+        }
+    }
+
+    // Expose switchAccount to global scope
+    window.switchAccount = function () {
+        if (window.VirginAPI) window.VirginAPI.clearToken();
+
+        const loginInputs = document.getElementById('vv-login-inputs');
+        const cachedSession = document.getElementById('vv-cached-session');
+        const btn = document.getElementById('btn-vv-login');
+        const passwordInput = document.getElementById('vv-password');
+
+        if (loginInputs) loginInputs.classList.remove('hidden');
+        if (cachedSession) cachedSession.classList.add('hidden');
+
+        if (btn) {
+            const span = btn.querySelector('span');
+            if (span) span.textContent = "Sign In & Import";
+        }
+
+        if (passwordInput) {
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    };
+
     // Confirmation Modal Listeners
     const btnConfirmOk = document.getElementById('btn-confirm-ok');
     const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
@@ -703,8 +751,19 @@ async function handleVVLogin() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
 
-    if (!username || !password) {
-        statusDiv.textContent = "Please enter both email and password.";
+    // Check if we can use cached session
+    const hasToken = window.VirginAPI && window.VirginAPI.hasValidToken();
+    const cachedUser = localStorage.getItem('vv_username');
+    const canUseCached = hasToken && (!username || (cachedUser && username === cachedUser));
+
+    if (!username) {
+        statusDiv.textContent = "Please enter your email.";
+        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
+        return;
+    }
+
+    if (!password && !canUseCached) {
+        statusDiv.textContent = "Please enter your password.";
         statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
         return;
     }
@@ -738,11 +797,18 @@ async function handleVVLogin() {
 
     } catch (err) {
         console.error(err);
-        statusDiv.textContent = "Error: " + err.message;
-        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
 
-        // Show CORS help on error
-        document.getElementById('cors-help-link').style.display = 'block';
+        // Handle Session Expiration
+        if (err.message && (err.message.includes('Session expired') || err.message.includes('401'))) {
+            if (window.switchAccount) window.switchAccount();
+            statusDiv.textContent = "Session expired. Please log in again.";
+        } else {
+            statusDiv.textContent = "Error: " + err.message;
+            // Show CORS help on error
+            document.getElementById('cors-help-link').style.display = 'block';
+        }
+
+        statusDiv.className = "text-center text-sm text-red-600 min-h-[20px]";
 
         btn.disabled = false;
         spinner.classList.add('hidden');
@@ -773,8 +839,19 @@ async function handleUpdateVVLogin() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
 
-    if (!username || !password) {
-        statusDiv.textContent = "Please enter both email and password.";
+    // Check if we can use cached session
+    const hasToken = window.VirginAPI && window.VirginAPI.hasValidToken();
+    const cachedUser = localStorage.getItem('vv_username');
+    const canUseCached = hasToken && (!username || (cachedUser && username === cachedUser));
+
+    if (!username) {
+        statusDiv.textContent = "Please enter your email.";
+        statusDiv.className = "text-center text-xs text-red-600 min-h-[16px]";
+        return;
+    }
+
+    if (!password && !canUseCached) {
+        statusDiv.textContent = "Please enter your password.";
         statusDiv.className = "text-center text-xs text-red-600 min-h-[16px]";
         return;
     }
@@ -816,7 +893,15 @@ async function handleUpdateVVLogin() {
 
     } catch (err) {
         console.error(err);
-        statusDiv.textContent = "Error: " + err.message;
+
+        // Handle Session Expiration
+        if (err.message && (err.message.includes('Session expired') || err.message.includes('401'))) {
+            if (window.switchUpdateAccount) window.switchUpdateAccount();
+            statusDiv.textContent = "Session expired. Please log in again.";
+        } else {
+            statusDiv.textContent = "Error: " + err.message;
+        }
+
         statusDiv.className = "text-center text-xs text-red-600 min-h-[16px]";
 
         btn.disabled = false;
