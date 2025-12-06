@@ -1176,59 +1176,90 @@ const getChangeKey = (ev) => `${ev.date}_${ev.name}_${ev.timePeriod || (ev.start
 
 function captureUpdateModalState() {
     if (!lastRenderedChanges) return;
-    const ignored = new Set();
+    const snapshot = {}; // key -> { ignored, forceOverlap }
 
-    // Check Booked Changes
+    const capture = (list) => {
+        if (!list) return;
+        list.forEach(ev => {
+            snapshot[getChangeKey(ev)] = {
+                ignored: ev.ignored,
+                forceOverlap: ev.forceOverlap
+            };
+        });
+    };
+
     if (lastRenderedChanges.bookedChanges) {
-        if (lastRenderedChanges.bookedChanges.added) {
-            lastRenderedChanges.bookedChanges.added.forEach(ev => {
-                if (ev.ignored) ignored.add(getChangeKey(ev));
-            });
-        }
-        if (lastRenderedChanges.bookedChanges.removed) {
-            lastRenderedChanges.bookedChanges.removed.forEach(ev => {
-                if (ev.ignored) ignored.add(getChangeKey(ev));
-            });
-        }
-        if (lastRenderedChanges.bookedChanges.unattended) {
-            lastRenderedChanges.bookedChanges.unattended.forEach(ev => {
-                if (ev.ignored) ignored.add(getChangeKey(ev));
-            });
-        }
+        capture(lastRenderedChanges.bookedChanges.added);
+        capture(lastRenderedChanges.bookedChanges.removed);
+        capture(lastRenderedChanges.bookedChanges.unattended);
     }
+    capture(lastRenderedChanges.added);
 
-    // Check Added
-    if (lastRenderedChanges.added) {
-        lastRenderedChanges.added.forEach(ev => {
-            if (ev.ignored) ignored.add(getChangeKey(ev));
+    if (lastRenderedChanges.modified) {
+        lastRenderedChanges.modified.forEach(item => {
+            // Use the new event for the key, as that is what persists
+            snapshot[getChangeKey(item.newEv)] = {
+                ignored: item.ignored,
+                forceOverlap: item.forceOverlap
+            };
+        });
+    }
+    if (lastRenderedChanges.removed) {
+        lastRenderedChanges.removed.forEach(ev => {
+            snapshot[getChangeKey(ev)] = {
+                reschedule: ev.reschedule
+            };
         });
     }
 
-    updateModalStateSnapshot = ignored;
+    updateModalStateSnapshot = snapshot;
 }
 
 function restoreUpdateModalState(changes) {
     if (!updateModalStateSnapshot) return;
-    const ignored = updateModalStateSnapshot;
+    const snapshot = updateModalStateSnapshot;
 
-    const apply = (list) => {
+    const restore = (list) => {
         if (!list) return;
         list.forEach(ev => {
-            if (ignored.has(getChangeKey(ev))) {
-                ev.ignored = true;
+            const state = snapshot[getChangeKey(ev)];
+            if (state) {
+                if (state.ignored !== undefined) ev.ignored = state.ignored;
+                if (state.forceOverlap !== undefined) ev.forceOverlap = state.forceOverlap;
             }
         });
     };
 
     if (changes.bookedChanges) {
-        apply(changes.bookedChanges.added);
-        apply(changes.bookedChanges.removed);
-        apply(changes.bookedChanges.unattended);
+        restore(changes.bookedChanges.added);
+        restore(changes.bookedChanges.removed);
+        restore(changes.bookedChanges.unattended);
     }
-    apply(changes.added);
+    restore(changes.added);
+
+    if (changes.modified) {
+        changes.modified.forEach(item => {
+            const state = snapshot[getChangeKey(item.newEv)];
+            if (state) {
+                if (state.ignored !== undefined) item.ignored = state.ignored;
+                if (state.forceOverlap !== undefined) item.forceOverlap = state.forceOverlap;
+            }
+        });
+    }
+
+    if (changes.removed) {
+        changes.removed.forEach(ev => {
+            const state = snapshot[getChangeKey(ev)];
+            if (state) {
+                if (state.reschedule !== undefined) ev.reschedule = state.reschedule;
+            }
+        });
+    }
 
     updateModalStateSnapshot = null;
 }
+
+
 
 window.launchRescheduleFromUpdate = (uid) => {
     captureUpdateModalState();
@@ -1400,19 +1431,23 @@ export function renderChangeSummary(changes) {
 
                 // Add the footer
                 const groupName = `action_booked_${idx}`;
+                const isOverlap = ev.forceOverlap;
+                const isSkip = ev.ignored;
+                const isAttend = !isOverlap && !isSkip;
+
                 const footerHtml = `
                     <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10">
                         <div class="flex flex-col gap-1">
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="attend" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <input type="radio" name="${groupName}" value="attend" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="overlap" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="overlap" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending with Overlap</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="skip" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="skip" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Skip Adding to Planner</span>
                             </label>
                         </div>
@@ -1437,8 +1472,15 @@ export function renderChangeSummary(changes) {
                 radios.forEach(r => {
                     r.onchange = (e) => {
                         ev.ignored = (e.target.value === 'skip');
+                        ev.forceOverlap = (e.target.value === 'overlap');
                     };
                 });
+
+                if (futureConflicts.length > 0) {
+                    ev.hasConflicts = true;
+                } else {
+                    ev.hasConflicts = false;
+                }
 
                 if (ev.conflicts && ev.conflicts.length > 0) {
                     // Handle resolve button
@@ -1556,19 +1598,23 @@ export function renderChangeSummary(changes) {
 
                 // Add the footer
                 const groupName = `action_added_${idx}`;
+                const isOverlap = bookedRef.forceOverlap;
+                const isSkip = bookedRef.ignored;
+                const isAttend = !isOverlap && !isSkip;
+
                 footerHtml = `
                     <div class="border-t border-green-200 dark:border-green-800 p-2 bg-green-100/30 dark:bg-green-900/10">
                         <div class="flex flex-col gap-1">
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="attend" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <input type="radio" name="${groupName}" value="attend" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Mark Attending in Planner</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="overlap" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="overlap" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Mark Attending with Overlap</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="skip" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="skip" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Skip Adding to Planner</span>
                             </label>
                         </div>
@@ -1596,8 +1642,14 @@ export function renderChangeSummary(changes) {
                 radios.forEach(r => {
                     r.onchange = (e) => {
                         bookedRef.ignored = (e.target.value === 'skip');
+                        bookedRef.forceOverlap = (e.target.value === 'overlap');
                     };
                 });
+            }
+
+
+            if (bookedRef && checkFutureConflict(ev).length > 0) {
+                bookedRef.hasConflicts = true;
             }
         });
     }
@@ -1668,19 +1720,23 @@ export function renderChangeSummary(changes) {
             let footerHtml = '';
             if (isScheduled) {
                 const groupName = `action_modified_${idx}`;
+                const isOverlap = item.forceOverlap;
+                const isSkip = item.ignored;
+                const isAttend = !isOverlap && !isSkip;
+
                 footerHtml = `
                     <div class="border-t border-orange-200 dark:border-orange-800 p-2 bg-orange-100/30 dark:bg-orange-900/10">
                         <div class="flex flex-col gap-1">
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="attend" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <input type="radio" name="${groupName}" value="attend" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending in Planner</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="overlap" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="overlap" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending with Overlap</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="skip" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600">
+                                <input type="radio" name="${groupName}" value="skip" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Skip Adding to Planner</span>
                             </label>
                         </div>
@@ -1707,22 +1763,22 @@ export function renderChangeSummary(changes) {
                 const radios = el.querySelectorAll(`input[name="${groupName}"]`);
                 radios.forEach(r => {
                     r.onchange = (e) => {
-                        // Modifying the 'item' object or tracking this state?
-                        // Usually changes are applied to appData.
-                        // For modified events, we need to know if we should update the attendance or remove it.
-                        // If 'skip', we want to REMOVE attendance for this event.
-                        // But 'item' here is { oldEv, newEv, changes }. Calling it 'ev' might be misleading if we need to flag the update.
-                        // We can flag the 'item' itself or 'newEv'.
-                        // Let's attach 'ignored' to the item wrapper, and in applyAgendaUpdate we check it.
                         item.ignored = (e.target.value === 'skip');
+                        item.forceOverlap = (e.target.value === 'overlap');
                     };
                 });
+
+                if (checkFutureConflict(newEv).length > 0) {
+                    item.hasConflicts = true;
+                } else {
+                    item.hasConflicts = false;
+                }
             }
         });
     }
 
     // 4. Render Removed
-    if (changes.removed.length > 0) {
+    if (changes.removed && changes.removed.length > 0) {
         const removedHeader = document.createElement('h5');
         removedHeader.className = "font-bold text-red-700 dark:text-red-300 text-sm uppercase tracking-wide mb-2 sticky top-0 bg-white dark:bg-gray-800 py-3 px-4 z-10 shadow-sm border-b border-gray-100 dark:border-gray-700";
         removedHeader.textContent = `Removed Events (${changes.removed.length})`;
@@ -1745,18 +1801,21 @@ export function renderChangeSummary(changes) {
             let footerHtml = '';
 
             if (isScheduled) {
-                // Default to reschedule = true for scheduled removed events
-                ev.reschedule = true;
+                // Mark for reschedule by default? 
+                // We don't have a "reschedule" input unless we specifically want to.
+                // Original logic had a checkbox. We'll keep it as "Reschedule this event?"
+
+                if (ev.reschedule === undefined) ev.reschedule = true;
 
                 warningHtml = `
                     <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
-                    `;
+                `;
 
                 footerHtml = `
                     <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
                         <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" checked>
-                                <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
+                            <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
+                            <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
                         </label>
                     </div>
                 `;
@@ -1783,6 +1842,35 @@ export function renderChangeSummary(changes) {
 }
 
 export function confirmUpdateApply() {
+    // Validation Step
+    const conflicts = [];
+
+    if (lastRenderedChanges) {
+        // Check Booked Changes (Added)
+        if (lastRenderedChanges.bookedChanges && lastRenderedChanges.bookedChanges.added) {
+            lastRenderedChanges.bookedChanges.added.forEach(ev => {
+                if (ev.hasConflicts && !ev.ignored && !ev.forceOverlap) {
+                    conflicts.push(ev.name);
+                }
+            });
+        }
+
+        // Check Modified Events
+        if (lastRenderedChanges.modified) {
+            lastRenderedChanges.modified.forEach(item => {
+                if (item.hasConflicts && !item.ignored && !item.forceOverlap) {
+                    conflicts.push(item.newEv.name);
+                }
+            });
+        }
+    }
+
+    if (conflicts.length > 0) {
+        // Show validation modal
+        showConflictValidationModal(conflicts);
+        return;
+    }
+
     if (window.applyAgendaUpdate) {
         const rescheduled = window.applyAgendaUpdate();
         updateStateSnapshot = null; // Commit changes
@@ -2362,3 +2450,49 @@ function triggerCelebration() {
         setTimeout(fire, 800);
     }
 }
+
+export function showConflictValidationModal(conflicts) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'conflict-validation-modal';
+    // Ensure Z-Index is significantly higher than the Update Itinerary Modal (z-index: 6000)
+    modal.style.zIndex = '9999';
+    // Force usage of flex display to override the default 'display: none' from .modal-overlay CSS class
+    modal.style.display = 'flex';
+
+    const listHtml = conflicts.map(name => `<li>${escapeHtml(name)}</li>`).join('');
+
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all z-[9999]">
+            <div class="bg-red-50 dark:bg-red-900/30 px-4 py-3 border-b border-red-200 dark:border-red-800 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-red-800 dark:text-red-200">Unresolved Conflicts</h3>
+                <button onclick="document.body.removeChild(document.getElementById('conflict-validation-modal'))" class="text-gray-400 hover:text-gray-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    The following events have schedule conflicts. You must resolve them before updating:
+                </p>
+                <ul class="list-disc list-inside text-sm font-medium text-gray-800 dark:text-gray-200 mb-4 bg-gray-50 dark:bg-gray-700/50 p-3 rounded border border-gray-200 dark:border-gray-700 max-h-40 overflow-y-auto">
+                    ${listHtml}
+                </ul>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    <strong>Options:</strong>
+                    <ul class="list-disc list-inside mt-1 ml-2">
+                        <li>Find an alternative time (Reschedule)</li>
+                        <li>Select <strong>"Mark Attending with Overlap"</strong> to allow the conflict</li>
+                        <li>Select <strong>"Skip Adding to Planner"</strong> to ignore the event</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 flex justify-end">
+                <button onclick="document.body.removeChild(document.getElementById('conflict-validation-modal'))" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                    OK
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+

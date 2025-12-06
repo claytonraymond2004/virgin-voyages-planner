@@ -938,6 +938,9 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
     // Ensure we handle single object input wrapped in array
     const objects = Array.isArray(jsonObjects) ? jsonObjects : [jsonObjects];
 
+    // Collect appointments extracted from JSON files
+    const extractedAppointments = [];
+
     objects.forEach(json => {
         // Handle if passed a single array of events (from API)
         if (Array.isArray(json) && json.length > 0 && json[0].date && json[0].name) {
@@ -957,11 +960,15 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
 
         // Grab Booked Events (Agenda)
         if (json.appointments && Array.isArray(json.appointments)) {
-            bookedEvents.push(...json.appointments);
+            extractedAppointments.push(...json.appointments);
         }
     });
 
-    if (newEvents.length === 0 && bookedEvents.length === 0) {
+    // Combine passed-in booked events (e.g. from API) with those extracted from files
+    // Use a new array to avoid mutating the input 'bookedEvents' which causes duplication on re-runs
+    const allBookedEvents = [...bookedEvents, ...extractedAppointments];
+
+    if (newEvents.length === 0 && allBookedEvents.length === 0) {
         alert("No valid agenda data found.");
         resetUpdateModal();
         return;
@@ -1085,9 +1092,9 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
     // 4. Check for Booked Event Changes
     const bookedChanges = { added: [], removed: [], unattended: [] };
 
-    if (bookedEvents.length > 0) { // Only if sync is enabled (bookedEvents is not null)
+    if (allBookedEvents.length > 0) { // Only if sync is enabled (bookedEvents is not null)
         // A. Check for ADDED bookings (New Custom or New Attendance)
-        bookedEvents.forEach(booked => {
+        allBookedEvents.forEach(booked => {
             const bookedTime = parseTimeRange(booked.timePeriod);
             if (!bookedTime) return;
             const bookedStart = bookedTime.start + SHIFT_START_ADD;
@@ -1200,7 +1207,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
 
         likelyImported.forEach(customEv => {
             // Check if this customEv is present in the NEW bookedEvents list
-            const stillExists = bookedEvents.find(b =>
+            const stillExists = allBookedEvents.find(b =>
                 b.name === customEv.name &&
                 b.date === customEv.date &&
                 b.timePeriod === customEv.timePeriod
@@ -1221,7 +1228,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
             if (!evTime) return;
             const evStart = evTime.start + SHIFT_START_ADD;
 
-            const isBooked = bookedEvents.find(b => {
+            const isBooked = allBookedEvents.find(b => {
                 if (b.date !== ev.date) return false;
                 if (b.name !== ev.name) return false;
                 const bTime = parseTimeRange(b.timePeriod);
@@ -1276,7 +1283,7 @@ function checkForUpdates(jsonObjects, bookedEvents = []) {
         });
     }
 
-    pendingUpdateEvents = { newEvents, migrations, bookedEvents, bookedChanges, removed };
+    pendingUpdateEvents = { newEvents, migrations, bookedEvents: allBookedEvents, bookedChanges, removed };
     renderChangeSummary({ added, removed, modified, unchanged, bookedChanges });
 }
 
