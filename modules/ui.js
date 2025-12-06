@@ -1712,6 +1712,8 @@ export function renderChangeSummary(changes) {
                 const uid = `${oldEv.date}_${oldEv.name}_${s}`;
                 if (state.attendingIds.has(uid)) isScheduled = true;
             }
+            // Store for usage in Removed Events check
+            item.wasScheduled = isScheduled;
 
             let conflictHtml = '';
             // Only check conflicts if it's scheduled and moving/changing
@@ -1909,7 +1911,13 @@ export function renderChangeSummary(changes) {
                     const match = changes.modified.find(m => {
                         if (m.newEv.name !== ev.name) return false;
                         if (m.ignored) return false; // User selected "Skip"
-                        // If user selected "Attend" or "Overlap", then we will be attending this new version
+
+                        // KEY FIX: Only count this as "attending" if the user was actually attending the ORIGINAL version of this modified event
+                        // OR if they explicitly chose "Attend" (which we don't expose UI for if not scheduled, but logic holds)
+                        // Actually, if !wasScheduled, we don't show radios, so they CAN'T choose attend.
+                        // So we simply check wasScheduled.
+                        if (!m.wasScheduled) return false;
+
                         return true;
                     });
                     if (match) alreadyAttendingEv = match.newEv; // Use newEv for display
