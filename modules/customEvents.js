@@ -1,7 +1,7 @@
 import { state, saveCustomEvents } from './state.js';
 import { STORAGE_KEY_CUSTOM } from './constants.js';
 import { renderApp } from './render.js';
-import { showConfirm, closeAllModals } from './ui.js';
+import { showConfirm, closeAllModals, pushModalState } from './ui.js';
 
 // --- Custom Events ---
 
@@ -94,6 +94,7 @@ export function openEditForm(ev) {
 }
 
 export function openCustomModal() {
+    pushModalState();
     document.getElementById('custom-event-modal').style.display = 'flex';
     setTimeout(() => {
         state.initialFormState = getCustomEventFormData();

@@ -23,7 +23,7 @@ import {
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
     openSmartScheduler, toggleAgendaPanel, updateAgendaPanel,
     openUpdateAgendaModal, resetUpdateModal, renderChangeSummary, confirmUpdateApply,
-    toggleHiddenSearchMenu, setHiddenSearchMode, toggleHiddenClearBtn, clearHiddenSearch, renderHiddenContent
+    toggleHiddenSearchMenu, setHiddenSearchMode, toggleHiddenClearBtn, clearHiddenSearch, renderHiddenContent, pushModalState
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -1834,6 +1834,7 @@ function openTransferModal(tab) {
 
     document.getElementById('transfer-modal').style.display = 'flex';
     document.getElementById('dropdown-menu').classList.remove('open');
+    pushModalState();
     switchTransferTab(tab);
 }
 

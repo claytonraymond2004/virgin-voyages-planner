@@ -5,7 +5,7 @@ import { parseTimeRange, formatTime } from './utils.js';
 import {
     showGenericChoice, showConfirm, closeAllModals,
     openUnhideModal, editEventNote, toggleOptionalEvent, openHiddenManager,
-    toggleComplete
+    toggleComplete, pushModalState
 } from './ui.js';
 import { populateCustomModal, deleteCustomEvent, initiateEdit } from './customEvents.js';
 import { initRescheduleWizard } from './smartScheduler.js';
@@ -264,6 +264,7 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
     // Mobile Overlay Logic
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
+        pushModalState();
         if (ctxOverlay) {
             ctxOverlay.classList.add('active');
             ctxOverlay.onclick = () => {
@@ -579,8 +580,9 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
         } else {
             btnPrev.style.opacity = '1';
             btnPrev.style.pointerEvents = 'auto';
+            btnPrev.style.pointerEvents = 'auto';
             btnPrev.onclick = () => {
-                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeAllModals();
                 closeMenu();
                 jumpToEvent(siblings[myIndex - 1]);
             };
@@ -596,8 +598,9 @@ export function showContextMenu(e, ev, isHiddenPreview = false) {
         } else {
             btnNext.style.opacity = '1';
             btnNext.style.pointerEvents = 'auto';
+            btnNext.style.pointerEvents = 'auto';
             btnNext.onclick = () => {
-                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeAllModals();
                 closeMenu();
                 jumpToEvent(siblings[myIndex + 1]);
             };
@@ -786,6 +789,7 @@ export function moveTooltip(e) {
 export function showFullTooltip(e, ev, el) {
     if (state.dragPreviewEl) return;
     if (document.querySelector('.add-event-btn')) return;
+    if (window.innerWidth <= 768) return; // Disable tooltips on mobile
 
     const isModalOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => m.style.display === 'flex');
 
@@ -1033,6 +1037,8 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
     const btnToggle = document.getElementById('mobile-btn-toggle');
     const btnMenu = document.getElementById('mobile-btn-menu');
 
+    pushModalState();
+
     titleEl.textContent = ev.name;
 
     // Build Content
@@ -1187,7 +1193,7 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
                     icon = `<span class="text-[10px] bg-transparent text-[#7C08BD] px-1.5 py-0.5 rounded-full border border-[#7C08BD] dark:text-[#d8b4fe] dark:border-[#d8b4fe]">Viewing</span>`;
                 } else {
                     const safeUid = sib.uid.replace(/'/g, "\\'");
-                    clickAction = `onclick="closeMobileEventModal(); jumpToEvent('${safeUid}')"`;
+                    clickAction = `onclick="closeAllModals(); jumpToEvent('${safeUid}')"`;
                     cursorClass = 'cursor-pointer hover:bg-gray-50';
                     icon = `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
                 }
@@ -1230,14 +1236,14 @@ export function openMobileEventModal(ev, isHiddenPreview = false) {
             btnToggle.className = "flex-1 py-3 px-4 rounded font-bold transition-colors shadow-sm flex justify-center items-center gap-2 bg-[#F3E8F5] text-[#5C068C] border border-[#5C068C]/30 hover:bg-[#eaddf0] dark:bg-transparent dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700";
             btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Remove from Agenda`;
             btnToggle.onclick = () => {
-                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeAllModals({ fromHistory: true });
                 toggleAttendance(ev.uid);
             };
         } else {
             btnToggle.className = "flex-1 py-3 px-4 rounded font-bold text-white transition-colors shadow-sm flex justify-center items-center gap-2 bg-[#AF231C] hover:bg-red-800";
             btnToggle.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add to Agenda`;
             btnToggle.onclick = () => {
-                document.getElementById('mobile-event-modal').style.display = 'none';
+                closeAllModals({ fromHistory: true });
                 toggleAttendance(ev.uid);
             };
         }

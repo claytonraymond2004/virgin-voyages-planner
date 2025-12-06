@@ -12,8 +12,143 @@ import { refreshUpdateCheck } from './main.js';
 // --- Modals ---
 
 let updateStateSnapshot = null;
+let modalStackDepth = 0;
+
+export function pushModalState() {
+    if (window.innerWidth <= 768) {
+        history.pushState({ modalOpen: true }, '', location.href);
+        modalStackDepth++;
+    }
+}
+
+// Global popstate handler for mobile back gesture
+window.addEventListener('popstate', (e) => {
+    // If we have pushed modal states, we must handle strict popping
+    if (modalStackDepth > 0) {
+        modalStackDepth--; // We just popped one state
+
+        // We know we are going back, so we should close the "top-most" modal.
+        // We need to identify strictly what is open.
+
+        // Priority list of modals to close (Top to Bottom visual stacking)
+
+        // 0. Tooltips (High priority as they float on top)
+        const tooltip = document.getElementById('tooltip');
+        if (tooltip && tooltip.style.display === 'block') {
+            hideTooltip();
+            return;
+        }
+
+        // 1. Event Note Modal (Mobile specific stack)
+        const noteModal = document.getElementById('event-note-modal');
+        if (noteModal && noteModal.style.display === 'flex') {
+            noteModal.style.display = 'none';
+            return;
+        }
+
+        // 2. Generic Choice / Confirm / Input Modals
+        const dlgs = ['delete-choice-modal', 'hide-choice-modal', 'edit-choice-modal', 'port-note-modal', 'generic-choice-modal', 'confirmation-modal', 'blacklist-modal', 'time-blocks-modal', 'transfer-modal'];
+        for (const id of dlgs) {
+            const el = document.getElementById(id);
+            if (el && el.style.display === 'flex') {
+                el.style.display = 'none';
+                return;
+            }
+        }
+
+        // 3. Unhide / Hidden Manager
+        const unhideModal = document.getElementById('unhide-modal');
+        if (unhideModal && unhideModal.style.display === 'flex') {
+            unhideModal.style.display = 'none';
+            return;
+        }
+
+        const hiddenMgr = document.getElementById('hidden-manager-modal');
+        if (hiddenMgr && hiddenMgr.style.display === 'flex') {
+            hiddenMgr.style.display = 'none';
+            return;
+        }
+
+        // 4. Custom Event Modal
+        const customModal = document.getElementById('custom-event-modal');
+        if (customModal && customModal.style.display === 'flex') {
+            customModal.style.display = 'none';
+            return;
+        }
+
+        // 5. Update Agenda Modal
+        const updateModal = document.getElementById('update-agenda-modal');
+        if (updateModal && updateModal.style.display === 'flex') {
+            // Need to cancel properly
+            cancelUpdateAgenda({ fromHistory: true });
+            return;
+        }
+
+        // 6. Smart Scheduler Wizard
+        const wizard = document.getElementById('smart-scheduler-modal');
+        if (wizard) {
+            // Check for internal navigation buttons ("Back" or "Cancel" that acts as back)
+            const btnChecklistBack = document.getElementById('btn-checklist-back');
+            const btnConflictsBack = document.getElementById('btn-conflicts-back');
+
+            // 1. Checklist Step Back
+            if (btnChecklistBack && btnChecklistBack.offsetParent !== null) {
+                btnChecklistBack.click();
+                pushModalState(); // Restore history state since we stayed in modal
+                return;
+            }
+
+            // 2. Conflicts Step Back
+            if (btnConflictsBack && btnConflictsBack.offsetParent !== null) {
+                // Determine if this button closes or navigates
+                // In Reschedule Mode, "Cancel" closes the wizard.
+                // In Global Mode, "Back" navigates to Checklist.
+                if (window.isRescheduleMode) {
+                    btnConflictsBack.click(); // Close
+                } else {
+                    btnConflictsBack.click(); // Navigate
+                    pushModalState(); // Restore history state
+                }
+                return;
+            }
+
+            wizard.remove();
+            return;
+        }
+
+        // 7. Mobile Event Modal (The main card view on mobile)
+        const mobileModal = document.getElementById('mobile-event-modal');
+        if (mobileModal && mobileModal.style.display === 'flex') {
+            closeMobileEventModal({ fromHistory: true }); // Special arg to prevent recurse?
+            return;
+        }
+
+        // 8. Panels
+        const attPanel = document.getElementById('attendance-panel');
+        if (attPanel && attPanel.classList.contains('open')) {
+            attPanel.classList.remove('open');
+            return;
+        }
+
+        const agPanel = document.getElementById('agenda-panel');
+        if (agPanel && agPanel.classList.contains('open')) {
+            agPanel.classList.remove('open');
+            return;
+        }
+
+        const menu = document.getElementById('dropdown-menu');
+        if (menu && menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            return;
+        }
+
+        // Fallback: Close All if we missed something (safe reset)
+        closeAllModals({ fromPopstate: true });
+    }
+});
 
 export function showGenericChoice(title, message, primaryLabel, onPrimary, secondaryLabel, onSecondary) {
+    pushModalState();
     document.getElementById('generic-choice-title').textContent = title;
 
     // Support HTML content if message starts with specific tag or just always use innerHTML?
@@ -25,7 +160,7 @@ export function showGenericChoice(title, message, primaryLabel, onPrimary, secon
     const btnPrimary = document.getElementById('btn-generic-primary');
     btnPrimary.textContent = primaryLabel;
     btnPrimary.onclick = () => {
-        document.getElementById('generic-choice-modal').style.display = 'none';
+        closeAllModals();
         if (onPrimary) onPrimary();
     };
 
@@ -34,7 +169,7 @@ export function showGenericChoice(title, message, primaryLabel, onPrimary, secon
         btnSecondary.style.display = 'inline-flex'; // Restore display
         btnSecondary.textContent = secondaryLabel;
         btnSecondary.onclick = () => {
-            document.getElementById('generic-choice-modal').style.display = 'none';
+            closeAllModals();
             if (onSecondary) onSecondary();
         };
     } else {
@@ -43,13 +178,14 @@ export function showGenericChoice(title, message, primaryLabel, onPrimary, secon
 
     const btnCancel = document.getElementById('btn-generic-cancel-x');
     btnCancel.onclick = () => {
-        document.getElementById('generic-choice-modal').style.display = 'none';
+        closeAllModals();
     };
 
     document.getElementById('generic-choice-modal').style.display = 'flex';
 }
 
 export function showConfirm(msg, onYes, title = "Confirm") {
+    pushModalState();
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-message').textContent = msg;
     state.confirmCallback = onYes;
@@ -94,6 +230,7 @@ export function showToast(message, type = 'info') {
 // --- Unhide Modal ---
 
 export function openUnhideModal(ev) {
+    pushModalState();
     const modal = document.getElementById('unhide-modal');
     const btnInstance = document.getElementById('btn-unhide-instance');
     const btnSeries = document.getElementById('btn-unhide-series');
@@ -219,6 +356,10 @@ export function switchHiddenTab(tab) {
 }
 
 export function openHiddenManager(keepTab = false) {
+    // Close menu if open to avoid history stack confusion
+    document.getElementById('dropdown-menu').classList.remove('open');
+
+    if (!keepTab) pushModalState();
     if (!keepTab) {
         state.activeHiddenTab = 'series';
         state.hiddenTabScrollPositions = {};
@@ -771,6 +912,7 @@ export function renderHiddenInstances(container) {
 
 export function editPortNote(date, event) {
     if (event) event.stopPropagation();
+    pushModalState();
     state.currentPortNoteDate = date;
     const current = state.portNotes[date] || '';
     document.getElementById('port-note-input').value = current;
@@ -795,6 +937,7 @@ export function savePortNoteUI() {
 }
 
 export function editEventNote(uid) {
+    pushModalState();
     state.currentEventNoteUid = uid;
     const current = state.eventNotes[uid] || '';
     document.getElementById('event-note-input').value = current;
@@ -811,7 +954,11 @@ export function closeEventNoteModal() {
     const mobileModal = document.getElementById('mobile-event-modal');
     if (window.innerWidth <= 768 && mobileModal.style.display === 'flex') {
         // Only close the note modal
-        document.getElementById('event-note-modal').style.display = 'none';
+        if (modalStackDepth > 0) {
+            history.back();
+        } else {
+            document.getElementById('event-note-modal').style.display = 'none';
+        }
     } else {
         closeAllModals();
     }
@@ -879,11 +1026,18 @@ export function toggleMenu() {
 }
 
 export function openSmartScheduler(skipIntro = false) {
+    pushModalState();
     initSmartScheduler(skipIntro);
     document.getElementById('dropdown-menu').classList.remove('open');
 }
 
-export function closeAllModals() {
+export function closeAllModals(options = {}) {
+    // If we are on mobile with history stack and not called from history event
+    if (!options.fromHistory && !options.fromPopstate && window.innerWidth <= 768 && modalStackDepth > 0) {
+        history.back();
+        return;
+    }
+
     // Check if update modal is open and cancel it properly
     const updateModal = document.getElementById('update-agenda-modal');
     if (updateModal && updateModal.style.display === 'flex') {
@@ -915,7 +1069,7 @@ export function closeAllModals() {
     closeMobileEventModal();
 }
 
-export function cancelUpdateAgenda() {
+export function cancelUpdateAgenda(options = {}) {
     if (updateStateSnapshot) {
         // Restore state
         state.attendingIds = new Set(updateStateSnapshot.attendingIds);
@@ -932,6 +1086,11 @@ export function cancelUpdateAgenda() {
 
     // Hide modal manually to avoid infinite recursion if we called closeAllModals
     document.getElementById('update-agenda-modal').style.display = 'none';
+
+    if (!options.fromHistory && !options.fromPopstate && window.innerWidth <= 768 && modalStackDepth > 0) {
+        history.back();
+        return;
+    }
 
     // Also ensure other things are closed
     document.querySelectorAll('.modal-overlay').forEach(el => {
@@ -978,6 +1137,10 @@ export function toggleAttendancePanel() {
     const isOpen = panel.classList.contains('open');
 
     if (isOpen) {
+        if (window.innerWidth <= 768 && modalStackDepth > 0) {
+            history.back();
+            return;
+        }
         // Save current scroll position before closing
         const content = document.getElementById('attendance-panel-content');
         if (content) {
@@ -989,6 +1152,7 @@ export function toggleAttendancePanel() {
         if (!state.attendancePanelScrollPositions) {
             state.attendancePanelScrollPositions = {};
         }
+        pushModalState();
         updateAttendancePanel();
         panel.classList.add('open');
         // Restore the saved scroll position for the active tab
@@ -1133,12 +1297,17 @@ export function toggleAgendaPanel() {
     const isOpen = panel.classList.contains('open');
 
     if (isOpen) {
+        if (window.innerWidth <= 768 && modalStackDepth > 0) {
+            history.back();
+            return;
+        }
         panel.classList.remove('open');
     } else {
         // Reset state for new session
         state.agendaHasUserScrolled = false;
         state.agendaIsAutoScrolling = false;
 
+        pushModalState();
         updateAgendaPanel();
         panel.classList.add('open');
 
@@ -1267,22 +1436,33 @@ export function updateAgendaPanel() {
             };
             card.onmouseleave = hideTooltip;
 
+            const displayImg = ev.imageUrl || 'virgin_placeholder.png';
+            const isPlaceholder = !ev.imageUrl || ev.imageUrl === 'virgin_placeholder.png';
+            const imgStyle = isPlaceholder ? 'transform: scale(1.4); transform-origin: center;' : '';
+
             let cardHtml = `
-                <div class="flex justify-between items-start">
-                    <div class="font-bold text-gray-800 dark:text-gray-100 text-sm pr-2">${escapeHtml(ev.name)}</div>
-                    ${isOptional ? `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-gray-200 dark:border-gray-600">Optional</span>` : ''}
+                <div class="flex">
+                    <div class="w-16 h-16 mr-3 flex-shrink-0 overflow-hidden rounded relative">
+                         <img src="${displayImg}" class="w-full h-full object-cover" style="${imgStyle}" onerror="this.src='virgin_placeholder.png'; this.style.transform='scale(1.4)'; this.style.transformOrigin='center';">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <div class="font-bold text-gray-800 dark:text-gray-100 text-sm pr-2 truncate">${escapeHtml(ev.name)}</div>
+                            ${isOptional ? `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-gray-200 dark:border-gray-600 flex-shrink-0">Optional</span>` : ''}
+                        </div>
+                        
+                        <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <svg class="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ${timeStr}
+                        </div>
+                        
+                        ${location ? `
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-500 mt-0.5 truncate">
+                            <svg class="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            ${escapeHtml(location)}
+                        </div>` : ''}
+                    </div>
                 </div>
-                
-                <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    ${timeStr}
-                </div>
-                
-                ${location ? `
-                <div class="flex items-center text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    ${escapeHtml(location)}
-                </div>` : ''}
             `;
 
             card.id = `agenda-card-${ev.uid}`;
@@ -1379,6 +1559,7 @@ function formatTime(mins) {
 // --- Update Itinerary Modal ---
 
 export function openUpdateAgendaModal() {
+    pushModalState();
     // Snapshot state for rollback
     updateStateSnapshot = {
         attendingIds: new Set(state.attendingIds),
@@ -2775,8 +2956,9 @@ export function jumpToEventFromPanel(uid) {
 
 export function openBlacklistModal() {
     document.getElementById('blacklist-input').value = Array.from(state.blacklist).join('\n');
-    document.getElementById('blacklist-modal').style.display = 'flex';
     document.getElementById('dropdown-menu').classList.remove('open');
+    pushModalState();
+    document.getElementById('blacklist-modal').style.display = 'flex';
 }
 
 export function saveBlacklistUI() {
@@ -2845,6 +3027,9 @@ export function openTimeBlocksModal() {
         dinner: document.getElementById('tb-dinner'),
         evening: document.getElementById('tb-evening')
     };
+
+    document.getElementById('dropdown-menu').classList.remove('open');
+    pushModalState();
 
     // Set enabled state
     cbEnabled.checked = state.timeBlocks.enabled !== false; // Default true
