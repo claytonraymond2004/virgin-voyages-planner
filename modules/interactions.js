@@ -795,15 +795,19 @@ export function showFullTooltip(e, ev, el) {
         tooltip.style.zIndex = '5000';
 
         document.getElementById('schedule-grid').classList.add('dim-mode');
-        el.classList.add('is-sibling-highlight');
 
-        // Also highlight the grid card if we are hovering something else (like agenda item)
-        if (ev.uid) {
-            const gridCard = document.getElementById(`card-${ev.uid}`);
-            if (gridCard && gridCard !== el) {
-                gridCard.classList.add('is-sibling-highlight');
-            }
+
+        // Highlight ALL siblings (including self)
+        if (ev.name) {
+            const siblingUids = state.eventNameMap.get(ev.name) || [];
+            siblingUids.forEach(uid => {
+                const card = document.getElementById(`card-${uid}`);
+                if (card) card.classList.add('is-sibling-highlight');
+            });
         }
+
+        // Ensure the hovered element itself is highlighted (in case it's not in the map/grid for some reason)
+        el.classList.add('is-sibling-highlight');
     }
 
     tooltip.className = "";
