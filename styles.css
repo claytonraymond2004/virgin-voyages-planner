@@ -7,7 +7,7 @@
     --virgin-purple: rgba(168, 85, 247, 0.15);
     --virgin-purple-text: #581c87;
     --virgin-purple-light: #F3E8F5;
-    --virgin-teal: #71d6e0;
+    --virgin-teal: #0d9488;
     --virgin-border: rgba(147, 51, 234, 0.2);
     --virgin-purple-solid: #e8dcf6;
     --custom-blue: #1d4ed8;
@@ -27,6 +27,7 @@ body {
 body.dark {
     background-color: #111827;
     color: #f3f4f6;
+    --virgin-teal: #71d6e0;
 }
 
 body.dark .bg-white {
