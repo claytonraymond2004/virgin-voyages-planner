@@ -753,10 +753,7 @@ export function toggleOptionalEvent(eventName) {
         state.optionalEvents.add(eventName);
     }
     saveOptionalEvents();
-    // Update agenda count badge
-    updateAgendaCount();
-    // Refresh the panel to move the item to the other tab
-    updateAttendancePanel();
+    renderApp();
 }
 
 export function updateAttendancePanel() {
