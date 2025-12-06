@@ -366,7 +366,7 @@ function renderProcessStep(body, footer) {
     footer.innerHTML = '';
 
     // Automatically start processing
-    setTimeout(runAlgorithm, 1000);
+    setTimeout(runAlgorithm, 500);
 }
 
 function runAlgorithm() {
