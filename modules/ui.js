@@ -222,6 +222,9 @@ export function openHiddenManager(keepTab = false) {
     if (!keepTab) {
         state.activeHiddenTab = 'series';
         state.hiddenTabScrollPositions = {};
+        const searchInput = document.getElementById('hidden-search-input');
+        if (searchInput) searchInput.value = '';
+        setHiddenSearchMode('default');
     } else {
         // Save current scroll position if refreshing view
         const container = document.getElementById('hidden-list-container');
@@ -336,45 +339,307 @@ export function restoreAllHidden(type) {
     renderHiddenContent();
 }
 
-export function renderHiddenSeriesList(container, type) {
-    const seriesList = [];
-    state.hiddenNames.forEach(name => {
-        let isVisibleAny = false;
-        state.appData.forEach(ev => {
-            if (ev.name === name) {
+// --- Hidden Search Logic ---
+let hiddenSearchMode = 'default';
+
+export function toggleHiddenSearchMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('hidden-search-menu');
+    menu.classList.toggle('hidden');
+}
+
+export function setHiddenSearchMode(mode) {
+    hiddenSearchMode = mode;
+    document.getElementById('hidden-search-menu').classList.add('hidden');
+
+    // Update checkmarks
+    ['default', 'description', 'location', 'date'].forEach(m => {
+        const check = document.getElementById(`check-hidden-${m}`);
+        if (check) {
+            check.classList.toggle('hidden', m !== mode);
+        }
+    });
+
+    // Update icon
+    const btn = document.getElementById('hidden-search-mode-btn');
+    if (btn) {
+        const iconSvg = btn.querySelector('svg'); // First SVG is the icon
+        if (iconSvg) {
+            if (mode === 'date') {
+                // Calendar Icon
+                iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>';
+            } else {
+                // Search Icon
+                iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>';
+            }
+        }
+    }
+
+    // Update input type
+    // Update input type & visibility
+    const input = document.getElementById('hidden-search-input');
+    const select = document.getElementById('hidden-search-select');
+
+    if (input && select) {
+        input.value = ''; // Always clear when switching modes
+        select.value = '';
+        input.removeAttribute('min');
+        input.removeAttribute('max');
+
+        if (mode === 'location') {
+            input.classList.add('hidden');
+            select.classList.remove('hidden');
+
+            const locations = new Set();
+            let hasHiddenNoLocation = false;
+
+            const processEvent = (ev, uid) => {
+                let isHidden = false;
+
+                // 1. Is it explicitly hidden as an instance?
+                if (state.hiddenUids.has(uid)) {
+                    isHidden = true;
+                }
+                // 2. Is it part of a hidden series?
+                else if (state.hiddenNames.has(ev.name)) {
+                    // It is hidden UNLESS it is specifically shown or attended
+                    if (!state.shownUids.has(uid) && !state.attendingIds.has(uid)) {
+                        isHidden = true;
+                    }
+                }
+
+                if (isHidden) {
+                    if (ev.location) locations.add(ev.location);
+                    else hasHiddenNoLocation = true;
+                }
+            };
+
+            state.appData.forEach(ev => {
                 const timeData = parseTimeRange(ev.timePeriod);
                 if (timeData) {
                     const s = timeData.start + SHIFT_START_ADD;
                     const uid = `${ev.date}_${ev.name}_${s}`;
-                    if (state.attendingIds.has(uid) || state.shownUids.has(uid)) isVisibleAny = true;
+                    processEvent(ev, uid);
+                }
+            });
+
+            state.customEvents.forEach(ev => {
+                if (ev.uid) processEvent(ev, ev.uid);
+            });
+
+            select.innerHTML = '<option value="">All Locations</option>';
+            if (hasHiddenNoLocation) {
+                select.innerHTML += '<option value="__no_location__">No Location</option>';
+            }
+
+            Array.from(locations).sort().forEach(loc => {
+                const opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                select.appendChild(opt);
+            });
+
+        } else if (mode === 'date') {
+            select.classList.add('hidden');
+            input.classList.remove('hidden');
+            input.type = 'date';
+
+            if (state.availableDates && state.availableDates.length > 0) {
+                input.min = state.availableDates[0];
+                input.max = state.availableDates[state.availableDates.length - 1];
+            }
+            // Auto open picker
+            try {
+                if (typeof input.showPicker === 'function') {
+                    input.showPicker();
+                } else {
+                    input.click(); // Fallback for some older browsers
+                }
+            } catch (e) {
+                console.log('Cannot auto-open picker:', e);
+            }
+        } else {
+            select.classList.add('hidden');
+            input.classList.remove('hidden');
+            input.type = 'text';
+        }
+        toggleHiddenClearBtn();
+    }
+
+    renderHiddenContent();
+}
+
+export function toggleHiddenClearBtn() {
+    const input = document.getElementById('hidden-search-input');
+    const select = document.getElementById('hidden-search-select');
+    const clearBtn = document.getElementById('hidden-search-clear');
+
+    if (clearBtn) {
+        let hasValue = false;
+        if (hiddenSearchMode === 'location') {
+            if (select && select.value) hasValue = true;
+        } else {
+            if (input && input.value.length > 0) hasValue = true;
+        }
+
+        if (hasValue) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+}
+
+export function clearHiddenSearch() {
+    const input = document.getElementById('hidden-search-input');
+    const select = document.getElementById('hidden-search-select');
+
+    if (hiddenSearchMode === 'location') {
+        if (select) select.value = '';
+    } else {
+        if (input) input.value = '';
+    }
+
+    toggleHiddenClearBtn();
+    renderHiddenContent();
+}
+
+// Close search menu when clicking outside
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('hidden-search-menu');
+    const btn = document.getElementById('hidden-search-mode-btn');
+    if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add('hidden');
+    }
+});
+
+export function renderHiddenSeriesList(container, type) {
+    const input = document.getElementById('hidden-search-input');
+    const select = document.getElementById('hidden-search-select');
+    let searchTerm = '';
+
+    if (hiddenSearchMode === 'location') {
+        searchTerm = select?.value || '';
+    } else {
+        searchTerm = input?.value.toLowerCase() || '';
+    }
+
+    const seriesData = [];
+
+    state.hiddenNames.forEach(name => {
+        let total = 0;
+        let attending = 0;
+        let explicitlyShown = 0;
+        let isVisibleAny = false;
+
+        // Calculate stats eagerly to use for filtering
+        state.appData.forEach(ev => {
+            if (ev.name === name) {
+                total++;
+                const timeData = parseTimeRange(ev.timePeriod);
+                if (timeData) {
+                    const s = timeData.start + SHIFT_START_ADD;
+                    const uid = `${ev.date}_${ev.name}_${s}`;
+                    if (state.attendingIds.has(uid)) {
+                        attending++;
+                        isVisibleAny = true;
+                    }
+                    else if (state.shownUids.has(uid)) {
+                        explicitlyShown++;
+                        isVisibleAny = true;
+                    }
                 }
             }
         });
+
         if (!isVisibleAny) {
+            // Check custom events only if not yet visible from appData
             state.customEvents.forEach(ev => {
                 if (ev.name === name) {
-                    if (state.attendingIds.has(ev.uid) || state.shownUids.has(ev.uid)) isVisibleAny = true;
+                    total++;
+                    if (state.attendingIds.has(ev.uid)) {
+                        attending++;
+                        isVisibleAny = true;
+                    }
+                    else if (state.shownUids.has(ev.uid)) {
+                        explicitlyShown++;
+                        isVisibleAny = true;
+                    }
                 }
             });
         }
 
-        if (type === 'partial' && isVisibleAny) seriesList.push(name);
-        if (type === 'full' && !isVisibleAny) seriesList.push(name);
+        // Check filtering by tab type
+        let shouldInclude = false;
+        if (type === 'partial' && isVisibleAny) shouldInclude = true;
+        if (type === 'full' && !isVisibleAny) shouldInclude = true;
+
+        if (shouldInclude) {
+            const visible = attending + explicitlyShown;
+            const hidden = total - visible;
+
+            // Construct label text for search
+            const parts = [];
+            if (attending > 0) parts.push(`${attending} attending`);
+            if (explicitlyShown > 0) parts.push(`${explicitlyShown} unhidden`);
+            parts.push(`${hidden} hidden`);
+
+            let labelText = '';
+            let labelHtml = '';
+
+            if (visible > 0) {
+                labelText = `(${parts.join(', ')})`;
+                labelHtml = `<span class="text-xs text-gray-500 ml-2 font-normal">${labelText}</span>`;
+            } else {
+                labelText = `(${hidden} hidden)`;
+                labelHtml = `<span class="text-xs text-gray-500 ml-2 font-normal">${labelText}</span>`;
+            }
+
+            // Search filter
+            let matches = false;
+
+            if (hiddenSearchMode === 'default') {
+                if (name.toLowerCase().includes(searchTerm) || labelText.toLowerCase().includes(searchTerm)) matches = true;
+            } else if (hiddenSearchMode === 'description') {
+                if (name.toLowerCase().includes(searchTerm)) matches = true;
+                else {
+                    // Check description of any event in series
+                    const events = state.appData.filter(e => e.name === name);
+                    if (events.some(e => (e.description || '').toLowerCase().includes(searchTerm) || (e.longDescription || '').toLowerCase().includes(searchTerm))) matches = true;
+                }
+            } else if (hiddenSearchMode === 'location') {
+                if (!searchTerm) matches = true; // Show all if no selection
+                else {
+                    const events = state.appData.filter(e => e.name === name);
+                    if (searchTerm === '__no_location__') {
+                        if (events.some(e => !e.location)) matches = true;
+                    } else {
+                        if (events.some(e => e.location === searchTerm)) matches = true;
+                    }
+                }
+            } else if (hiddenSearchMode === 'date') {
+                // Check if any event date matches
+                const events = state.appData.filter(e => e.name === name);
+                if (events.some(e => e.date.includes(searchTerm))) matches = true;
+            }
+
+            if (matches) {
+                seriesData.push({ name, labelHtml });
+            }
+        }
     });
 
-    if (seriesList.length === 0) {
-        container.innerHTML = `<div class="text-center text-gray-400 py-8 italic">No events found.</div>`;
+
+    if (seriesData.length === 0) {
+        container.innerHTML = `<div class="text-center text-gray-400 py-8 italic">No events found matching your search.</div>`;
         return;
     }
 
     const restoreBtn = document.createElement('button');
     restoreBtn.className = "w-full mb-4 py-2 bg-[#F3E8F5] text-[#5C068C] font-semibold rounded hover:bg-[#eaddf0] transition text-sm dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]";
-    restoreBtn.textContent = `Restore All (${seriesList.length})`;
+    restoreBtn.textContent = `Restore All (${seriesData.length})`;
     restoreBtn.onclick = () => restoreAllHidden(type);
     container.appendChild(restoreBtn);
 
-    const sortedSeries = seriesList.map(name => {
-        const firstEvent = state.appData.find(e => e.name === name);
+    const sortedSeries = seriesData.map(item => {
+        const firstEvent = state.appData.find(e => e.name === item.name);
         let sortTime = 9999999999999;
         if (firstEvent) {
             const timeData = parseTimeRange(firstEvent.timePeriod);
@@ -383,51 +648,12 @@ export function renderHiddenSeriesList(container, type) {
                 sortTime = dateObj.getTime() + timeData.start;
             }
         }
-        return { name, sortTime };
+        return { ...item, sortTime };
     }).sort((a, b) => a.sortTime - b.sortTime);
 
-    sortedSeries.forEach(({ name }) => {
+    sortedSeries.forEach(({ name, labelHtml }) => {
         const row = document.createElement('div');
         row.className = 'flex justify-between items-center bg-white border border-gray-200 rounded p-3 mb-2 shadow-sm';
-
-        let total = 0;
-        let attending = 0;
-        let explicitlyShown = 0;
-
-        state.appData.forEach(ev => {
-            if (ev.name === name) {
-                total++;
-                const timeData = parseTimeRange(ev.timePeriod);
-                if (timeData) {
-                    const s = timeData.start + SHIFT_START_ADD;
-                    const uid = `${ev.date}_${ev.name}_${s}`;
-                    if (state.attendingIds.has(uid)) attending++;
-                    else if (state.shownUids.has(uid)) explicitlyShown++;
-                }
-            }
-        });
-
-        state.customEvents.forEach(ev => {
-            if (ev.name === name) {
-                total++;
-                if (state.attendingIds.has(ev.uid)) attending++;
-                else if (state.shownUids.has(ev.uid)) explicitlyShown++;
-            }
-        });
-
-        const visible = attending + explicitlyShown;
-        const hidden = total - visible;
-
-        let countText = '';
-        if (visible > 0) {
-            const parts = [];
-            if (attending > 0) parts.push(`${attending} attending`);
-            if (explicitlyShown > 0) parts.push(`${explicitlyShown} unhidden`);
-            parts.push(`${hidden} hidden`);
-            countText = `<span class="text-xs text-gray-500 ml-2 font-normal">(${parts.join(', ')})</span>`;
-        } else {
-            countText = `<span class="text-xs text-gray-500 ml-2 font-normal">(${hidden} hidden)</span>`;
-        }
 
         const repEvent = state.appData.find(e => e.name === name);
         if (repEvent) {
@@ -444,7 +670,7 @@ export function renderHiddenSeriesList(container, type) {
             }
         }
 
-        row.innerHTML = `<span class="font-medium text-gray-800 text-sm truncate pr-4 cursor-pointer flex-1" onclick="if(window.innerWidth <= 768) openMobileEventModalFromHidden('${name}')">${name}${countText}</span>
+        row.innerHTML = `<span class="font-medium text-gray-800 text-sm truncate pr-4 cursor-pointer flex-1" onclick="if(window.innerWidth <= 768) openMobileEventModalFromHidden('${name}')">${name}${labelHtml}</span>
 <button class="text-xs bg-[#F3E8F5] text-[#5C068C] px-3 py-1 rounded hover:bg-[#eaddf0] font-semibold restore-series-btn dark:bg-[#5C068C] dark:text-white dark:hover:bg-[#4a0470]">Restore</button>`;
 
         row.querySelector('.restore-series-btn').onclick = (e) => { e.stopPropagation(); unhideSeries(name, true); };
@@ -466,6 +692,16 @@ export function renderHiddenInstances(container) {
 
     const section = document.createElement('div');
 
+    const input = document.getElementById('hidden-search-input');
+    const select = document.getElementById('hidden-search-select');
+    let searchTerm = '';
+
+    if (hiddenSearchMode === 'location') {
+        searchTerm = select?.value || '';
+    } else {
+        searchTerm = input?.value.toLowerCase() || '';
+    }
+
     const hiddenInstanceData = [];
     const allSourceEvents = [...state.appData];
 
@@ -474,7 +710,30 @@ export function renderHiddenInstances(container) {
         if (!timeData) return;
         const s = timeData.start + SHIFT_START_ADD;
         const uid = `${ev.date}_${ev.name}_${s}`;
-        if (state.hiddenUids.has(uid)) hiddenInstanceData.push({ ...ev, uid, s });
+
+        if (state.hiddenUids.has(uid)) {
+            // Apply Search Filter
+            let matches = false;
+            if (hiddenSearchMode === 'default') {
+                if (ev.name.toLowerCase().includes(searchTerm)) matches = true;
+            } else if (hiddenSearchMode === 'description') {
+                if (ev.name.toLowerCase().includes(searchTerm)) matches = true;
+                else if ((ev.description || '').toLowerCase().includes(searchTerm) || (ev.longDescription || '').toLowerCase().includes(searchTerm)) matches = true;
+            } else if (hiddenSearchMode === 'location') {
+                if (!searchTerm) matches = true;
+                else if (searchTerm === '__no_location__') {
+                    if (!ev.location) matches = true;
+                } else {
+                    if (ev.location === searchTerm) matches = true;
+                }
+            } else if (hiddenSearchMode === 'date') {
+                if (ev.date.includes(searchTerm)) matches = true;
+            }
+
+            if (matches) {
+                hiddenInstanceData.push({ ...ev, uid, s });
+            }
+        }
     });
 
     hiddenInstanceData.sort((a, b) => {

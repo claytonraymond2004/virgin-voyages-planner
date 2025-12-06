@@ -22,7 +22,8 @@ import {
     jumpToEventFromPanel, openBlacklistModal, saveBlacklistUI, toggleOptionalEvent,
     toggleShowHiddenTemp, openTimeBlocksModal, saveTimeBlocksUI, initInstallPrompt,
     openSmartScheduler, toggleAgendaPanel, updateAgendaPanel,
-    openUpdateAgendaModal, resetUpdateModal, renderChangeSummary, confirmUpdateApply
+    openUpdateAgendaModal, resetUpdateModal, renderChangeSummary, confirmUpdateApply,
+    toggleHiddenSearchMenu, setHiddenSearchMode, toggleHiddenClearBtn, clearHiddenSearch, renderHiddenContent
 } from './ui.js';
 import {
     populateCustomModal, saveCustomEvent, tryCloseCustomModal,
@@ -55,6 +56,11 @@ window.toggleMenu = (e) => {
 window.toggleSearchMenu = toggleSearchMenu;
 window.setSearchMode = setSearchMode;
 window.clearSearch = clearSearch;
+window.toggleHiddenSearchMenu = toggleHiddenSearchMenu;
+window.setHiddenSearchMode = setHiddenSearchMode;
+window.toggleHiddenClearBtn = toggleHiddenClearBtn;
+window.clearHiddenSearch = clearHiddenSearch;
+window.renderHiddenContent = renderHiddenContent;
 window.jumpToEvent = jumpToEvent;
 window.jumpToEventFromPanel = jumpToEventFromPanel;
 window.toggleAttendance = toggleAttendance;
