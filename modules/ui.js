@@ -873,8 +873,22 @@ export function toggleAgendaPanel() {
     if (isOpen) {
         panel.classList.remove('open');
     } else {
+        // Reset state for new session
+        state.agendaHasUserScrolled = false;
+        state.agendaIsAutoScrolling = false;
+
         updateAgendaPanel();
         panel.classList.add('open');
+
+        const content = document.getElementById('agenda-panel-content');
+        if (content) {
+            content.onscroll = () => {
+                state.agendaPanelScrollPosition = content.scrollTop;
+                if (!state.agendaIsAutoScrolling) {
+                    state.agendaHasUserScrolled = true;
+                }
+            };
+        }
     }
 }
 
@@ -1024,47 +1038,73 @@ export function updateAgendaPanel() {
     // Find closest event
     let targetUid = null;
 
-    // 1. Try to find event today that hasn't ended yet or is about to start
-    const todayEvents = events.filter(e => e.date === currentDateStr);
-    if (todayEvents.length > 0) {
-        // Find first event that ends after now (current or future)
-        const upcoming = todayEvents.find(e => {
-            const end = e.endMins ?? e.endMinutes;
-            return end > currentMins;
-        });
+    // Check if current date is within the cruise range
+    // We use all attending events to determine range.
+    // If we are before the first event, or after the last event, do NOT auto-scroll.
+    const uniqueDates = Object.keys(byDay).sort();
+    let isWithinRange = false;
 
-        if (upcoming) {
-            targetUid = upcoming.uid;
-        } else {
-            // All events today have passed, maybe scroll to the last one? 
-            // Or just let it be. User request says "closest event".
-            // If all passed, maybe next day?
+    if (uniqueDates.length > 0) {
+        const firstDate = uniqueDates[0];
+        const lastDate = uniqueDates[uniqueDates.length - 1];
+        if (currentDateStr >= firstDate && currentDateStr <= lastDate) {
+            isWithinRange = true;
         }
     }
 
-    // 2. If no target yet, find first event of future dates
-    if (!targetUid) {
-        const futureEvents = events.filter(e => e.date > currentDateStr);
-        if (futureEvents.length > 0) {
-            targetUid = futureEvents[0].uid;
-        }
-    }
+    if (!isWithinRange) {
+        // Stop here, leave targetUid as null
+    } else {
+        // 1. Try to find event today that hasn't ended yet or is about to start
+        const todayEvents = events.filter(e => e.date === currentDateStr);
+        if (todayEvents.length > 0) {
+            // Find first event that ends after now (current or future)
+            const upcoming = todayEvents.find(e => {
+                const end = e.endMins ?? e.endMinutes;
+                return end > currentMins;
+            });
 
-    // 3. If still no target (e.g. all past), maybe last event of today?
-    if (!targetUid && todayEvents.length > 0) {
-        targetUid = todayEvents[todayEvents.length - 1].uid;
-    }
-
-    if (targetUid) {
-        setTimeout(() => {
-            const el = document.getElementById(`agenda-card-${targetUid}`);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (upcoming) {
+                targetUid = upcoming.uid;
+            } else {
+                // All events today have passed, maybe scroll to the last one? 
+                // Or just let it be. User request says "closest event".
+                // If all passed, maybe next day?
             }
-        }, 100);
+        }
+
+        // 2. If no target yet, find first event of future dates
+        if (!targetUid) {
+            const futureEvents = events.filter(e => e.date > currentDateStr);
+            if (futureEvents.length > 0) {
+                targetUid = futureEvents[0].uid;
+            }
+        }
+
+        // 3. If still no target (e.g. all past), maybe last event of today?
+        if (!targetUid && todayEvents.length > 0) {
+            targetUid = todayEvents[todayEvents.length - 1].uid;
+        }
+
+        if (targetUid) {
+            if (!state.agendaHasUserScrolled) {
+                state.agendaIsAutoScrolling = true;
+                setTimeout(() => {
+                    const el = document.getElementById(`agenda-card-${targetUid}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    // Release lock after animation
+                    setTimeout(() => { state.agendaIsAutoScrolling = false; }, 800);
+                }, 100);
+            } else if (state.agendaPanelScrollPosition !== null) {
+                // Restore position if user has scrolled
+                const content = document.getElementById('agenda-panel-content');
+                if (content) content.scrollTop = state.agendaPanelScrollPosition;
+            }
+        }
     }
 }
-
 
 function formatTime(mins) {
     const h = Math.floor(mins / 60) % 24;
