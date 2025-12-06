@@ -222,6 +222,12 @@ export function openHiddenManager(keepTab = false) {
     if (!keepTab) {
         state.activeHiddenTab = 'series';
         state.hiddenTabScrollPositions = {};
+    } else {
+        // Save current scroll position if refreshing view
+        const container = document.getElementById('hidden-list-container');
+        if (container && document.getElementById('hidden-manager-modal').style.display === 'flex') {
+            state.hiddenTabScrollPositions[state.activeHiddenTab] = container.scrollTop;
+        }
     }
     renderHiddenContent();
     document.getElementById('hidden-manager-modal').style.display = 'flex';
