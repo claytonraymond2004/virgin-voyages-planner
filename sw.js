@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vv-planner-v3';
+const CACHE_NAME = 'vv-planner-v4';
 const ASSETS = [
     './',
     './index.html',
@@ -52,19 +52,26 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// List of allowed external image domains to cache
+const ALLOWED_IMAGE_DOMAINS = [
+    'virginvoyages.imgix.net'
+];
+
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Only handle same-origin requests (app assets) with Stale-While-Revalidate
-    // This avoids caching API calls or external resources inappropriately
-    if (url.origin === location.origin) {
+    // Handle same-origin requests (app assets) OR allowed external images
+    // This allows us to cache the agenda images for offline use
+    if (url.origin === location.origin || ALLOWED_IMAGE_DOMAINS.includes(url.hostname)) {
         event.respondWith(
             caches.match(event.request)
                 .then((cachedResponse) => {
-                    // Fetch from network to update cache
+                    // Fetch from network to update cache (Stale-While-Revalidate/Cache-First hybrid)
+                    // For external immutable images, cache is king, but we try to update if possible or fill if missing
                     const fetchPromise = fetch(event.request).then((networkResponse) => {
                         // Check if we received a valid response
-                        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                        // Allow 'basic' (same-origin) and 'cors' (external with CORS which we use for images)
+                        if (networkResponse && networkResponse.status === 200 && (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
                             const responseToCache = networkResponse.clone();
                             caches.open(CACHE_NAME).then((cache) => {
                                 cache.put(event.request, responseToCache);
@@ -80,5 +87,5 @@ self.addEventListener('fetch', (event) => {
                 })
         );
     }
-    // For cross-origin requests (like API calls), fall back to browser default (Network Only)
+    // For other cross-origin requests (like API calls), fall back to browser default (Network Only)
 });
