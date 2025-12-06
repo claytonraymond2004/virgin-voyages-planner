@@ -1448,6 +1448,16 @@ function applyAgendaUpdate() {
         }
     }
 
+    // Persist all changes
+    if (newEvents && newEvents.length > 0) {
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(state.appData));
+    }
+    saveAttendance();
+    saveEventNotes();
+    saveHiddenUids();
+    saveHiddenNames();
+    saveOptionalEvents();
+
     pendingUpdateEvents = null;
     renderApp();
 
