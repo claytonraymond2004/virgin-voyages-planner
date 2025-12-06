@@ -483,9 +483,24 @@ export function renderEventCard(ev, dayCol, widthPercent, leftPercent, isOptiona
     if (ev.isCustom) iconHtml = '<span class="mr-1 text-white">👤</span>';
     else if (ev.color === 'SINGLE') iconHtml = '<span class="mr-1 text-yellow-600">★</span>';
 
+    // Switch to row layout for image + text
+    el.style.flexDirection = 'row';
+    el.style.alignItems = 'center';
+
+    let imgHtml = '';
+    if (ev.imageUrl) {
+        imgHtml = `
+<div class="h-full aspect-square mr-2 flex-shrink-0 overflow-hidden rounded-md relative" style="max-height: 30px;">
+    <img src="${ev.imageUrl}" class="w-full h-full object-cover" alt="" style="pointer-events: none;" onerror="this.closest('div').style.display='none'">
+</div>`;
+    }
+
     el.innerHTML = `
-<div class="event-title truncate" title="${ev.name}">${iconHtml}${ev.name}</div>
-<div class="event-loc truncate">${ev.location || ''}</div>
+${imgHtml}
+<div class="flex flex-col min-w-0 flex-1 justify-center pointer-events-none">
+    <div class="event-title truncate" title="${ev.name}">${iconHtml}${ev.name}</div>
+    <div class="event-loc truncate">${ev.location || ''}</div>
+</div>
 `;
 
     el.dataset.uid = ev.uid;
