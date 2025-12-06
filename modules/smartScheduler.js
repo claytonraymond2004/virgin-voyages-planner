@@ -28,9 +28,10 @@ let currentRescheduleTargetUid = null;
 let restoreStateOnClose = null;
 
 // --- Main Entry Point ---
-export function initSmartScheduler() {
+export function initSmartScheduler(skipIntro = false) {
     window.isRescheduleMode = false;
-    currentWizardStep = WIZARD_STEPS.INTRO;
+    window.isIntroSkipped = skipIntro; // Store flag
+    currentWizardStep = skipIntro ? WIZARD_STEPS.PROCESS : WIZARD_STEPS.INTRO;
     proposedSchedule.clear();
     conflictList = [];
     ignoredConflicts.clear();
@@ -254,6 +255,8 @@ function renderIntroStep(body, footer) {
 
 // --- Step 2: Checklist ---
 function renderChecklistStep(body, footer) {
+    // If skipping intro and user goes BACK from process step, they might land here.
+    // That is fine, skipping is only for initial launch.
     const blacklistCount = state.blacklist.size;
     const customCount = state.customEvents.length;
     const customAttendingCount = state.customEvents.filter(e => state.attendingIds.has(e.uid)).length;
@@ -361,6 +364,9 @@ function renderProcessStep(body, footer) {
         </div>
     `;
     footer.innerHTML = '';
+
+    // Automatically start processing
+    setTimeout(runAlgorithm, 1000);
 }
 
 function runAlgorithm() {
@@ -738,13 +744,18 @@ function renderConflictsStep(body, footer) {
         cancelBtn.innerText = 'Back';
         cancelBtn.onclick = () => {
             // Clear backups if going back further
-            conflictSelectionsBackup = null;
             proposedScheduleBackup = null;
             skippedEventsBackup = null;
 
-            currentWizardStep = WIZARD_STEPS.CHECKLIST; // Go back to checklist? Or re-run?
-            // Maybe just re-run algo?
-            renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+            if (window.isIntroSkipped) {
+                // Do not allow going back to checklist if intro was skipped
+                // Treat as Cancel
+                closeWizard();
+            } else {
+                currentWizardStep = WIZARD_STEPS.CHECKLIST; // Go back to checklist? Or re-run?
+                // Maybe just re-run algo?
+                renderStepContent(document.getElementById('wizard-body'), document.getElementById('wizard-footer'));
+            }
         };
     }
 

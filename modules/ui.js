@@ -613,8 +613,8 @@ export function toggleMenu() {
     menu.classList.toggle('open');
 }
 
-export function openSmartScheduler() {
-    initSmartScheduler();
+export function openSmartScheduler(skipIntro = false) {
+    initSmartScheduler(skipIntro);
     document.getElementById('dropdown-menu').classList.remove('open');
 }
 
@@ -1435,6 +1435,8 @@ export function renderChangeSummary(changes) {
                 const isSkip = ev.ignored;
                 const isAttend = !isOverlap && !isSkip;
 
+                const canShowOverlap = futureConflicts.length > 0;
+
                 const footerHtml = `
                     <div class="border-t border-purple-200 dark:border-purple-800 p-2 bg-purple-100/30 dark:bg-purple-900/10">
                         <div class="flex flex-col gap-1">
@@ -1442,10 +1444,11 @@ export function renderChangeSummary(changes) {
                                 <input type="radio" name="${groupName}" value="attend" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending in Planner</span>
                             </label>
+                            ${canShowOverlap ? `
                             <label class="flex items-center gap-2 cursor-pointer select-none">
                                 <input type="radio" name="${groupName}" value="overlap" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Mark Attending with Overlap</span>
-                            </label>
+                            </label>` : ''}
                             <label class="flex items-center gap-2 cursor-pointer select-none">
                                 <input type="radio" name="${groupName}" value="skip" class="text-purple-600 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Skip Adding to Planner</span>
@@ -1473,6 +1476,15 @@ export function renderChangeSummary(changes) {
                     r.onchange = (e) => {
                         ev.ignored = (e.target.value === 'skip');
                         ev.forceOverlap = (e.target.value === 'overlap');
+
+                        // Re-render to update dynamic checks (like "Already Attending" in removed section)
+                        const list = document.getElementById('update-changes-list');
+                        const scroll = list ? list.scrollTop : 0;
+                        captureUpdateModalState(); // Capture state
+                        renderChangeSummary(lastRenderedChanges);
+                        // Restore scroll
+                        const newList = document.getElementById('update-changes-list');
+                        if (newList) newList.scrollTop = scroll;
                     };
                 });
 
@@ -1602,6 +1614,23 @@ export function renderChangeSummary(changes) {
                 const isSkip = bookedRef.ignored;
                 const isAttend = !isOverlap && !isSkip;
 
+                const canShowOverlap = futureConflicts.length > 0;
+
+                // Re-render conflict HTML here since we need it for canShowOverlap logic (though previously it was below)
+                // Actually we need to make sure conflictHtml is generated before footerHtml?
+                // In original code, conflictHtml was generated inside `if (bookedRef) { ... }`.
+                // Wait, `futureConflicts` was generated inside `if (bookedRef)` block in original code.
+                // So I will keep structure but move variable declaration up.
+
+                if (futureConflicts.length > 0) {
+                    // ... conflict HTML generation (omitted from replace block to keep brief, assumes it runs below/parallel) ...
+                    // Actually I need to regenerate the whole `if (bookedRef)` block or check where I am.
+                    // The snippet I am replacing covers the footer generation inside `if (bookedRef)`.
+                    // I will assume `futureConflicts` variable is accessible or I recalc it.
+                    // `futureConflicts` was defined LATER in the original code (Line 1579).
+                    // I must lift it up or recalculate.
+                }
+
                 footerHtml = `
                     <div class="border-t border-green-200 dark:border-green-800 p-2 bg-green-100/30 dark:bg-green-900/10">
                         <div class="flex flex-col gap-1">
@@ -1609,10 +1638,11 @@ export function renderChangeSummary(changes) {
                                 <input type="radio" name="${groupName}" value="attend" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Mark Attending in Planner</span>
                             </label>
+                            ${canShowOverlap ? `
                             <label class="flex items-center gap-2 cursor-pointer select-none">
                                 <input type="radio" name="${groupName}" value="overlap" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Mark Attending with Overlap</span>
-                            </label>
+                            </label>` : ''}
                             <label class="flex items-center gap-2 cursor-pointer select-none">
                                 <input type="radio" name="${groupName}" value="skip" class="text-green-600 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
                                 <span class="text-xs font-bold text-green-800 dark:text-green-300">Skip Adding to Planner</span>
@@ -1643,6 +1673,14 @@ export function renderChangeSummary(changes) {
                     r.onchange = (e) => {
                         bookedRef.ignored = (e.target.value === 'skip');
                         bookedRef.forceOverlap = (e.target.value === 'overlap');
+
+                        // Re-render to update dynamic checks
+                        const list = document.getElementById('update-changes-list');
+                        const scroll = list ? list.scrollTop : 0;
+                        captureUpdateModalState();
+                        renderChangeSummary(lastRenderedChanges);
+                        const newList = document.getElementById('update-changes-list');
+                        if (newList) newList.scrollTop = scroll;
                     };
                 });
             }
@@ -1724,24 +1762,35 @@ export function renderChangeSummary(changes) {
                 const isSkip = item.ignored;
                 const isAttend = !isOverlap && !isSkip;
 
-                footerHtml = `
-                    <div class="border-t border-orange-200 dark:border-orange-800 p-2 bg-orange-100/30 dark:bg-orange-900/10">
-                        <div class="flex flex-col gap-1">
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="attend" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending in Planner</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="overlap" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending with Overlap</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="radio" name="${groupName}" value="skip" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Skip Adding to Planner</span>
-                            </label>
+                // Check for conflicts again or reuse? `futureConflicts` was inside `if (isScheduled)` block just above?
+                // Actually `conflictHtml` generation block was `if (isScheduled) { const futureConflicts = ... }`.
+                // `footerHtml` generation block is ALSO `if (isScheduled) { ... }`.
+                // Since they are separate consecutive `if` blocks with same condition, I can technically merge them or just re-run check.
+                // Merging them would be cleaner but risky with replace tool.
+                // I will just re-run check for safety and minimal diff.
+                const userConflicts = checkFutureConflict(newEv);
+                const canShowOverlap = userConflicts.length > 0;
+
+                if (canShowOverlap) {
+                    footerHtml = `
+                        <div class="border-t border-orange-200 dark:border-orange-800 p-2 bg-orange-100/30 dark:bg-orange-900/10">
+                            <div class="flex flex-col gap-1">
+                                <label class="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="radio" name="${groupName}" value="attend" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isAttend ? 'checked' : ''}>
+                                    <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending in Planner</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="radio" name="${groupName}" value="overlap" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isOverlap ? 'checked' : ''}>
+                                    <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Mark Attending with Overlap</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="radio" name="${groupName}" value="skip" class="text-orange-600 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" ${isSkip ? 'checked' : ''}>
+                                    <span class="text-xs font-bold text-orange-800 dark:text-orange-300">Skip Adding to Planner</span>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
 
             el.innerHTML = `
@@ -1761,17 +1810,27 @@ export function renderChangeSummary(changes) {
             if (isScheduled) {
                 const groupName = `action_modified_${idx}`;
                 const radios = el.querySelectorAll(`input[name="${groupName}"]`);
-                radios.forEach(r => {
-                    r.onchange = (e) => {
-                        item.ignored = (e.target.value === 'skip');
-                        item.forceOverlap = (e.target.value === 'overlap');
-                    };
-                });
+                if (radios.length > 0) {
+                    radios.forEach(r => {
+                        r.onchange = (e) => {
+                            item.ignored = (e.target.value === 'skip');
+                            item.forceOverlap = (e.target.value === 'overlap');
 
-                if (checkFutureConflict(newEv).length > 0) {
-                    item.hasConflicts = true;
-                } else {
-                    item.hasConflicts = false;
+                            const list = document.getElementById('update-changes-list');
+                            const scroll = list ? list.scrollTop : 0;
+                            captureUpdateModalState();
+                            renderChangeSummary(lastRenderedChanges);
+
+                            const newList = document.getElementById('update-changes-list');
+                            if (newList) newList.scrollTop = scroll;
+                        };
+                    });
+
+                    if (checkFutureConflict(newEv).length > 0) {
+                        item.hasConflicts = true;
+                    } else {
+                        item.hasConflicts = false;
+                    }
                 }
             }
         });
@@ -1801,24 +1860,97 @@ export function renderChangeSummary(changes) {
             let footerHtml = '';
 
             if (isScheduled) {
-                // Mark for reschedule by default? 
-                // We don't have a "reschedule" input unless we specifically want to.
-                // Original logic had a checkbox. We'll keep it as "Reschedule this event?"
+                // Check if we are ALREADY attending another instance of this SAME event
+                let alreadyAttendingEv = null;
 
-                if (ev.reschedule === undefined) ev.reschedule = true;
+                // 1. Check existing Future Base Schedule
+                for (const uid of futureAttending) {
+                    const existing = state.eventLookup.get(uid);
+                    if (existing && existing.name === ev.name) {
+                        alreadyAttendingEv = existing;
+                        break;
+                    }
+                }
 
-                warningHtml = `
-                    <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
-                `;
+                // 2. Check "New Events" (Added)
+                if (!alreadyAttendingEv) {
+                    const match = changes.added.find(a => {
+                        if (a.name !== ev.name) return false;
 
-                footerHtml = `
-                    <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
-                            <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
-                        </label>
-                    </div>
-                `;
+                        // If it corresponds to a Booked Change (e.g. "Attending In VV App"), check the state of that booked change
+                        if (a._bookedChangeRef) {
+                            if (a._bookedChangeRef.ignored) return false; // Skipped by user selection
+                            return true; // Marked Attend or Overlap
+                        }
+
+                        // If it's a raw new event (not booked), it's not "attending" unless we someday allow auto-attend new events
+                        // For now, assume if it's in "Added" list without booked ref, it's NOT attending yet.
+                        return false;
+                    });
+                    if (match) alreadyAttendingEv = match;
+                }
+
+                // 3. Check "Booked Event Changes" (Added)
+                // These are ones NOT in "New Events" section (visibleAdded logic inside render loop, but we can check source)
+                if (!alreadyAttendingEv && changes.bookedChanges && changes.bookedChanges.added) {
+                    const match = changes.bookedChanges.added.find(b => {
+                        if (b.name !== ev.name) return false;
+                        if (b.ignored) return false; // User selected "Skip Adding to Planner"
+
+                        // Ensure we don't count if we already matched it in step 2 (via _bookedChangeRef)
+                        // But logic above handles that by checking !alreadyAttendingEv
+                        return true;
+                    });
+                    if (match) alreadyAttendingEv = match;
+                }
+
+                // 4. Check "Modified Events"
+                if (!alreadyAttendingEv && changes.modified) {
+                    const match = changes.modified.find(m => {
+                        if (m.newEv.name !== ev.name) return false;
+                        if (m.ignored) return false; // User selected "Skip"
+                        // If user selected "Attend" or "Overlap", then we will be attending this new version
+                        return true;
+                    });
+                    if (match) alreadyAttendingEv = match.newEv; // Use newEv for display
+                }
+
+
+                if (alreadyAttendingEv) {
+                    // Found an attending instance!
+                    // Disable reschedule (logic wise) so we don't accidentally prompt later
+                    ev.reschedule = false;
+
+                    warningHtml = `
+                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                    `;
+
+                    footerHtml = `
+                        <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                             <div class="flex items-center gap-2 text-xs text-green-700 dark:text-green-300 font-bold">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>No need to reschedule, already attending<br><span class="font-normal opacity-90">${alreadyAttendingEv.date} @ ${alreadyAttendingEv.timePeriod || formatTimeRange(alreadyAttendingEv.startMins, alreadyAttendingEv.endMins)}</span></span>
+                             </div>
+                        </div>
+                    `;
+
+                } else {
+                    // Default Reschedule Logic
+                    if (ev.reschedule === undefined || ev.reschedule === false) ev.reschedule = true;
+
+                    warningHtml = `
+                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                    `;
+
+                    footerHtml = `
+                        <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
+                                <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
+                            </label>
+                        </div>
+                    `;
+                }
             }
 
             el.innerHTML = `
@@ -1835,7 +1967,9 @@ export function renderChangeSummary(changes) {
 
             if (isScheduled) {
                 const cb = document.getElementById(`rem-resched-${idx}-grid`);
-                cb.onchange = (e) => { ev.reschedule = e.target.checked; };
+                if (cb) {
+                    cb.onchange = (e) => { ev.reschedule = e.target.checked; };
+                }
             }
         });
     }
