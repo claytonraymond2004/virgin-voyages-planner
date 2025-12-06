@@ -1315,6 +1315,12 @@ function applyAgendaUpdate() {
             state.hiddenUids.delete(oldUid);
             state.hiddenUids.add(newUid);
         }
+
+        // Shown UIDs (Instance Unhiding)
+        if (state.shownUids && state.shownUids.has(oldUid)) {
+            state.shownUids.delete(oldUid);
+            state.shownUids.add(newUid);
+        }
     });
 
     // 2. Apply New Events Data
@@ -1449,13 +1455,15 @@ function applyAgendaUpdate() {
     }
 
     // Persist all changes
-    if (newEvents && newEvents.length > 0) {
+    if (state.appData && state.appData.length > 0) {
         localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(state.appData));
     }
     saveAttendance();
+    saveCustomEvents();
     saveEventNotes();
     saveHiddenUids();
     saveHiddenNames();
+    saveShownUids();
     saveOptionalEvents();
 
     pendingUpdateEvents = null;
@@ -1720,8 +1728,9 @@ function processBookedEvents(bookedEvents, shouldRender = true) {
                 modified = true;
             }
 
-            // Hide other occurrences (Series Hiding)
-            if (!state.hiddenNames.has(match.name)) {
+            // Hide other occurrences (Series Hiding) - ONLY if it's actually a series (needs hiding others)
+            const instanceCount = state.appData.filter(e => e.name === match.name).length;
+            if (instanceCount > 1 && !state.hiddenNames.has(match.name)) {
                 state.hiddenNames.add(match.name);
                 modified = true;
             }

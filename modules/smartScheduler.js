@@ -1260,7 +1260,11 @@ function applySchedule() {
     state.attendingIds.forEach(uid => {
         const ev = state.eventLookup.get(uid);
         if (ev) {
-            state.hiddenNames.add(ev.name);
+            // Only hide if it's a series (multiple instances)
+            const siblings = state.eventNameMap.get(ev.name);
+            if (siblings && siblings.length > 1) {
+                state.hiddenNames.add(ev.name);
+            }
         }
     });
 
