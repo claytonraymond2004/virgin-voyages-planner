@@ -775,6 +775,7 @@ async function handleUpdateVVLogin() {
     const btn = document.getElementById('btn-update-vv-login');
     const spinner = document.getElementById('update-vv-spinner');
     const statusDiv = document.getElementById('update-vv-status');
+    const switchBtn = document.getElementById('btn-update-switch-account');
 
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
@@ -807,6 +808,10 @@ async function handleUpdateVVLogin() {
     passwordInput.disabled = true;
     importBookedCheckbox.disabled = true;
     if (modeRadios) modeRadios.forEach(r => r.disabled = true);
+    if (switchBtn) {
+        switchBtn.disabled = true;
+        switchBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
 
     const importBooked = importBookedCheckbox.checked;
 
@@ -828,8 +833,14 @@ async function handleUpdateVVLogin() {
         passwordInput.disabled = false;
         importBookedCheckbox.disabled = false;
 
+
         // Restore radio state
         if (window.toggleUpdateOptions) window.toggleUpdateOptions();
+
+        if (switchBtn) {
+            switchBtn.disabled = false;
+            switchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
 
     } catch (err) {
         console.error(err);
@@ -849,6 +860,11 @@ async function handleUpdateVVLogin() {
         usernameInput.disabled = false;
         passwordInput.disabled = false;
         importBookedCheckbox.disabled = false;
+
+        if (switchBtn) {
+            switchBtn.disabled = false;
+            switchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
 
         // Restore radio state
         if (window.toggleUpdateOptions) window.toggleUpdateOptions();
