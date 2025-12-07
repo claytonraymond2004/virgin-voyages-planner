@@ -1789,25 +1789,28 @@ export function renderChangeSummary(changes) {
 
     const hasBookedChanges = changes.bookedChanges && (changes.bookedChanges.added.length > 0 || changes.bookedChanges.removed.length > 0 || changes.bookedChanges.unattended.length > 0);
 
-    const getStatusBadges = (ev) => {
+    const getStatusBadges = (ev, isScheduled = false) => {
         let html = '';
         // Optional
         if (state.optionalEvents.has(ev.name)) {
-            html += `<span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-1 rounded h-5 flex items-center ml-2 border border-blue-200 dark:border-blue-800 whitespace-nowrap">Optional</span>`;
+            html += `<span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-1 py-0.5 rounded flex items-center ml-2 border border-blue-200 dark:border-blue-800 text-center">Optional</span>`;
         }
 
         // Hidden
-        if (state.hiddenNames.has(ev.name)) {
-            html += `<span class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1 rounded h-5 flex items-center ml-2 border border-gray-200 dark:border-gray-600 whitespace-nowrap">Hidden Series</span>`;
-        } else {
-            // Check instance hidden
-            // Try to resolve UID
-            let uid = ev.uid || ev._uid;
-            if (!uid && ev.date && ev.name && typeof ev.startMins === 'number') {
-                uid = `${ev.date}_${ev.name}_${ev.startMins}`;
-            }
-            if (uid && state.hiddenUids.has(uid)) {
-                html += `<span class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1 rounded h-5 flex items-center ml-2 border border-gray-200 dark:border-gray-600 whitespace-nowrap">Hidden Instance</span>`;
+        // Only show if NOT scheduled (if scheduled, it is a visible instance of a hidden series)
+        if (!isScheduled) {
+            if (state.hiddenNames.has(ev.name)) {
+                html += `<span class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded flex items-center ml-2 border border-gray-200 dark:border-gray-600 text-center">Hidden Series</span>`;
+            } else {
+                // Check instance hidden
+                // Try to resolve UID
+                let uid = ev.uid || ev._uid;
+                if (!uid && ev.date && ev.name && typeof ev.startMins === 'number') {
+                    uid = `${ev.date}_${ev.name}_${ev.startMins}`;
+                }
+                if (uid && state.hiddenUids.has(uid)) {
+                    html += `<span class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded flex items-center ml-2 border border-gray-200 dark:border-gray-600 text-center">Hidden Instance</span>`;
+                }
             }
         }
         return html;
@@ -1991,9 +1994,11 @@ export function renderChangeSummary(changes) {
                         <div class="flex justify-between items-start">
                             <div class="flex flex-wrap items-center gap-1">
                                 <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</span>
-                                ${getStatusBadges(ev)}
                             </div>
-                            <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 rounded h-5 flex items-center">${typeLabel}</span>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1 py-0.5 rounded flex items-center text-center">${typeLabel}</span>
+                                ${getStatusBadges(ev, true)}
+                            </div>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${ev.timePeriod}</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
@@ -2048,9 +2053,11 @@ export function renderChangeSummary(changes) {
                         <div class="flex justify-between items-start">
                              <div class="flex flex-wrap items-center gap-1">
                                 <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</span>
-                                ${getStatusBadges(ev)}
                             </div>
-                            <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 rounded h-5 flex items-center">Booking Cancelled</span>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1 py-0.5 rounded flex items-center text-center">Booking Cancelled</span>
+                                ${getStatusBadges(ev, false)}
+                            </div>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     </div>
@@ -2077,9 +2084,11 @@ export function renderChangeSummary(changes) {
                         <div class="flex justify-between items-start">
                             <div class="flex flex-wrap items-center gap-1">
                                 <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</span>
-                                ${getStatusBadges(ev)}
                             </div>
-                            <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 rounded h-5 flex items-center">Atttending in Planner</span>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[10px] uppercase font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900 px-1 py-0.5 rounded flex items-center text-center">Atttending in Planner</span>
+                                ${getStatusBadges(ev, true)}
+                            </div>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     </div>
@@ -2122,7 +2131,7 @@ export function renderChangeSummary(changes) {
             if (bookedRef) {
                 // Label for "Attending In VV App"
                 attendingLabelHtml = `
-                    <span class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 px-1 rounded h-5 flex items-center whitespace-nowrap ml-2">Attending In VV App</span>
+                    <span class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 px-1 py-0.5 rounded flex items-center ml-2">Attending In VV App</span>
                 `;
 
                 // If it's a booked event, we show conflict UI if any
@@ -2195,9 +2204,11 @@ export function renderChangeSummary(changes) {
                     <div class="flex justify-between items-start">
                         <div class="flex flex-wrap items-center gap-1">
                             <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</span>
-                            ${getStatusBadges(ev)}
                         </div>
-                        ${attendingLabelHtml}
+                        <div class="flex flex-col items-end gap-1">
+                            ${attendingLabelHtml}
+                            ${getStatusBadges(ev, false)}
+                        </div>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                     <div class="text-xs text-gray-400 dark:text-gray-500 truncate">${escapeHtml(ev.location || '')}</div>
@@ -2294,7 +2305,7 @@ export function renderChangeSummary(changes) {
             let warningHtml = '';
             if (isScheduled) {
                 warningHtml = `
-                    <span class="text-[10px] uppercase font-bold text-orange-800 dark:text-orange-200 bg-orange-100 dark:bg-orange-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                    <span class="text-[10px] uppercase font-bold text-orange-800 dark:text-orange-200 bg-orange-100 dark:bg-orange-900 px-1 py-0.5 rounded ml-2">Attending in Planner</span>
                 `;
             }
 
@@ -2341,9 +2352,11 @@ export function renderChangeSummary(changes) {
                     <div class="flex justify-between items-start">
                          <div class="flex flex-wrap items-center gap-1">
                             <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(newEv.name)}</span>
-                            ${getStatusBadges(newEv)}
                         </div>
-                        ${warningHtml}
+                        <div class="flex flex-col items-end gap-1">
+                            ${warningHtml}
+                            ${getStatusBadges(newEv, isScheduled)}
+                        </div>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${newEv.date}</div>
                     ${details}
@@ -2474,7 +2487,7 @@ export function renderChangeSummary(changes) {
                     ev.reschedule = false;
 
                     warningHtml = `
-                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 py-0.5 rounded ml-2">Attending in Planner</span>
                     `;
 
                     footerHtml = `
@@ -2494,7 +2507,7 @@ export function renderChangeSummary(changes) {
                         // No other instances exist - cannot reschedule
                         ev.reschedule = false;
                         warningHtml = `
-                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending (Discontinued)</span>
+                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 py-0.5 rounded ml-2">Attending (Discontinued)</span>
                     `;
 
                         footerHtml = `
@@ -2510,7 +2523,7 @@ export function renderChangeSummary(changes) {
                         if (ev.reschedule === undefined || ev.reschedule === false) ev.reschedule = true;
 
                         warningHtml = `
-                            <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                            <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 py-0.5 rounded ml-2">Attending in Planner</span>
                         `;
 
                         footerHtml = `
@@ -2530,9 +2543,11 @@ export function renderChangeSummary(changes) {
                     <div class="flex justify-between items-start">
                         <div class="flex flex-wrap items-center gap-1">
                             <span class="font-bold text-gray-800 dark:text-gray-100">${escapeHtml(ev.name)}</span>
-                            ${getStatusBadges(ev)}
                         </div>
-                        ${warningHtml}
+                        <div class="flex flex-col items-end gap-1">
+                            ${warningHtml}
+                            ${getStatusBadges(ev, isScheduled)}
+                        </div>
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">${ev.date} @ ${formatTimeRange(ev.startMins, ev.endMins)}</div>
                 </div>
