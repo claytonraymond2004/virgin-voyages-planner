@@ -233,17 +233,14 @@ const VirginAPI = {
                 throw new Error('No itinerary days found.');
             }
 
-            const allEvents = [];
-            const bookedEvents = [];
             const totalDays = itineraries.length;
+            let completedCount = 0;
 
-            for (let i = 0; i < totalDays; i++) {
-                const day = itineraries[i];
-                onProgress(`Fetching day ${i + 1} of ${totalDays} (${day.date})...`);
+            // Initial progress update
+            onProgress(`Fetching ${totalDays} days of data...`);
 
-                // Add a small delay to be nice to the API
-                await new Promise(r => setTimeout(r, 500));
-
+            // Helper to fetch a single day (Lineup + Agenda)
+            const fetchDay = async (day) => {
                 try {
                     const dayData = await this.getLineup(accessToken, day.date, reservationGuestId, reservationNumber, voyageNumber);
 
@@ -255,15 +252,14 @@ const VirginAPI = {
                         dayData.date = day.date;
                     }
 
-                    allEvents.push(dayData);
-
+                    let dayBookings = [];
                     if (importBooked) {
                         // Fetch agenda
                         const sc = shipCode || (voyageNumber ? voyageNumber.substring(0, 2) : 'BR');
                         try {
                             const agendaData = await this.getAgenda(accessToken, day.date, reservationGuestId, sc);
                             if (agendaData && agendaData.appointments) {
-                                bookedEvents.push(...agendaData.appointments);
+                                dayBookings = agendaData.appointments;
                             }
                         } catch (err) {
                             if (err.message && err.message.includes('401')) throw err;
@@ -271,11 +267,34 @@ const VirginAPI = {
                         }
                     }
 
+                    completedCount++;
+                    onProgress(`Fetching days... (${completedCount}/${totalDays})`);
+
+                    return { dayData, dayBookings };
+
                 } catch (err) {
                     if (err.message && err.message.includes('401')) throw err;
+                    // Log but continue for other errors
                     console.error(`Error fetching day ${day.date}`, err);
+                    completedCount++;
+                    onProgress(`Fetching days... (${completedCount}/${totalDays})`);
+                    return null;
                 }
-            }
+            };
+
+            // Execute all day fetches in parallel
+            const results = await Promise.all(itineraries.map(day => fetchDay(day)));
+
+            const allEvents = [];
+            const bookedEvents = [];
+
+            // Aggregate results
+            results.forEach(result => {
+                if (result) {
+                    allEvents.push(result.dayData);
+                    bookedEvents.push(...result.dayBookings);
+                }
+            });
 
             onProgress('Processing data...');
             return { events: allEvents, bookedEvents };
