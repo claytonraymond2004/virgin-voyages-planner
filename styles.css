@@ -1460,7 +1460,7 @@ body.dark .time-block::after {
     height: 2px;
     background-color: var(--virgin-red);
     width: 100%;
-    z-index: 500;
+    z-index: 149;
     pointer-events: none;
     left: 0;
     box-shadow: 0 0 4px rgba(175, 35, 28, 0.6);
