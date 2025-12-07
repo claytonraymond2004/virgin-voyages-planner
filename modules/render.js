@@ -175,7 +175,7 @@ export function renderApp() {
                 <div class="absolute bottom-1 right-1 port-note-container">
                     ${note ?
                 `<span class="text-xs font-semibold port-text cursor-pointer hover:underline port-note-edit">${note}</span>` :
-                `<button class="text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded px-1 port-note-add">+</button>`
+                `<button class="text-xs text-gray-600 hover:text-gray-900 border border-gray-400 hover:border-gray-600 dark:text-gray-400 dark:border-gray-500 dark:hover:text-gray-200 rounded px-1 port-note-add">+</button>`
             }
                 </div>
             </div>
@@ -908,6 +908,10 @@ export function renderCurrentTimeBar(shouldCenter = false) {
     dayCol.appendChild(bar);
 
     if (shouldCenter) {
+        state.isAutoScrolling = true;
         bar.scrollIntoView({ block: 'center', inline: 'center' });
+        setTimeout(() => {
+            state.isAutoScrolling = false;
+        }, 500);
     }
 }

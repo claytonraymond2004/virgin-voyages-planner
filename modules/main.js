@@ -182,7 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewport = document.getElementById('schedule-viewport');
     const timeCol = document.getElementById('time-column');
     if (viewport && timeCol) {
-        viewport.addEventListener('scroll', () => { timeCol.scrollTop = viewport.scrollTop; });
+        viewport.addEventListener('scroll', () => {
+            timeCol.scrollTop = viewport.scrollTop;
+            if (!state.isAutoScrolling) {
+                state.hasUserScrolled = true;
+            }
+        });
     }
 
     // Menu Button
@@ -568,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Visibility Change for Time Bar
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-            renderCurrentTimeBar(true);
+            renderCurrentTimeBar(!state.hasUserScrolled);
             startTimeBarUpdater();
         } else {
             stopTimeBarUpdater();
@@ -621,6 +626,7 @@ function loadApp() {
         document.getElementById('main-header').classList.remove('hidden');
         document.getElementById('main-header').classList.add('flex');
         renderApp();
+        state.hasUserScrolled = false;
         renderCurrentTimeBar(true);
         if (document.visibilityState === 'visible') {
             startTimeBarUpdater();

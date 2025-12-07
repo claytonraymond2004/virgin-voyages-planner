@@ -60,7 +60,9 @@ export const state = {
     // Scroll Positions
     hiddenTabScrollPositions: {},
     attendancePanelScrollPositions: {},
-    agendaPanelScrollPosition: null
+    agendaPanelScrollPosition: null,
+    hasUserScrolled: false,
+    isAutoScrolling: false
 };
 
 // --- State Management Functions ---
