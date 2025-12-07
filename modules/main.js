@@ -1,7 +1,8 @@
 import {
     state, loadFromStorage as loadState, saveData as saveStateData, updateAppData,
     saveCustomEvents, saveAttendance, saveHiddenNames, saveHiddenUids,
-    saveShownUids, savePortNote, saveEventNotes, saveBlacklist, saveOptionalEvents
+    saveShownUids, savePortNote, saveEventNotes, saveBlacklist, saveOptionalEvents,
+    saveTheme
 } from './state.js';
 import {
     STORAGE_KEY_THEME, STORAGE_KEY_DATA, STORAGE_KEY_ATTENDANCE,
@@ -129,20 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    const applyTheme = (isDark) => {
-        if (isDark) {
-            document.body.classList.add('dark');
-            document.getElementById('icon-moon').style.display = 'none';
-            document.getElementById('icon-sun').style.display = 'block';
-        } else {
-            document.body.classList.remove('dark');
-            document.getElementById('icon-moon').style.display = 'block';
-            document.getElementById('icon-sun').style.display = 'none';
-        }
-        updateThemeColor(isDark);
-    };
-
+    // Auto-clear override if it matches system state
     if (savedTheme) {
+        const isSystemDark = mediaQuery.matches;
+        const isStoredDark = savedTheme === 'dark';
+        if (isSystemDark === isStoredDark) {
+            localStorage.removeItem(STORAGE_KEY_THEME);
+        }
+    }
+
+    if (localStorage.getItem(STORAGE_KEY_THEME)) {
         applyTheme(savedTheme === 'dark');
     } else {
         applyTheme(mediaQuery.matches);
@@ -150,7 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listen for system changes
     mediaQuery.addEventListener('change', (e) => {
-        if (!localStorage.getItem(STORAGE_KEY_THEME)) {
+        const currentSaved = localStorage.getItem(STORAGE_KEY_THEME);
+        if (currentSaved) {
+            // If the system changes to match the user's override, clear the override
+            // so that future changes are respected.
+            if (e.matches === (currentSaved === 'dark')) {
+                localStorage.removeItem(STORAGE_KEY_THEME);
+            }
+        } else {
             applyTheme(e.matches);
         }
     });
@@ -172,6 +176,48 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (e.dataTransfer.files.length) {
                 handleFiles(e.dataTransfer.files);
             }
+        });
+    }
+
+    // PWA File Launch Handler
+    if ('launchQueue' in window) {
+        window.launchQueue.setConsumer(async (launchParams) => {
+            if (!launchParams.files.length) return;
+
+            const fileHandle = launchParams.files[0];
+            const file = await fileHandle.getFile();
+
+            // Only process if it looks like our backup file or json
+            // (manifest limits to .vvoyage but we double check or just try parse)
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+
+                    // Check if it's a valid backup
+                    if (json.appData) {
+                        showConfirm(
+                            "Loading this backup will overwrite all existing app data. Are you sure you want to proceed?",
+                            () => {
+                                restoreBackup(json);
+                            },
+                            "Restore Backup"
+                        );
+                    } else {
+                        // If it's just a regular JSON (like a day schedule), handle normally?
+                        // The user request specifically mentioned .vvoyage backup file.
+                        // But let's route through handleFiles if it's not a backup, or warn?
+                        // For now, let's treat it as a potential data load.
+                        // Existing logic for single file handling:
+                        processLoadedData([json]);
+                    }
+                } catch (err) {
+                    console.error("Error reading launched file:", err);
+                    alert("Error opening file: " + file.name);
+                }
+            };
+            reader.readAsText(file);
         });
     }
 
@@ -634,6 +680,23 @@ function loadApp() {
     }
 }
 
+// --- Theme Logic ---
+
+function applyTheme(isDark) {
+    if (isDark) {
+        document.documentElement.classList.add('dark'); // For Tailwind
+        document.body.classList.add('dark'); // For custom CSS
+        document.getElementById('icon-moon').style.display = 'none';
+        document.getElementById('icon-sun').style.display = 'block';
+    } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+        document.getElementById('icon-moon').style.display = 'block';
+        document.getElementById('icon-sun').style.display = 'none';
+    }
+    updateThemeColor(isDark);
+}
+
 function updateThemeColor(isDark) {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
@@ -642,14 +705,9 @@ function updateThemeColor(isDark) {
 }
 
 function toggleDarkMode() {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
-
-    document.getElementById('icon-moon').style.display = isDark ? 'none' : 'block';
-    document.getElementById('icon-sun').style.display = isDark ? 'block' : 'none';
-
-    updateThemeColor(isDark);
+    const isDark = !document.body.classList.contains('dark');
+    applyTheme(isDark);
+    saveTheme(isDark ? 'dark' : 'light');
 }
 
 // --- Data Handling ---
