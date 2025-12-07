@@ -1760,6 +1760,28 @@ export function renderChangeSummary(changes) {
     lastRenderedChanges = changes;
     restoreUpdateModalState(changes);
 
+    const getRemainingInstances = (name) => {
+        let count = 0;
+        // 1. Unaffected existing events
+        state.appData.forEach(existing => {
+            if (existing.name !== name) return;
+            // Is it being removed?
+            if (changes.removed && changes.removed.some(r => r.uid === existing.uid)) return;
+            // Is it being modified?
+            if (changes.modified && changes.modified.some(m => m.oldEv.uid === existing.uid)) return;
+            count++;
+        });
+        // 2. Added events
+        if (changes.added) {
+            count += changes.added.filter(a => a.name === name).length;
+        }
+        // 3. Modified events (new versions)
+        if (changes.modified) {
+            count += changes.modified.filter(m => m.newEv.name === name).length;
+        }
+        return count;
+    };
+
     const list = document.getElementById('update-changes-list');
     list.innerHTML = '';
 
@@ -2465,21 +2487,41 @@ export function renderChangeSummary(changes) {
                     `;
 
                 } else {
-                    // Default Reschedule Logic
-                    if (ev.reschedule === undefined || ev.reschedule === false) ev.reschedule = true;
+                    // Check if there are any instances left to reschedule TO
+                    const remainingCount = getRemainingInstances(ev.name);
 
-                    warningHtml = `
-                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                    if (remainingCount === 0) {
+                        // No other instances exist - cannot reschedule
+                        ev.reschedule = false;
+                        warningHtml = `
+                        <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending (Discontinued)</span>
                     `;
 
-                    footerHtml = `
+                        footerHtml = `
                         <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
-                                <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
-                            </label>
+                             <div class="flex items-center gap-2 text-xs text-red-800 dark:text-red-300 font-medium">
+                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span>Cannot reschedule (No other times available)</span>
+                             </div>
                         </div>
                     `;
+                    } else {
+                        // Default Reschedule Logic
+                        if (ev.reschedule === undefined || ev.reschedule === false) ev.reschedule = true;
+
+                        warningHtml = `
+                            <span class="text-[10px] uppercase font-bold text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900 px-1 rounded ml-2 whitespace-nowrap">Attending in Planner</span>
+                        `;
+
+                        footerHtml = `
+                            <div class="border-t border-red-200 dark:border-red-800 p-2 bg-red-100/30 dark:bg-red-900/10">
+                                <label class="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" id="rem-resched-${idx}-grid" class="rounded text-red-600 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600" ${ev.reschedule ? 'checked' : ''}>
+                                    <span class="text-xs font-bold text-red-800 dark:text-red-300">Reschedule this event?</span>
+                                </label>
+                            </div>
+                        `;
+                    }
                 }
             }
 
