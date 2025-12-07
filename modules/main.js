@@ -124,6 +124,42 @@ window.stopTransferScanner = stopTransferScanner;
 
 // --- Initialization ---
 
+if ('launchQueue' in window) {
+    window.launchQueue.setConsumer(async (launchParams) => {
+        if (!launchParams.files.length) return;
+
+        const fileHandle = launchParams.files[0];
+        const file = await fileHandle.getFile();
+
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+
+                if (json.appData) {
+                    showConfirm(
+                        "Loading this backup will overwrite all existing app data. Are you sure you want to proceed?",
+                        () => {
+                            restoreBackup(json);
+                        },
+                        "Restore Backup"
+                    );
+                } else {
+                    processLoadedData([json]);
+                }
+            } catch (err) {
+                console.error("Error reading launched file:", err);
+                alert("Error opening file: " + file.name);
+            }
+        };
+        reader.readAsText(file);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Dark Mode Init
     // Dark Mode Init
@@ -176,48 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (e.dataTransfer.files.length) {
                 handleFiles(e.dataTransfer.files);
             }
-        });
-    }
-
-    // PWA File Launch Handler
-    if ('launchQueue' in window) {
-        window.launchQueue.setConsumer(async (launchParams) => {
-            if (!launchParams.files.length) return;
-
-            const fileHandle = launchParams.files[0];
-            const file = await fileHandle.getFile();
-
-            // Only process if it looks like our backup file or json
-            // (manifest limits to .vvoyage but we double check or just try parse)
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const json = JSON.parse(e.target.result);
-
-                    // Check if it's a valid backup
-                    if (json.appData) {
-                        showConfirm(
-                            "Loading this backup will overwrite all existing app data. Are you sure you want to proceed?",
-                            () => {
-                                restoreBackup(json);
-                            },
-                            "Restore Backup"
-                        );
-                    } else {
-                        // If it's just a regular JSON (like a day schedule), handle normally?
-                        // The user request specifically mentioned .vvoyage backup file.
-                        // But let's route through handleFiles if it's not a backup, or warn?
-                        // For now, let's treat it as a potential data load.
-                        // Existing logic for single file handling:
-                        processLoadedData([json]);
-                    }
-                } catch (err) {
-                    console.error("Error reading launched file:", err);
-                    alert("Error opening file: " + file.name);
-                }
-            };
-            reader.readAsText(file);
         });
     }
 
