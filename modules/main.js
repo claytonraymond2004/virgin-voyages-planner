@@ -1655,7 +1655,11 @@ function restoreBackup(json) {
     localStorage.setItem(STORAGE_KEY_EVENT_NOTES, JSON.stringify(json.eventNotes || {}));
     localStorage.setItem(STORAGE_KEY_BLACKLIST, JSON.stringify(json.blacklist || []));
     localStorage.setItem(STORAGE_KEY_OPTIONAL_EVENTS, JSON.stringify(json.optionalEvents || []));
-    loadApp();
+    localStorage.setItem(STORAGE_KEY_COMPLETED, JSON.stringify(json.completedIds || []));
+    localStorage.setItem(STORAGE_KEY_TIME_BLOCKS, JSON.stringify(json.timeBlocks || {}));
+
+    // Reload to ensure clean state
+    window.location.reload();
 }
 
 function saveNewData(json, newPortNotes = {}) {
