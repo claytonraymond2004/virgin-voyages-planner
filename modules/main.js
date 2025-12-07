@@ -471,7 +471,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Touch detection
-    document.addEventListener('touchstart', () => { state.lastTouchTime = Date.now(); }, { passive: true });
+    document.addEventListener('touchstart', (e) => {
+        state.lastTouchTime = Date.now();
+        const tooltip = document.getElementById('tooltip');
+        // Close tooltip if tapping outside
+        if (tooltip && tooltip.style.display === 'block' && !tooltip.contains(e.target)) {
+            hideTooltip();
+        }
+    }, { passive: true });
 
     // Login Enter Key
     const vvPassword = document.getElementById('vv-password');
